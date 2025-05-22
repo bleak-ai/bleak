@@ -8,7 +8,7 @@ import {AiPromptForm} from "./components/AiPromptForm";
 
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-zinc-900">
       <AiPromptForm />
     </div>
   );
