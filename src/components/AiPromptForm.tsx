@@ -5,7 +5,7 @@ import {
   submitAnswers,
   type PromptQuestion,
   type AnsweredQuestion
-} from "../api/postalApi";
+} from "../api/bleakApi.ts";
 import {useState, type FormEvent} from "react";
 import {Textarea} from "./ui/textarea";
 import {Button} from "./ui/button";

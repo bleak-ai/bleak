@@ -1,6 +1,6 @@
 import {RadioGroup, RadioGroupItem} from "./ui/radio-group";
 import {Label} from "./ui/label";
-import {type PromptQuestion} from "../api/postalApi";
+import {type PromptQuestion} from "../api/bleakApi";
 import {Textarea} from "./ui/textarea";
 
 const SelectOptions = ({data}: {data: PromptQuestion[]}) => {

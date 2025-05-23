@@ -1,4 +1,4 @@
-// src/api/postalApi.ts
+// src/api/bleakApi.ts
 import axios from "axios";
 import {z} from "zod";
 
@@ -46,7 +46,7 @@ export const fetchQuestions = async (
 
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/postal/questions`,
+      `${API_BASE_URL}/bleak/questions`,
       {prompt},
       {
         headers: {
@@ -81,7 +81,7 @@ export const submitAnswers = async ({
 
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/postal/answer`,
+      `${API_BASE_URL}/bleak/answer`,
       {
         answered_questions: answeredQuestions,
         prompt: prompt
