@@ -3,7 +3,7 @@ import axios from "axios";
 import {z} from "zod";
 
 // API Base URL
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = "http://127.0.0.1:8000/local";
 
 // Response Schemas
 const QuestionsResponseSchema = z.object({
@@ -47,10 +47,10 @@ export const fetchQuestions = async (
   try {
     const response = await axios.post(
       `${API_BASE_URL}/postal/questions`,
-      prompt,
+      {prompt},
       {
         headers: {
-          "Content-Type": "text/plain"
+          "Content-Type": "application/json"
         }
       }
     );
@@ -70,15 +70,28 @@ export const fetchQuestions = async (
   }
 };
 
-export const submitAnswers = async (
-  answeredQuestions: AnsweredQuestion[]
-): Promise<string> => {
+export const submitAnswers = async ({
+  answeredQuestions,
+  prompt
+}: {
+  answeredQuestions: AnsweredQuestion[];
+  prompt: string;
+}): Promise<string> => {
   console.log("Submitting answers:", answeredQuestions);
 
   try {
-    const response = await axios.post(`${API_BASE_URL}/postal/answer`, {
-      answered_questions: answeredQuestions
-    });
+    const response = await axios.post(
+      `${API_BASE_URL}/postal/answer`,
+      {
+        answered_questions: answeredQuestions,
+        prompt: prompt
+      },
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
 
     console.log("Answer response:", response.data);
 
