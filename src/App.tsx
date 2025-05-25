@@ -1,10 +1,10 @@
 import "./App.css";
-import {AiPromptForm} from "./components/AiPromptForm";
+import {SimpleInteractive} from "./components/SimpleInteractive";
 
 function App() {
   return (
-    <div className="dark min-h-screen flex items-center justify-center bg-background">
-      <AiPromptForm />
+    <div className="dark min-h-screen bg-background py-8">
+      <SimpleInteractive />
     </div>
   );
 }
