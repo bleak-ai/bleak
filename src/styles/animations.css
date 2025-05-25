@@ -1,0 +1,19 @@
+/* Custom animation for falling and bouncing letters */
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+  }
+
+  90% {
+    opacity: 0.6;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-bounce-in {
+  /* animation: bounce-in 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; */
+  animation: bounce-in 1s cubic-bezier(0, 0, 1, 0) forwards;
+}
