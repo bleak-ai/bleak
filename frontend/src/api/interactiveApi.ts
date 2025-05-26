@@ -23,7 +23,6 @@ const InteractiveResponseSchema = z.object({
   questions: z.array(InteractiveQuestionSchema).optional(),
   answer: z.string().optional(),
   message: z.string().optional(),
-  rating: z.number().optional(),
   answered_questions: z
     .array(
       z.object({
