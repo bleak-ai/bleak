@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import {useState, useEffect} from "react";
 import {ArrowDown} from "lucide-react";
 import {Label} from "./ui/label";
 
@@ -75,7 +75,7 @@ export default function Bleak() {
       </div>
 
       <Label className="absolute bottom-30 opacity-50">
-        See how it Works <ArrowDown className="animate-pulse" />
+        How it works <ArrowDown className="animate-pulse" />
       </Label>
     </div>
   );
