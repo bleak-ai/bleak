@@ -6,16 +6,17 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && uv run uvicorn backend.main:app --host 0.0.0.0 --port 8008 --reload",
+    "dev:backend": "cd backend && uv run uvicorn backend.src.main:app --reload --host 0.0.0.0 --port 8008",
     "build": "npm run build:frontend && npm run build:backend",
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && uv build",
     "install:all": "npm run install:frontend && npm run install:backend",
     "install:frontend": "cd frontend && npm install",
-    "install:backend": "cd backend && uv sync",
+    "install:backend": "cd backend && uv sync --dev --active",
+    "install:backend:prod": "cd backend && uv sync --active",
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
     "start:frontend": "cd frontend && npm run preview",
-    "start:backend": "cd backend && uv run uvicorn backend.main:app --host 0.0.0.0 --port 8008"
+    "start:backend": "cd backend && uv run --active uvicorn backend.main:app --host 0.0.0.0 --port 8008"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
