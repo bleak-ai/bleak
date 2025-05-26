@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev:backend": "cd backend && uv run uvicorn backend.src.main:app --reload --host 0.0.0.0 --port 8008",
+    "dev:backend": "uv run uvicorn backend.src.main:app --reload --host 0.0.0.0 --port 8008",
     "build": "npm run build:frontend && npm run build:backend",
     "build:frontend": "cd frontend && npm run build",
     "build:backend": "cd backend && uv build",
