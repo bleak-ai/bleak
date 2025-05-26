@@ -38,7 +38,7 @@ def create_interactive_graph():
     # Use the shared checkpointer for state persistence
     # Compile with checkpointer and interrupt before wait_for_human node
     return builder.compile(
-        # checkpointer=_shared_checkpointer, 
+        checkpointer=_shared_checkpointer, 
         interrupt_before=["wait_for_human"]
     )
 
