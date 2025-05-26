@@ -8,8 +8,7 @@ import time
 import uuid
 import traceback
 
-# Import your graph (we'll create this next)
-from graph import create_graph
+
 # Import bleak interactive functions
 from bleak_interactive.graph.runner import run_interactive_graph, resume_interactive_graph
 
@@ -41,9 +40,6 @@ class ChatResponse(BaseModel):
     response: str
     conversation_id: str
 
-# Initialize the graph
-graph = create_graph()
-
 @app.get("/")
 async def root():
     return {"message": "Bleak Backend API is running!"}
@@ -51,36 +47,6 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
-
-@app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
-    """
-    Main chat endpoint that processes messages through the LangGraph
-    """
-    try:
-        logger.info(f"Processing chat request: {request.message}")
-        
-        # Prepare input for the graph
-        graph_input = {
-            "message": request.message,
-            "conversation_id": request.conversation_id or "default"
-        }
-        
-        # Execute the graph
-        result = await graph.ainvoke(graph_input)
-        
-        # Extract response from graph result
-        response_text = result.get("response", "I'm sorry, I couldn't process your request.")
-        conversation_id = result.get("conversation_id", request.conversation_id or "default")
-        
-        return ChatResponse(
-            response=response_text,
-            conversation_id=conversation_id
-        )
-        
-    except Exception as e:
-        logger.error(f"Error processing chat request: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
 
 # Bleak Interactive Models
 class BleakInput(BaseModel):

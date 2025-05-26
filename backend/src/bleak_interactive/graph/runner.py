@@ -1,26 +1,7 @@
 from typing import Dict, Any, Optional
-from .build_graph import get_bleak_graph, create_answer_graph, create_interactive_graph
+from .build_graph import create_interactive_graph
 from langgraph.types import Command
 
-def run_graph(input_data: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Run the bleak graph with the given input data
-    
-    Args:
-        input_data: Dictionary containing the input data
-        
-    Returns:
-        Dictionary containing the graph execution results
-    """
-    try:
-        # Get the graph
-        graph = get_bleak_graph()
-        
-        # Run the graph
-        result = graph.invoke(input_data)
-        return result
-    except Exception as e:
-        return {"error": str(e)}
 
 
 def run_interactive_graph(input_data: Dict[str, Any], thread_id: Optional[str] = None) -> Dict[str, Any]:
