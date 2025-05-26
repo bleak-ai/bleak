@@ -12,6 +12,9 @@ import traceback
 # Import bleak interactive functions
 from bleak_interactive.graph.runner import run_interactive_graph, resume_interactive_graph
 
+# Import chatbot graph
+from chatbot.graph import graph
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -164,6 +167,58 @@ async def bleak_interactive_resume_endpoint(payload: InteractiveResumeInput, req
         duration_ms = (time.time() - start_time) * 1000
         error_details = str(e)
         logger.error(f"Error processing /bleak/interactive/resume request: {error_details}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Error processing request: {error_details}")
+
+@app.post("/chat")
+async def chat_endpoint(payload: ChatRequest, request: Request):
+    """
+    Simple chat endpoint that uses the chatbot graph to process messages.
+    """
+    request_id = str(uuid.uuid4())
+    start_time = time.time()
+    
+    try:
+        logger.info(f"Received chat request: {payload.message}")
+        
+        # Use provided conversation_id or generate a new one
+        conversation_id = payload.conversation_id or str(uuid.uuid4())
+        
+        # Process the message using the chatbot graph
+        loop = asyncio.get_event_loop()
+        
+        def run_graph():
+            # Create the input in the format expected by the graph
+            graph_input = {"messages": [{"role": "user", "content": payload.message}]}
+            
+            # Stream through the graph and get the final result
+            result = None
+            for event in graph.stream(graph_input):
+                for value in event.values():
+                    if "messages" in value and len(value["messages"]) > 0:
+                        result = value["messages"][-1].content
+            
+            return result
+        
+        result = await loop.run_in_executor(None, run_graph)
+        
+        duration_ms = (time.time() - start_time) * 1000
+        
+        if result is None:
+            logger.warning("Graph execution completed but no result was returned")
+            raise HTTPException(status_code=500, detail="No response generated")
+        
+        logger.info(f"Successfully processed chat request in {duration_ms:.2f}ms")
+        
+        return ChatResponse(
+            response=result,
+            conversation_id=conversation_id
+        )
+        
+    except Exception as e:
+        duration_ms = (time.time() - start_time) * 1000
+        error_details = str(e)
+        logger.error(f"Error processing chat request: {error_details}")
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Error processing request: {error_details}")
 

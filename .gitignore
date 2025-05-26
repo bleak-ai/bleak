@@ -139,3 +139,5 @@ Thumbs.db
 
 # Demo files (if any)
 demo/
+
+backend/.langgraph_api/

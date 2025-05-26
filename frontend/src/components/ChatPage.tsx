@@ -1,5 +1,5 @@
 import React from "react";
-import {SimpleInteractive} from "./SimpleInteractive";
+import {Chatbot} from "./Chatbot";
 
 const ChatPage = () => {
   return (
@@ -23,7 +23,7 @@ const ChatPage = () => {
           </p>
         </div>
 
-        <SimpleInteractive />
+        <Chatbot />
       </div>
     </div>
   );
