@@ -1,37 +1,50 @@
 import React, {useState, useEffect} from "react";
 
+const DELAY_PER_LETTER = 180;
+const INITIAL_DELAY = 50;
+
 export default function Landing() {
   const [showImage, setShowImage] = useState(false);
   const [animateLetters, setAnimateLetters] = useState(false);
-  const letters = ["B", "l", "e", "a", "k"];
+  const letters = ["b", "l", "e", "a", "k"];
 
   useEffect(() => {
-    // Start letter animation immediately
-    setAnimateLetters(true);
+    // Start letter animation
+    const letterTimer = setTimeout(() => {
+      setAnimateLetters(true);
+    }, 100);
 
-    // Show image after letters finish falling (delay for dramatic effect)
+    const iconDelay = letters.length * DELAY_PER_LETTER + INITIAL_DELAY;
+    // Show image after letters finish
     const imageTimer = setTimeout(() => {
       setShowImage(true);
-    }, 500);
+    }, iconDelay);
 
-    return () => clearTimeout(imageTimer);
+    return () => {
+      clearTimeout(letterTimer);
+      clearTimeout(imageTimer);
+    };
   }, []);
 
   return (
-    <div className="flex items-center justify-center h-screen overflow-hidden">
-      <div className="flex items-center justify-center gap-8">
-        <h1 className="text-white md:text-[240px] flex">
+    <div className="flex items-center justify-center min-h-screen overflow-hidden bg-black">
+      {/* Main content */}
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-16 px-4">
+        {/* Title with animated letters */}
+        <h1
+          className="flex text-white font-bold tracking-tight z-20"
+          style={{fontFamily: "'Orbitron', monospace"}}
+        >
           {letters.map((letter, index) => (
             <span
               key={index}
-              className={`inline-block opacity-0  ${
+              className={`inline-block opacity-0 transition-all duration-200 text-4xl sm:text-6xl md:text-8xl lg:text-9xl xl:text-[140px] 2xl:text-[180px] ${
                 animateLetters
-                  ? "animate-bounce-in"
-                  : "transform translate-y-[-100vh] opacity-0"
+                  ? "animate-letter-drop gradient-text animate-glow "
+                  : ""
               }`}
               style={{
-                animationDelay: `${index * 150}ms`,
-                animationDuration: "0.2s",
+                animationDelay: `${index * DELAY_PER_LETTER + INITIAL_DELAY}ms`,
                 animationFillMode: "forwards"
               }}
             >
@@ -39,15 +52,23 @@ export default function Landing() {
             </span>
           ))}
         </h1>
-        <div className="relative w-[150px] h-[150px} ">
-          <img src="/bleaktreewhite.png" width={150} height={150} />
-          <div
-            className={`absolute z-10 top-0 w-[200px] h-[200px] bg-background transition-all duration-2000 ease-out ${
-              showImage
-                ? "transform -translate-y-60 opacity-100"
-                : "transform translate-y-2 opacity-100"
-            }`}
-          ></div>
+
+        {/* Tree image with reveal */}
+        <div className="relative">
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 xl:w-48 xl:h-48">
+            <img
+              src="/bleaktreewhite.png"
+              alt="Bleak Tree"
+              className="w-full h-full object-contain"
+            />
+            <div
+              className={`absolute inset-0 bg-black transition-transform duration-1500 ease-out ${
+                showImage
+                  ? "transform translate-y-[-100%]"
+                  : "transform translate-y-0 "
+              }`}
+            />
+          </div>
         </div>
       </div>
     </div>

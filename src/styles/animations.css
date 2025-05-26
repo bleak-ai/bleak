@@ -1,19 +1,28 @@
-/* Custom animation for falling and bouncing letters */
-@keyframes bounce-in {
+/* Import Orbitron font for dramatic titles */
+/* @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap"); */
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap");
+
+/* Impressive letter drop animation */
+@keyframes letter-drop {
   0% {
+    transform: translateY(-100vh) rotate(-10deg) scale(0.5);
     opacity: 0;
   }
-
-  90% {
-    opacity: 0.6;
+  60% {
+    transform: translateY(20px) rotate(2deg) scale(1.1);
+    opacity: 0.8;
   }
-
+  80% {
+    transform: translateY(-10px) rotate(-1deg) scale(1.05);
+    opacity: 0.95;
+  }
   100% {
+    transform: translateY(0) rotate(0deg) scale(1);
     opacity: 1;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
   }
 }
 
-.animate-bounce-in {
-  /* animation: bounce-in 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; */
-  animation: bounce-in 1s cubic-bezier(0, 0, 1, 0) forwards;
+.animate-letter-drop {
+  animation: letter-drop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
