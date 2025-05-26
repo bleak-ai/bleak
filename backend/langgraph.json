@@ -1,7 +1,8 @@
 {
   "dependencies": ["."],
   "graphs": {
-    "bleak_interactive": "./src/bleak_interactive/graph/build_graph.py:graph"
+    "bleak_interactive": "./src/bleak_interactive/graph/build_graph.py:graph",
+    "chatbot": "./src/chatbot/graph.py:graph"
   },
   "env": ".env"
 }
