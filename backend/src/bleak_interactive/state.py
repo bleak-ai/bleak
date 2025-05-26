@@ -1,0 +1,37 @@
+from dataclasses import dataclass, field
+from typing import List, Optional, Union
+from typing_extensions import Annotated
+import operator
+from .models.models import Answer, RadioQuestion, TextQuestion
+
+# Main state class
+@dataclass(kw_only=True)
+class BleakState:
+    """Main state for the bleak graph"""
+    prompt: str = field(default="What is the best region in Europe?")
+    intermediate_results: Annotated[list, operator.add] = field(default_factory=list)
+    answer: Optional[str] = field(default=None)
+    rating: Optional[float] = field(default=None)
+    questions_to_ask: Optional[List[str]] = field(default=None)
+    structured_questions: Optional[List[Union[RadioQuestion, TextQuestion]]] = field(default=None)
+    metadata: dict = field(default_factory=dict)
+
+# Input state
+@dataclass(kw_only=True)
+class BleakStateInput:
+    """Input state definition"""
+    prompt: str = field(default="")
+    metadata: dict = field(default_factory=dict)
+
+# Output state
+@dataclass(kw_only=True)
+class BleakStateOutput:
+    """Output state definition"""
+    # For questions workflow
+    structured_questions: List[Union[RadioQuestion, TextQuestion]] = field(default_factory=list)
+    # For answer workflow
+    answer: Optional[str] = field(default=None)
+    rating: Optional[float] = field(default=None)
+
+
+

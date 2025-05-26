@@ -9,9 +9,9 @@ import uuid
 import traceback
 
 # Import your graph (we'll create this next)
-from graph import create_graph
+from .graph import create_graph
 # Import bleak interactive functions
-from bleak_interactive.graph.runner import run_interactive_graph, resume_interactive_graph
+from .bleak_interactive.graph.runner import run_interactive_graph, resume_interactive_graph
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -82,14 +82,27 @@ async def chat(request: ChatRequest):
         logger.error(f"Error processing chat request: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-# Bleak Interactive Models
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True) 
+
+
 class BleakInput(BaseModel):
+    prompt: str
+
+# Add new models for the enhanced bleak workflow
+class BleakQuestionsInput(BaseModel):
     prompt: str
 
 class AnsweredQuestion(BaseModel):
     question: str
     answer: str
 
+class BleakAnswerInput(BaseModel):
+    prompt: str  # Original prompt
+    answered_questions: List[AnsweredQuestion]
+
+# Add new models for the interactive workflow
 class InteractiveInput(BaseModel):
     prompt: str
     thread_id: Optional[str] = None
@@ -97,6 +110,7 @@ class InteractiveInput(BaseModel):
 class InteractiveResumeInput(BaseModel):
     thread_id: str
     answered_questions: List[AnsweredQuestion]
+
 
 @app.post("/bleak/interactive")
 async def bleak_interactive_endpoint(payload: InteractiveInput, request: Request):
@@ -217,8 +231,4 @@ async def debug_info():
             "/bleak/interactive/resume",
             "/debug"
         ]
-    }
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True) 
+    } 
