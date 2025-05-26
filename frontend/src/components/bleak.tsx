@@ -40,7 +40,7 @@ export default function Bleak() {
           {letters.map((letter, index) => (
             <span
               key={index}
-              className={`inline-block opacity-0 transition-all duration-200 text-4xl sm:text-6xl md:text-8xl lg:text-9xl xl:text-[140px] 2xl:text-[180px] ${
+              className={`inline-block opacity-0 transition-all duration-200 text-6xl sm:text-6xl md:text-8xl lg:text-9xl xl:text-[140px] 2xl:text-[180px] ${
                 animateLetters
                   ? "animate-letter-drop gradient-text animate-glow "
                   : ""
