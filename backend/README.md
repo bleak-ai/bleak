@@ -44,14 +44,14 @@ FastAPI backend with LangGraph integration for interactive AI conversations.
 Start the FastAPI development server:
 
 ```bash
-uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+uv run uvicorn backend.main:app --reload --host 0.0.0.0 --port 8008
 ```
 
 The API will be available at:
 
-- **API**: http://localhost:8000
-- **Interactive Docs**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **API**: http://localhost:8008
+- **Interactive Docs**: http://localhost:8008/docs
+- **ReDoc**: http://localhost:8008/redoc
 
 ### LangGraph Dev Tool
 
@@ -98,7 +98,7 @@ The Bleak Interactive system follows this flow:
 **Start conversation**:
 
 ```bash
-curl -X POST "http://localhost:8000/bleak/interactive" \
+curl -X POST "http://localhost:8008/bleak/interactive" \
   -H "Content-Type: application/json" \
   -d '{"prompt": "What is the best region in Europe?"}'
 ```
@@ -106,7 +106,7 @@ curl -X POST "http://localhost:8000/bleak/interactive" \
 **Resume with answers**:
 
 ```bash
-curl -X POST "http://localhost:8000/bleak/interactive/resume" \
+curl -X POST "http://localhost:8008/bleak/interactive/resume" \
   -H "Content-Type: application/json" \
   -d '{
     "thread_id": "your_thread_id",

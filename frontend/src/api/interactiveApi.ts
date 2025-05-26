@@ -2,7 +2,7 @@ import axios from "axios";
 import {z} from "zod";
 
 // API Base URL
-const API_BASE_URL = "http://localhost:8000/local";
+const API_BASE_URL = "http://0.0.0.0:8008";
 
 // Response Schemas
 const InteractiveQuestionSchema = z.discriminatedUnion("type", [

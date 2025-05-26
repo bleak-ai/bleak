@@ -45,7 +45,7 @@ npm run install:all
 npm run dev
 ```
 
-This starts both frontend (http://localhost:5173) and backend (http://localhost:8000)
+This starts both frontend (http://localhost:5173) and backend (http://localhost:8008)
 
 ### Individual Services
 
@@ -62,20 +62,20 @@ cd frontend && npm run dev
 ```bash
 npm run dev:backend
 # or
-cd backend && uv run uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+cd backend && uv run uvicorn backend.main:app --host 0.0.0.0 --port 8008 --reload
 ```
 
 ## 🔗 API Integration
 
 The backend provides:
 
-- **Health Check**: `GET http://localhost:8000/health`
-- **Chat Endpoint**: `POST http://localhost:8000/chat`
+- **Health Check**: `GET http://localhost:8008/health`
+- **Chat Endpoint**: `POST http://localhost:8008/chat`
   - Request: `{"message": "Hello", "conversation_id": "optional"}`
   - Response: `{"response": "AI response", "conversation_id": "id"}`
-- **API Docs**: `http://localhost:8000/docs`
+- **API Docs**: `http://localhost:8008/docs`
 
-The frontend is configured to make requests to `http://localhost:8000`
+The frontend is configured to make requests to `http://localhost:8008`
 
 ## 🛠️ Backend Features
 
@@ -111,11 +111,11 @@ From the root directory:
 
 1. Start both services: `npm run dev`
 2. Check frontend: http://localhost:5173
-3. Check backend health: http://localhost:8000/health
-4. Check API docs: http://localhost:8000/docs
+3. Check backend health: http://localhost:8008/health
+4. Check API docs: http://localhost:8008/docs
 5. Test chat endpoint with curl:
    ```bash
-   curl -X POST "http://localhost:8000/chat" \
+   curl -X POST "http://localhost:8008/chat" \
      -H "Content-Type: application/json" \
      -d '{"message": "Hello, world!"}'
    ```

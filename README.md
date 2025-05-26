@@ -59,10 +59,10 @@ uv sync
 uv run dev
 ```
 
-The backend API will be available at `http://localhost:8000`
+The backend API will be available at `http://localhost:8008`
 
-- API docs: `http://localhost:8000/docs`
-- Health check: `http://localhost:8000/health`
+- API docs: `http://localhost:8008/docs`
+- Health check: `http://localhost:8008/health`
 
 #### Frontend Setup
 

@@ -3,7 +3,7 @@ import axios from "axios";
 import {z} from "zod";
 
 // API Base URL
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = "http://127.0.0.1:8008";
 
 // Response Schemas
 const QuestionsResponseSchema = z.object({
