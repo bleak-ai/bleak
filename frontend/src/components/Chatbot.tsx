@@ -113,7 +113,7 @@ export const Chatbot = () => {
       <div className="bg-gray-800/50 border-b border-gray-700 p-4">
         <div className="flex items-center space-x-3">
           <Avatar className="w-8 h-8">
-            <AvatarFallback className="bg-red-600 text-white">
+            <AvatarFallback className="bg-rose-600 text-white">
               <Bot className="w-5 h-5" />
             </AvatarFallback>
           </Avatar>
@@ -155,7 +155,7 @@ export const Chatbot = () => {
                   className={
                     message.role === "user"
                       ? "bg-blue-600 text-white"
-                      : "bg-red-600 text-white"
+                      : "bg-rose-600 text-white"
                   }
                 >
                   {message.role === "user" ? (
@@ -194,7 +194,7 @@ export const Chatbot = () => {
           <div className="flex justify-start">
             <div className="flex items-start space-x-2">
               <Avatar className="w-8 h-8 mr-2">
-                <AvatarFallback className="bg-red-600 text-white">
+                <AvatarFallback className="bg-rose-600 text-white">
                   <Bot className="w-4 h-4" />
                 </AvatarFallback>
               </Avatar>
@@ -218,13 +218,13 @@ export const Chatbot = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Type your message..."
-            className="flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-red-500"
+            className="flex-1 bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-rose-500"
             disabled={chatMutation.isPending}
           />
           <Button
             type="submit"
             disabled={!inputValue.trim() || chatMutation.isPending}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-rose-600 hover:bg-rose-700 text-white"
           >
             <Send className="w-4 h-4" />
           </Button>

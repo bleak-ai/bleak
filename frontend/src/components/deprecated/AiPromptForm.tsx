@@ -158,7 +158,7 @@
 //       </form>
 
 //       {error && (
-//         <div className="text-red-400 text-sm p-3 bg-red-900/30 border border-red-700 rounded-md">
+//         <div className="text-rose-400 text-sm p-3 bg-rose-900/30 border border-rose-700 rounded-md">
 //           <p className="font-medium">Error occurred:</p>
 //           <p>{error.message || "An unknown error occurred."}</p>
 //         </div>
