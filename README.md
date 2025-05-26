@@ -6,6 +6,26 @@ Bleak revolutionizes AI-powered applications by delivering ready-to-use React co
 
 ![Bleak Landing Page](./docs/screenshot.png)
 
+## 🏗️ Monorepo Structure
+
+This repository is structured as a monorepo containing both the frontend and backend:
+
+```
+bleak/
+├── frontend/              # React + Vite frontend application
+│   ├── src/              # Frontend source code
+│   ├── public/           # Static assets
+│   ├── package.json      # Frontend dependencies
+│   └── vite.config.ts    # Vite configuration
+├── backend/              # Python FastAPI backend
+│   ├── src/backend/      # Backend source code
+│   │   ├── main.py       # FastAPI application
+│   │   └── graph.py      # LangGraph implementation
+│   ├── pyproject.toml    # Python dependencies
+│   └── uv.lock           # Dependency lock file
+└── README.md             # This file
+```
+
 ## ✨ Features
 
 - **🎯 UI Components as Responses**: Get interactive React components, not text
@@ -13,20 +33,42 @@ Bleak revolutionizes AI-powered applications by delivering ready-to-use React co
 - **🧠 Context-Aware**: AI understands your app structure and returns appropriate components
 - **👥 Developer First**: Simple API, great docs, and active community
 - **🎨 Modern Design**: Built with Vite, React, TypeScript, and Tailwind CSS
+- **🔗 LangGraph Integration**: Advanced conversation flows with state management
+- **🚀 FastAPI Backend**: High-performance async API server
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
+- Node.js 18+ (for frontend)
+- Python 3.12+ (for backend)
+- [uv](https://docs.astral.sh/uv/) (for Python dependency management)
 
-### Installation
+### Installation & Running
+
+#### Backend Setup
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/bleak.git
-cd bleak
+# Navigate to backend directory
+cd backend
+
+# Install dependencies with uv
+uv sync
+
+# Start development server
+uv run dev
+```
+
+The backend API will be available at `http://localhost:8000`
+
+- API docs: `http://localhost:8000/docs`
+- Health check: `http://localhost:8000/health`
+
+#### Frontend Setup
+
+```bash
+# Navigate to frontend directory
+cd frontend
 
 # Install dependencies
 npm install
@@ -35,16 +77,59 @@ npm install
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173`
+The frontend will be available at `http://localhost:5173`
+
+### Full Stack Development
+
+1. Start the backend server in one terminal:
+
+   ```bash
+   cd backend && uv run dev
+   ```
+
+2. Start the frontend in another terminal:
+
+   ```bash
+   cd frontend && npm run dev
+   ```
+
+3. The frontend will automatically connect to the backend API
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: React 19 + TypeScript
+### Frontend
+
+- **Framework**: React 19 + TypeScript
 - **Styling**: Tailwind CSS + shadcn/ui
 - **Build Tool**: Vite
 - **Icons**: Lucide React
 - **State Management**: React Query
-- **Email Service**: SMTP2Go (configurable)
+- **HTTP Client**: Axios
+
+### Backend
+
+- **Framework**: FastAPI
+- **AI/ML**: LangGraph + LangChain
+- **Async Runtime**: Uvicorn
+- **Dependency Management**: uv
+- **Python Version**: 3.12+
+
+## 📡 API Endpoints
+
+### Backend API
+
+- `GET /health` - Health check endpoint
+- `POST /chat` - Process chat messages through LangGraph
+  - Request: `{"message": "your message", "conversation_id": "optional"}`
+  - Response: `{"response": "ai response", "conversation_id": "conversation_id"}`
+
+### Frontend Integration
+
+The frontend is configured to communicate with the backend API for:
+
+- Chat message processing
+- Conversation management
+- AI-powered component generation
 
 ## 📁 Project Structure
 
