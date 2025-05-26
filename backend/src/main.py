@@ -13,7 +13,9 @@ import traceback
 from bleak_interactive.graph.runner import run_interactive_graph, resume_interactive_graph
 
 # Import chatbot graph
-from chatbot.graph import graph
+# from chatbot.graph import graph
+from chatbot.toolsgraph import graph
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
