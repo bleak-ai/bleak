@@ -7,14 +7,14 @@ import asyncio
 import time
 import uuid
 import traceback
-
+from langchain_core.runnables.config import RunnableConfig
 
 # Import bleak interactive functions
 from bleak_interactive.graph.runner import run_interactive_graph, resume_interactive_graph
 
 # Import chatbot graph
 # from chatbot.graph import graph
-from chatbot.toolsgraph import graph
+from chatbot.graphs.memory_graph import graph
 
 
 # Configure logging
@@ -185,6 +185,10 @@ async def chat_endpoint(payload: ChatRequest, request: Request):
         
         # Use provided conversation_id or generate a new one
         conversation_id = payload.conversation_id or str(uuid.uuid4())
+        config = {"thread_id": conversation_id}
+        config = RunnableConfig(configurable=config)
+        print("config", config)
+        
         
         # Process the message using the chatbot graph
         loop = asyncio.get_event_loop()
@@ -195,7 +199,7 @@ async def chat_endpoint(payload: ChatRequest, request: Request):
             
             # Stream through the graph and get the final result
             result = None
-            for event in graph.stream(graph_input):
+            for event in graph.stream(graph_input, config=config):
                 for value in event.values():
                     if "messages" in value and len(value["messages"]) > 0:
                         result = value["messages"][-1].content
@@ -205,7 +209,6 @@ async def chat_endpoint(payload: ChatRequest, request: Request):
         result = await loop.run_in_executor(None, run_graph)
         
         duration_ms = (time.time() - start_time) * 1000
-        
         if result is None:
             logger.warning("Graph execution completed but no result was returned")
             raise HTTPException(status_code=500, detail="No response generated")
