@@ -29,7 +29,7 @@ export default function Bleak() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen overflow-hidden bg-black">
+    <div className="relative flex flex-col items-center pt-[40%] min-h-screen overflow-hidden bg-black">
       {/* Main content */}
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-16 px-4">
         {/* Title with animated letters */}
@@ -75,7 +75,7 @@ export default function Bleak() {
       </div>
 
       <Button
-        className="absolute bottom-10 animate-pulse"
+        className="absolute bottom-30 animate-pulse"
         variant="secondary"
         onClick={() =>
           document.getElementById("main")?.scrollIntoView({behavior: "smooth"})

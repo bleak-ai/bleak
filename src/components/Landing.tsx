@@ -18,6 +18,8 @@ import {
   Mail
 } from "lucide-react";
 import {storeEmailLocally} from "../api/emailService";
+import {SimpleInteractive} from "./SimpleInteractive";
+import Bleak from "./bleak";
 
 export default function Landing() {
   const [showContent, setShowContent] = useState(false);
@@ -61,8 +63,9 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden" id="main">
+    <div className="min-h-screen bg-black text-white overflow-hidden">
       {/* Hero Section */}
+
       <div className="flex items-center justify-center min-h-screen px-4 relative">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
@@ -71,12 +74,15 @@ export default function Landing() {
 
         <div className="max-w-6xl mx-auto text-center relative z-10">
           {/* Main Content */}
+          <Bleak />
+
           <div
             className={`transition-all duration-1000 ${
               showContent
                 ? "opacity-100 translate-y-0"
                 : "opacity-0 translate-y-8"
             }`}
+            id="main"
           >
             {/* Tagline */}
             <div className="mb-8">
@@ -154,6 +160,14 @@ export default function Landing() {
               >
                 <Code className="w-5 h-5 mr-2" />
                 View Demo
+              </Button>
+              <Button
+                size="lg"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-8"
+                onClick={() => (window.location.hash = "chat")}
+              >
+                <MessageSquare className="w-5 h-5 mr-2" />
+                Try Chat
               </Button>
               <Button
                 size="lg"
@@ -270,24 +284,15 @@ export default function Landing() {
           <h3 className="text-3xl sm:text-4xl font-bold mb-8">
             See Bleak in <span className="text-blue-400">Action</span>
           </h3>
-          <div className="bg-black/50 rounded-lg p-8 border border-white/10">
-            <div className="text-left">
-              <div className="text-sm text-white/50 mb-4">API Response</div>
-              <div className="bg-green-500/10 border border-green-500/20 rounded p-4 mb-4">
-                <code className="text-green-400 text-sm">
-                  {`// Instead of: "Here's a login form..."`}
-                  <br />
-                  {`// You get:`}
-                  <br />
-                  {`<LoginForm onSubmit={handleAuth} />`}
-                </code>
-              </div>
-              <p className="text-white/70 text-sm">
-                Ready-to-use React components with props, styling, and
-                functionality—straight from your AI assistant.
-              </p>
-            </div>
-          </div>
+
+          <Button
+            size="lg"
+            className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-8"
+            onClick={() => (window.location.hash = "chat")}
+          >
+            <MessageSquare className="w-5 h-5 mr-2" />
+            Try Chat
+          </Button>
         </div>
       </div>
 
@@ -324,50 +329,6 @@ export default function Landing() {
           </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="border-t border-white/10 py-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-3 mb-4 md:mb-0">
-              <div className="w-8 h-8">
-                <img
-                  src="/bleaktreewhite.png"
-                  alt="Bleak"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <span
-                className="font-bold text-xl"
-                style={{fontFamily: "'Orbitron', monospace"}}
-              >
-                bleak
-              </span>
-            </div>
-
-            <div className="flex items-center gap-6 text-white/50 text-sm">
-              <a href="#" className="hover:text-white transition-colors">
-                Documentation
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                GitHub
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                Discord
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                Twitter
-              </a>
-            </div>
-          </div>
-
-          <Separator className="my-8 bg-white/10" />
-
-          <div className="text-center text-white/50 text-sm">
-            © 2025 Bleak. Built with ❤️ for developers.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
