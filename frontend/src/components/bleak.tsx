@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from "react";
-import {Button} from "./ui/button";
 import {ArrowDown} from "lucide-react";
+import {Label} from "./ui/label";
 
 const DELAY_PER_LETTER = 180;
 const INITIAL_DELAY = 50;
@@ -29,7 +29,7 @@ export default function Bleak() {
   }, []);
 
   return (
-    <div className="relative flex flex-col items-center pt-[40%] min-h-screen overflow-hidden bg-black">
+    <div className="relative flex flex-col items-center pt-[40%] min-h-screen overflow-hidden">
       {/* Main content */}
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-16 px-4">
         {/* Title with animated letters */}
@@ -61,28 +61,22 @@ export default function Bleak() {
             <img
               src="/bleaktreewhite.png"
               alt="Bleak Tree"
-              className="w-full h-full object-contain"
-            />
-            <div
-              className={`absolute inset-0 bg-black transition-transform duration-1500 ease-out ${
-                showImage
-                  ? "transform translate-y-[-100%]"
-                  : "transform translate-y-0 "
+              className={`w-full h-full object-contain transition-all duration-1500 ease-out ${
+                showImage ? "animate-tree-grow" : "opacity-0"
               }`}
+              style={{
+                clipPath: showImage
+                  ? "inset(0% 0% 0% 0%)"
+                  : "inset(100% 0% 0% 0%)"
+              }}
             />
           </div>
         </div>
       </div>
 
-      <Button
-        className="absolute bottom-30 animate-pulse"
-        variant="secondary"
-        onClick={() =>
-          document.getElementById("main")?.scrollIntoView({behavior: "smooth"})
-        }
-      >
-        How it Works <ArrowDown />
-      </Button>
+      <Label className="absolute bottom-30 opacity-50">
+        See how it Works <ArrowDown className="animate-pulse" />
+      </Label>
     </div>
   );
 }

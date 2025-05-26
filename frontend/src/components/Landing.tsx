@@ -4,7 +4,6 @@ import {Input} from "./ui/input";
 import {Card, CardContent} from "./ui/card";
 import {Badge} from "./ui/badge";
 import {Avatar, AvatarFallback, AvatarImage} from "./ui/avatar";
-import {Separator} from "./ui/separator";
 import {
   ArrowRight,
   Code,
@@ -18,7 +17,6 @@ import {
   Mail
 } from "lucide-react";
 import {storeEmailLocally} from "../api/emailService";
-import {SimpleInteractive} from "./SimpleInteractive";
 import Bleak from "./bleak";
 
 export default function Landing() {
@@ -68,9 +66,9 @@ export default function Landing() {
 
       <div className="flex items-center justify-center min-h-screen px-4 relative">
         {/* Animated Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-br from-red-900/5 to-red-800/5" />
+        <div className="absolute top-20 left-10 w-72 h-72 bg-red-900/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-800/10 rounded-full blur-3xl" />
 
         <div className="max-w-6xl mx-auto text-center relative z-10">
           {/* Main Content */}
@@ -96,7 +94,7 @@ export default function Landing() {
 
               <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
                 The{" "}
-                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
                   Chatbot API
                 </span>
                 <br />
@@ -120,7 +118,7 @@ export default function Landing() {
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-blue-400"
+                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-red-600"
                   required
                 />
                 <Button
@@ -151,7 +149,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Button
                 size="lg"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-8"
+                className="bg-red-700 hover:bg-red-800 text-white font-medium px-8"
                 onClick={() =>
                   document
                     .getElementById("demo")
@@ -163,7 +161,7 @@ export default function Landing() {
               </Button>
               <Button
                 size="lg"
-                className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-8"
+                className="bg-red-600 hover:bg-red-700 text-white font-medium px-8"
                 onClick={() => (window.location.hash = "chat")}
               >
                 <MessageSquare className="w-5 h-5 mr-2" />
@@ -216,7 +214,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h3 className="text-3xl sm:text-4xl font-bold mb-4">
-              Why Choose <span className="text-blue-400">Bleak</span>?
+              Why Choose <span className="text-red-600">Bleak</span>?
             </h3>
             <p className="text-xl text-white/70 max-w-2xl mx-auto">
               Traditional chatbots return plain text. Bleak returns interactive
@@ -227,8 +225,8 @@ export default function Landing() {
           <div className="grid md:grid-cols-3 gap-8">
             <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Zap className="w-8 h-8 text-blue-400" />
+                <div className="w-16 h-16 bg-red-700/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Zap className="w-8 h-8 text-red-600" />
                 </div>
                 <h4 className="text-xl font-bold mb-4 text-white">
                   Instant Integration
@@ -242,8 +240,8 @@ export default function Landing() {
 
             <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <MessageSquare className="w-8 h-8 text-purple-400" />
+                <div className="w-16 h-16 bg-red-700/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <MessageSquare className="w-8 h-8 text-red-600" />
                 </div>
                 <h4 className="text-xl font-bold mb-4 text-white">
                   Smart Responses
@@ -257,8 +255,8 @@ export default function Landing() {
 
             <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Users className="w-8 h-8 text-green-400" />
+                <div className="w-16 h-16 bg-red-700/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Users className="w-8 h-8 text-red-600" />
                 </div>
                 <h4 className="text-xl font-bold mb-4 text-white">
                   Developer First
@@ -282,12 +280,12 @@ export default function Landing() {
       >
         <div className="max-w-4xl mx-auto text-center">
           <h3 className="text-3xl sm:text-4xl font-bold mb-8">
-            See Bleak in <span className="text-blue-400">Action</span>
+            See Bleak in <span className="text-red-600">Action</span>
           </h3>
 
           <Button
             size="lg"
-            className="bg-purple-600 hover:bg-purple-700 text-white font-medium px-8"
+            className="bg-red-600 hover:bg-red-700 text-white font-medium px-8"
             onClick={() => (window.location.hash = "chat")}
           >
             <MessageSquare className="w-5 h-5 mr-2" />

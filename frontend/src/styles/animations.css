@@ -26,3 +26,22 @@
 .animate-letter-drop {
   animation: letter-drop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
 }
+
+/* Tree growing animation */
+@keyframes tree-grow {
+  0% {
+    clip-path: inset(100% 0% 0% 0%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    clip-path: inset(0% 0% 0% 0%);
+    opacity: 1;
+  }
+}
+
+.animate-tree-grow {
+  animation: tree-grow 1.5s ease-out forwards;
+}
