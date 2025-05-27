@@ -81,7 +81,7 @@ export const RadioQuestion = ({
             <Input
               value={otherValue}
               onChange={(e) => handleOtherTextChange(e.target.value)}
-              placeholder="Please specify..."
+              placeholder="Other"
               className="resize-none"
             />
           </div>

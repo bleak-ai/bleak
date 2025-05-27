@@ -1,8 +1,7 @@
 from bleak_interactive.graph.runner import (
     resume_interactive_graph, 
     run_interactive_graph, 
-    assess_question_sufficiency,
-    generate_additional_questions,
+    resume_with_choice,
     generate_structured_questions_from_text
 )
 from fastapi import FastAPI, HTTPException, Request, APIRouter
@@ -125,13 +124,14 @@ async def bleak_interactive_resume_endpoint(payload: InteractiveResumeInput, req
     Resume an interrupted interactive bleak conversation with user answers.
     
     This endpoint continues the workflow after the user has provided answers
-    to clarifying questions and generates the final answer.
+    to clarifying questions. Now leads to a choice between more questions or final answer.
     
     Returns:
         - thread_id: The conversation identifier
-        - status: "completed"
-        - answer: The final generated answer
+        - status: "interrupted" (waiting for choice) or "completed" (if final answer)
+        - choice_options: Available choices for the user
         - answered_questions: All questions that were answered
+        - message: Instructions for the user
     """
     request_id = str(uuid.uuid4())
     start_time = time.time()
@@ -162,12 +162,24 @@ async def bleak_interactive_resume_endpoint(payload: InteractiveResumeInput, req
         
         logger.info(f"[{request_id}] Successfully processed resume request in {duration_ms:.2f}ms")
         
-        return {
-            "thread_id": payload.thread_id,
-            "status": "completed",
-            "answer": result.get("answer"),
-            "answered_questions": payload.answered_questions
-        }
+        # Check if we got a final answer (old flow) or need to present choice (new flow)
+        if result.get("answer"):
+            # Old flow - direct to answer
+            return {
+                "thread_id": payload.thread_id,
+                "status": "completed",
+                "answer": result.get("answer"),
+                "answered_questions": payload.answered_questions
+            }
+        else:
+            # New flow - present choice to user
+            return {
+                "thread_id": payload.thread_id,
+                "status": "interrupted",
+                "choice_options": ["more_questions", "final_answer"],
+                "answered_questions": payload.answered_questions,
+                "message": "Would you like me to ask more clarifying questions or generate the final answer?"
+            }
         
     except Exception as e:
         duration_ms = (time.time() - start_time) * 1000
@@ -184,18 +196,15 @@ async def bleak_interactive_choice_endpoint(payload: InteractiveChoiceInput, req
     
     This endpoint processes the user's choice after they've answered initial questions:
     - "final_answer": Proceed to generate the final answer
-    - "more_questions": Assess if more questions are needed and generate them
-    
-    The assessment considers ALL previously answered questions and enforces
-    a maximum of 5 questions before automatically proceeding to final answer.
+    - "more_questions": Generate additional questions if needed
     
     Returns:
         For "final_answer" choice:
         - thread_id, status: "completed", answer, answered_questions
         
         For "more_questions" choice:
-        - If more questions needed: thread_id, status: "interrupted", questions, message
-        - If sufficient info: thread_id, status: "no_more_questions", suggestion: "final_answer"
+        - If more questions generated: thread_id, status: "interrupted", questions, message
+        - If no more questions needed: thread_id, status: "completed", answer, answered_questions
     """
     request_id = str(uuid.uuid4())
     start_time = time.time()
@@ -213,21 +222,57 @@ async def bleak_interactive_choice_endpoint(payload: InteractiveChoiceInput, req
         # Convert answered questions to dict format for processing
         all_answered_questions = [q.model_dump() for q in payload.answered_questions]
         
-        if payload.choice == "final_answer":
-            # User wants the final answer - proceed with resume
-            return await _handle_final_answer_choice(
-                payload.thread_id, 
-                all_answered_questions, 
-                request_id
-            )
+        # Use the new resume_with_choice function to handle the choice in the graph
+        loop = asyncio.get_event_loop()
+        result = await loop.run_in_executor(
+            None,
+            resume_with_choice,
+            payload.choice,
+            all_answered_questions,
+            payload.thread_id
+        )
+
+        duration_ms = (time.time() - start_time) * 1000
         
-        elif payload.choice == "more_questions":
-            # User wants more questions - assess if they're needed
-            return await _handle_more_questions_choice(
-                payload.thread_id,
-                all_answered_questions,
-                request_id
-            )
+        # Handle errors from graph execution
+        if isinstance(result, dict) and "error" in result:
+            error_msg = str(result.get("error", "Unknown error"))
+            logger.warning(f"[{request_id}] Choice processing failed: {error_msg}")
+            return {
+                "result": result,
+                "status": "error",
+                "message": error_msg
+            }
+        
+        logger.info(f"[{request_id}] Successfully processed choice in {duration_ms:.2f}ms")
+        print("result", result)
+
+        # Check if we got new questions or a final answer
+        if result.get("answer"):
+            # More questions were generated
+            return {
+                "thread_id": payload.thread_id,
+                "status": "completed",
+                "answer": result.get("answer"),
+                "answered_questions": all_answered_questions
+            }
+        elif result.get("structured_questions"):
+            # Final answer was generated
+            return {
+                "thread_id": payload.thread_id,
+                "status": "interrupted",
+                "questions": result.get("structured_questions", []),
+                "message": "Here are additional questions to help provide a better answer.",
+                "answered_questions": all_answered_questions
+            }
+        else:
+            # Fallback case
+            return {
+                "thread_id": payload.thread_id,
+                "status": "completed",
+                "message": "Processing completed",
+                "answered_questions": all_answered_questions
+            }
         
     except HTTPException:
         # Re-raise HTTP exceptions as-is
@@ -239,186 +284,3 @@ async def bleak_interactive_choice_endpoint(payload: InteractiveChoiceInput, req
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=500, detail=f"Error processing request: {error_details}")
 
-
-# Helper functions for better code organization
-
-async def _handle_final_answer_choice(
-    thread_id: str, 
-    answered_questions: List[Dict[str, str]], 
-    request_id: str
-) -> Dict[str, Any]:
-    """
-    Handle the user's choice to proceed to final answer generation.
-    
-    Args:
-        thread_id: The conversation thread identifier
-        answered_questions: All previously answered questions
-        request_id: Request ID for logging
-        
-    Returns:
-        Dictionary containing the final answer and completion status
-    """
-    logger.info(f"[{request_id}] Generating final answer for thread: {thread_id}")
-    
-    loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(
-        None,
-        resume_interactive_graph,
-        answered_questions,
-        thread_id
-    )
-    
-    # Handle errors from graph execution
-    if isinstance(result, dict) and "error" in result:
-        error_msg = str(result.get("error", "Unknown error"))
-        logger.warning(f"[{request_id}] Final answer generation failed: {error_msg}")
-        return {
-            "result": result,
-            "status": "error",
-            "message": error_msg
-        }
-    
-    logger.info(f"[{request_id}] Successfully generated final answer")
-    
-    return {
-        "thread_id": thread_id,
-        "status": "completed",
-        "answer": result.get("answer"),
-        "answered_questions": answered_questions
-    }
-
-
-async def _handle_more_questions_choice(
-    thread_id: str,
-    answered_questions: List[Dict[str, str]],
-    request_id: str
-) -> Dict[str, Any]:
-    """
-    Handle the user's choice to get more clarifying questions.
-    
-    This function:
-    1. Retrieves the original prompt from the thread state
-    2. Assesses if more questions are actually needed (considering ALL previous answers)
-    3. Generates additional questions if needed
-    4. Structures the questions for UI display
-    
-    Args:
-        thread_id: The conversation thread identifier
-        answered_questions: All previously answered questions
-        request_id: Request ID for logging
-        
-    Returns:
-        Dictionary containing either new questions or suggestion to proceed to final answer
-    """
-    logger.info(f"[{request_id}] Assessing need for more questions (current count: {len(answered_questions)})")
-    
-    try:
-        # Retrieve the original prompt from thread state
-        original_prompt = await _get_original_prompt_from_thread(thread_id)
-        
-        # Assess if more questions are needed using ALL answered questions
-        loop = asyncio.get_event_loop()
-        assessment = await loop.run_in_executor(
-            None,
-            assess_question_sufficiency,
-            original_prompt,
-            answered_questions
-        )
-        
-        logger.info(f"[{request_id}] Question assessment result: {assessment.get('reason', 'unknown')}")
-        
-        if not assessment.get("needs_more_questions", False):
-            # No more questions needed - suggest final answer
-            logger.info(f"[{request_id}] Sufficient information available, suggesting final answer")
-            return {
-                "thread_id": thread_id,
-                "status": "no_more_questions",
-                "message": assessment.get("message", "I have enough information to provide a comprehensive answer."),
-                "suggestion": "final_answer",
-                "total_questions_answered": assessment.get("total_questions_answered", len(answered_questions))
-            }
-        
-        # Generate additional questions
-        new_questions = await loop.run_in_executor(
-            None,
-            generate_additional_questions,
-            original_prompt,
-            answered_questions
-        )
-        
-        if not new_questions:
-            # No questions generated - fallback to final answer
-            logger.warning(f"[{request_id}] No additional questions generated, suggesting final answer")
-            return {
-                "thread_id": thread_id,
-                "status": "no_more_questions",
-                "message": "I have enough information to provide a comprehensive answer.",
-                "suggestion": "final_answer"
-            }
-        
-        # Structure the questions for UI display
-        structured_result = await loop.run_in_executor(
-            None,
-            generate_structured_questions_from_text,
-            new_questions,
-            original_prompt
-        )
-        
-        logger.info(f"[{request_id}] Generated {len(new_questions)} additional questions")
-        
-        return {
-            "thread_id": thread_id,
-            "status": "interrupted",
-            "questions": structured_result.get("structured_questions", []),
-            "message": assessment.get("message", "Here are additional questions to help provide a better answer."),
-            "previous_answers": answered_questions
-        }
-        
-    except Exception as e:
-        logger.error(f"[{request_id}] Error in more questions assessment: {str(e)}")
-        # Fallback to suggesting final answer on error
-        return {
-            "thread_id": thread_id,
-            "status": "no_more_questions",
-            "message": "I have enough information to provide an answer.",
-            "suggestion": "final_answer",
-            "error": str(e)
-        }
-
-
-async def _get_original_prompt_from_thread(thread_id: str) -> str:
-    """
-    Retrieve the original user prompt from the thread state.
-    
-    Args:
-        thread_id: The conversation thread identifier
-        
-    Returns:
-        The original user prompt, cleaned of any added context
-        
-    Raises:
-        Exception: If unable to retrieve the prompt from thread state
-    """
-    try:
-        from bleak_interactive.graph.build_graph import create_interactive_graph
-        
-        graph = create_interactive_graph()
-        config = RunnableConfig(configurable={"thread_id": thread_id})
-        
-        # Get the current state to extract the original prompt
-        state_snapshot = graph.get_state(config)
-        original_prompt = state_snapshot.values.get("prompt", "")
-        
-        # Clean the prompt by removing any added context from previous interactions
-        if "\n\nUser's answers to clarifying questions:" in original_prompt:
-            original_prompt = original_prompt.split("\n\nUser's answers to clarifying questions:")[0]
-        
-        if not original_prompt:
-            raise ValueError("No prompt found in thread state")
-            
-        return original_prompt.strip()
-        
-    except Exception as e:
-        logger.warning(f"Could not retrieve original prompt from thread {thread_id}: {e}")
-        # Return a fallback prompt
-        return "User's question"

@@ -32,7 +32,11 @@ def clarify_node(state: BleakState, config: Configuration) -> BleakState:
     # Chain that generates questions - removed StrOutputParser since we want the Questions object
     chain = QUESTION_GENERATOR_PROMPT | llm_with_structured_output
 
-    result = chain.invoke({"prompt": prompt})
+
+    previous_questions = state.all_previous_questions
+    result = chain.invoke({"prompt": prompt, "previous_questions": previous_questions})
+
+    print("Clarify node result", result)
 
     # result = {
     #     "questions": mockQuestions

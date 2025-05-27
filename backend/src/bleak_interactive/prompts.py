@@ -10,7 +10,7 @@ ANSWER_PROMPT = ChatPromptTemplate.from_messages([
 # Initial question generation prompt
 # Used to generate clarifying questions when first processing a user's prompt
 QUESTION_GENERATOR_PROMPT = PromptTemplate.from_template(
-    "You are a helpful assistant. Instead of answering the user's prompt, generate up to 3 specific clarifying questions that would help you better understand the request.\n\nUser Prompt: {prompt}\n\nQuestions:"
+    "You are a helpful assistant. Instead of answering the user's prompt, generate up to 3 specific clarifying questions that would help you better understand the request, avoid these questions that have already been answered {previous_questions}.\n\nUser Prompt: {prompt}\n\nQuestions:"
 )
 
 # Assessment prompt for determining if more questions are needed

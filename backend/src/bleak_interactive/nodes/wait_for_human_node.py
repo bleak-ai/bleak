@@ -22,6 +22,7 @@ def wait_for_human_node(state: BleakState, config: Configuration) -> BleakState:
         # If no questions, skip waiting and continue
         return state
     
+    print("Interrupt Wait for human node")
     # Present the questions to the user and wait for input
     # The interrupt will pause execution here until resumed with user answers
     user_answers = interrupt({
@@ -30,11 +31,19 @@ def wait_for_human_node(state: BleakState, config: Configuration) -> BleakState:
     })
     
     # When resumed, user_answers should contain the answered questions
-    # We'll add the answers to our state for the answer node to process
     if user_answers and "answered_questions" in user_answers:
+        # Store the answered questions in state for future reference
+        new_answered_questions = user_answers["answered_questions"]
+        state.answered_questions.extend(new_answered_questions)
+        
+        # Track the questions that were asked to avoid duplicates
+        for q in state.structured_questions:
+            if hasattr(q, 'question'):
+                state.all_previous_questions.append(q.question)
+        
         # Convert answered questions to a context string for the answer node
         answered_context = "\n\nUser's answers to clarifying questions:\n"
-        for q in user_answers["answered_questions"]:
+        for q in new_answered_questions:
             answered_context += f"Q: {q['question']}\nA: {q['answer']}\n"
         
         # Enhance the prompt with the user's answers

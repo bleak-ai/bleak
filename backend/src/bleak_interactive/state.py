@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 from typing_extensions import Annotated
 import operator
 from .models.models import Answer, RadioQuestion, TextQuestion
@@ -13,6 +13,9 @@ class BleakState:
     answer: Optional[str] = field(default=None)
     questions_to_ask: Optional[List[str]] = field(default=None)
     structured_questions: Optional[List[Union[RadioQuestion, TextQuestion]]] = field(default=None)
+    answered_questions: List[Dict[str, str]] = field(default_factory=list)
+    user_choice: Optional[str] = field(default=None)  # "more_questions" or "final_answer"
+    all_previous_questions: List[str] = field(default_factory=list)  # Track all questions asked to avoid duplicates
     metadata: dict = field(default_factory=dict)
 
 # Input state
