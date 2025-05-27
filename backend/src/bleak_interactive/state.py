@@ -11,7 +11,6 @@ class BleakState:
     prompt: str = field(default="What is the best region in Europe?")
     intermediate_results: Annotated[list, operator.add] = field(default_factory=list)
     answer: Optional[str] = field(default=None)
-    rating: Optional[float] = field(default=None)
     questions_to_ask: Optional[List[str]] = field(default=None)
     structured_questions: Optional[List[Union[RadioQuestion, TextQuestion]]] = field(default=None)
     metadata: dict = field(default_factory=dict)
@@ -31,7 +30,6 @@ class BleakStateOutput:
     structured_questions: List[Union[RadioQuestion, TextQuestion]] = field(default_factory=list)
     # For answer workflow
     answer: Optional[str] = field(default=None)
-    rating: Optional[float] = field(default=None)
 
 
 
