@@ -1,6 +1,6 @@
 from langchain_core.output_parsers import StrOutputParser
 from ..state import BleakState
-from ..prompts import ANSWER_PROMPT, RATING_PROMPT
+from ..prompts import ANSWER_PROMPT
 from ..llm_provider import LLMProvider
 from ..configuration import Configuration
 from ..models.models import Answer

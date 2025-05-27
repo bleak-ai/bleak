@@ -3,14 +3,12 @@ import type {AnsweredQuestion} from "../../api/interactiveApi";
 
 interface AnswerSectionProps {
   answer: string;
-  rating?: number;
   answeredQuestions?: AnsweredQuestion[];
   onReset: () => void;
 }
 
 export const AnswerSection = ({
   answer,
-  rating,
   answeredQuestions,
   onReset
 }: AnswerSectionProps) => {
@@ -19,11 +17,6 @@ export const AnswerSection = ({
       <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-foreground">Answer</h2>
-          {rating && (
-            <div className="text-sm text-muted-foreground">
-              Rating: {rating}/10
-            </div>
-          )}
         </div>
         <div className="bg-muted/50 border border-border rounded-md p-4">
           <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">

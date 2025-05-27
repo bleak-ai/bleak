@@ -2,9 +2,8 @@ from pydantic import BaseModel
 from typing import Optional, Union, List, Literal
 
 class Answer(BaseModel):
-    """Model for the answer and its rating"""
+    """Model for the answer"""
     answer: str
-    rating: float
 
 class RadioQuestion(BaseModel):
     """Model for radio button questions"""

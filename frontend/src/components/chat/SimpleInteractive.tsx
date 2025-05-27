@@ -10,7 +10,6 @@ import {
 import {PromptForm} from "./PromptForm";
 import {QuestionsSection} from "./QuestionsSection";
 import {AnswerSection} from "./AnswerSection";
-import {LoadingSpinner} from "./LoadingSpinner";
 import {ErrorDisplay} from "./ErrorDisplay";
 
 export const SimpleInteractive = () => {
@@ -18,7 +17,6 @@ export const SimpleInteractive = () => {
   const [questions, setQuestions] = useState<InteractiveQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [finalAnswer, setFinalAnswer] = useState<string | null>(null);
-  const [rating, setRating] = useState<number | undefined>(undefined);
   const [allAnsweredQuestions, setAllAnsweredQuestions] = useState<
     AnsweredQuestion[]
   >([]);
@@ -43,7 +41,6 @@ export const SimpleInteractive = () => {
         setNoMoreQuestionsMessage("");
       } else if (data.answer) {
         setFinalAnswer(data.answer);
-        setRating(data.rating);
       }
     }
   });
@@ -64,7 +61,6 @@ export const SimpleInteractive = () => {
       if (data.status === "completed" && data.answer) {
         // Final answer received
         setFinalAnswer(data.answer);
-        setRating(data.rating);
         setQuestions([]);
         setAllAnsweredQuestions((prev) => [
           ...prev,
@@ -129,7 +125,6 @@ export const SimpleInteractive = () => {
     setQuestions([]);
     setAnswers({});
     setFinalAnswer(null);
-    setRating(undefined);
     setAllAnsweredQuestions([]);
     setPreviousAnswers([]);
     setNoMoreQuestionsAvailable(false);
@@ -173,14 +168,13 @@ export const SimpleInteractive = () => {
       {finalAnswer && (
         <AnswerSection
           answer={finalAnswer}
-          rating={rating}
           answeredQuestions={allAnsweredQuestions}
           onReset={reset}
         />
       )}
 
       {/* Loading */}
-      {isLoading && <LoadingSpinner />}
+      {/* {isLoading && <LoadingSpinner />} */}
 
       {/* Error */}
       {error && <ErrorDisplay error={error} />}

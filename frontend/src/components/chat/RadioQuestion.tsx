@@ -2,6 +2,7 @@ import {useState} from "react";
 import {Label} from "../ui/label";
 import {RadioGroup, RadioGroupItem} from "../ui/radio-group";
 import {Textarea} from "../ui/textarea";
+import {Input} from "../ui/input";
 
 interface RadioQuestionProps {
   question: string;
@@ -77,11 +78,10 @@ export const RadioQuestion = ({
             >
               Other
             </Label> */}
-            <Textarea
+            <Input
               value={otherValue}
               onChange={(e) => handleOtherTextChange(e.target.value)}
               placeholder="Please specify..."
-              rows={1}
               className="resize-none"
             />
           </div>

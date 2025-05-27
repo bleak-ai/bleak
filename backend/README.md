@@ -91,7 +91,7 @@ The Bleak Interactive system follows this flow:
 3. **Structure**: Questions are formatted for UI (radio/text inputs)
 4. **Wait**: Execution pauses for human input
 5. **Resume**: Send answers to `/bleak/interactive/resume`
-6. **Answer**: System generates final answer with rating
+6. **Answer**: System generates final answer
 
 #### Example Usage
 
