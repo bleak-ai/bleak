@@ -12,9 +12,14 @@ from langchain_core.messages import ToolMessage
 from langchain_tavily import TavilySearch
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command, interrupt
+from langgraph.prebuilt import ToolNode, tools_condition
 
+
+class State(TypedDict):
+    messages: Annotated[list, add_messages]
 
 memory = MemorySaver()
+graph_builder = StateGraph(State)
 
 
 # Tool definitions
@@ -53,112 +58,28 @@ def human_assistance(query: str) -> str:
 
 
 # Available tools for the chatbot
-TOOLS = [multiply, divide, human_assistance]
+tools = [multiply, divide, human_assistance]
 
-
-class BasicToolNode:
-    """Executes tools requested by the AI assistant."""
-    
-    def __init__(self, tools: list) -> None:
-        print(f"Initializing tool node with {len(tools)} tools")
-        self.tools_by_name = {tool.name: tool for tool in tools}
-
-    def __call__(self, inputs: dict) -> dict:
-        """Execute tool calls from the latest AI message."""
-        messages = inputs.get("messages", [])
-        if not messages:
-            raise ValueError("No messages found in input")
-        
-        last_message = messages[-1]
-        tool_outputs = []
-        
-        # Execute each tool call and collect results
-        for tool_call in last_message.tool_calls:
-            tool_name = tool_call["name"]
-            tool_args = tool_call["args"]
-
-            print("tool_call:", tool_name)
-            
-            # Execute the tool - let interrupts bubble up naturally
-            result = self.tools_by_name[tool_name].invoke(tool_args)
-            
-            # Create tool message with result
-            tool_outputs.append(
-                ToolMessage(
-                    content=json.dumps(result) if not isinstance(result, str) else result,
-                    name=tool_name,
-                    tool_call_id=tool_call["id"],
-                )
-            )
-        
-        return {"messages": tool_outputs}
-
-
-class State(TypedDict):
-    """Graph state containing conversation messages."""
-    messages: Annotated[list, add_messages]
-
-
-def chatbot_node(state: State) -> dict:
-    """Main chatbot node that generates responses using LLM with tools."""
-    return {"messages": [llm_with_tools.invoke(state["messages"])]}
-
-
-def route_after_chatbot(state: State) -> str:
-    """
-    Route to tools if the AI wants to use them, otherwise end conversation.
-    
-    Returns:
-        "tools" if AI made tool calls, END otherwise
-    """
-    messages = state.get("messages", [])
-    if not messages:
-        raise ValueError("No messages found in state")
-    
-    last_message = messages[-1]
-    
-    # Check if AI wants to use tools
-    if hasattr(last_message, "tool_calls") and len(last_message.tool_calls) > 0:
-        return "tools"
-    
-    return END
-
-
-def build_chatbot_graph():
-    """Build and return the chatbot conversation graph."""
-    # Initialize LLM with tool capabilities
-    config = Configuration()
-    llm = LLMProvider.get_llm(config)
-    llm_with_tools = llm.bind_tools(TOOLS)
-    
-    # Create tool execution node
-    tool_node = BasicToolNode(tools=TOOLS)
-    
-    # Build the conversation graph
-    graph_builder = StateGraph(State)
-    
-    # Add nodes
-    graph_builder.add_node("chatbot", chatbot_node)
-    graph_builder.add_node("tools", tool_node)
-    
-    # Add edges
-    graph_builder.add_edge(START, "chatbot")
-    graph_builder.add_edge("tools", "chatbot")  # Return to chatbot after using tools
-    
-    # Add conditional routing from chatbot
-    graph_builder.add_conditional_edges(
-        "chatbot",
-        route_after_chatbot,
-        {"tools": "tools", END: END}
-    )
-    
-    return graph_builder.compile(checkpointer=memory)
-
-
-# Initialize the chatbot graph
 config = Configuration()
 llm = LLMProvider.get_llm(config)
-llm_with_tools = llm.bind_tools(TOOLS)
+llm_with_tools = llm.bind_tools(tools)
 
-# Build the complete graph
-graph = build_chatbot_graph()
+def chatbot(state: State):
+    message = llm_with_tools.invoke(state["messages"])
+    assert(len(message.tool_calls) <= 1)
+    return {"messages": [message]}
+
+graph_builder.add_node("chatbot", chatbot)
+
+tool_node = ToolNode(tools=tools)
+graph_builder.add_node("tools", tool_node)
+
+graph_builder.add_conditional_edges(
+    "chatbot",
+    tools_condition,
+)
+graph_builder.add_edge("tools", "chatbot")
+graph_builder.add_edge(START, "chatbot")
+
+memory = MemorySaver()
+graph = graph_builder.compile(checkpointer=memory)
