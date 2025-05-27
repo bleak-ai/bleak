@@ -1,24 +1,34 @@
-import {useState, type FormEvent} from "react";
+import {useState} from "react";
 import {useMutation} from "@tanstack/react-query";
-import {Loader} from "lucide-react";
-import {Button} from "../ui/button";
-import {Textarea} from "../ui/textarea";
-import {Label} from "../ui/label";
-import {RadioGroup, RadioGroupItem} from "../ui/radio-group";
 import {
   startInteractiveSession,
-  resumeInteractiveSession,
+  makeInteractiveChoice,
   type InteractiveResponse,
   type AnsweredQuestion,
   type InteractiveQuestion
 } from "../../api/interactiveApi";
+import {PromptForm} from "./PromptForm";
+import {QuestionsSection} from "./QuestionsSection";
+import {AnswerSection} from "./AnswerSection";
+import {LoadingSpinner} from "./LoadingSpinner";
+import {ErrorDisplay} from "./ErrorDisplay";
 
 export const SimpleInteractive = () => {
-  const [prompt, setPrompt] = useState("");
   const [threadId, setThreadId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<InteractiveQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [finalAnswer, setFinalAnswer] = useState<string | null>(null);
+  const [rating, setRating] = useState<number | undefined>(undefined);
+  const [allAnsweredQuestions, setAllAnsweredQuestions] = useState<
+    AnsweredQuestion[]
+  >([]);
+  const [previousAnswers, setPreviousAnswers] = useState<AnsweredQuestion[]>(
+    []
+  );
+  const [noMoreQuestionsAvailable, setNoMoreQuestionsAvailable] =
+    useState(false);
+  const [noMoreQuestionsMessage, setNoMoreQuestionsMessage] =
+    useState<string>("");
 
   // Start session mutation
   const startMutation = useMutation<InteractiveResponse, Error, string>({
@@ -28,45 +38,65 @@ export const SimpleInteractive = () => {
       if (data.questions && data.questions.length > 0) {
         setQuestions(data.questions);
         setAnswers({});
+        setPreviousAnswers([]);
+        setNoMoreQuestionsAvailable(false);
+        setNoMoreQuestionsMessage("");
       } else if (data.answer) {
         setFinalAnswer(data.answer);
+        setRating(data.rating);
       }
     }
   });
 
-  // Resume session mutation
-  const resumeMutation = useMutation<
+  // Choice mutation
+  const choiceMutation = useMutation<
     InteractiveResponse,
     Error,
-    {threadId: string; answeredQuestions: AnsweredQuestion[]}
+    {
+      threadId: string;
+      answeredQuestions: AnsweredQuestion[];
+      choice: "more_questions" | "final_answer";
+    }
   >({
-    mutationFn: ({threadId, answeredQuestions}) =>
-      resumeInteractiveSession(threadId, answeredQuestions),
+    mutationFn: ({threadId, answeredQuestions, choice}) =>
+      makeInteractiveChoice(threadId, answeredQuestions, choice),
     onSuccess: (data) => {
-      if (data.questions && data.questions.length > 0) {
+      if (data.status === "completed" && data.answer) {
+        // Final answer received
+        setFinalAnswer(data.answer);
+        setRating(data.rating);
+        setQuestions([]);
+        setAllAnsweredQuestions((prev) => [
+          ...prev,
+          ...getCurrentAnsweredQuestions()
+        ]);
+        setNoMoreQuestionsAvailable(false);
+        setNoMoreQuestionsMessage("");
+      } else if (data.status === "no_more_questions") {
+        // No more questions available, show message and only final answer option
+        setNoMoreQuestionsAvailable(true);
+        setNoMoreQuestionsMessage(
+          data.message ||
+            "I have enough information to provide a comprehensive answer."
+        );
+      } else if (data.questions && data.questions.length > 0) {
+        // More questions received
+        const currentAnswered = getCurrentAnsweredQuestions();
+        setPreviousAnswers((prev) => [...prev, ...currentAnswered]);
+        setAllAnsweredQuestions((prev) => [...prev, ...currentAnswered]);
         setQuestions(data.questions);
         setAnswers({});
-      } else if (data.answer) {
-        setFinalAnswer(data.answer);
-        setQuestions([]);
+        setNoMoreQuestionsAvailable(false);
+        setNoMoreQuestionsMessage("");
       }
     }
   });
 
-  const isLoading = startMutation.isPending || resumeMutation.isPending;
-  const error = startMutation.error || resumeMutation.error;
+  const isLoading = startMutation.isPending || choiceMutation.isPending;
+  const error = startMutation.error || choiceMutation.error;
 
-  const handlePromptSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (prompt.trim() && !isLoading) {
-      startMutation.mutate(prompt.trim());
-    }
-  };
-
-  const handleAnswersSubmit = () => {
-    if (!threadId || isLoading) return;
-
-    const answeredQuestions: AnsweredQuestion[] = questions
+  const getCurrentAnsweredQuestions = (): AnsweredQuestion[] => {
+    return questions
       .map((q) => {
         const answer = answers[q.question];
         if (answer && answer.trim()) {
@@ -75,9 +105,18 @@ export const SimpleInteractive = () => {
         return null;
       })
       .filter((item): item is AnsweredQuestion => item !== null);
+  };
 
+  const handlePromptSubmit = (prompt: string) => {
+    startMutation.mutate(prompt);
+  };
+
+  const handleChoice = (choice: "more_questions" | "final_answer") => {
+    if (!threadId || isLoading) return;
+
+    const answeredQuestions = getCurrentAnsweredQuestions();
     if (answeredQuestions.length > 0) {
-      resumeMutation.mutate({threadId, answeredQuestions});
+      choiceMutation.mutate({threadId, answeredQuestions, choice});
     }
   };
 
@@ -86,11 +125,15 @@ export const SimpleInteractive = () => {
   };
 
   const reset = () => {
-    setPrompt("");
     setThreadId(null);
     setQuestions([]);
     setAnswers({});
     setFinalAnswer(null);
+    setRating(undefined);
+    setAllAnsweredQuestions([]);
+    setPreviousAnswers([]);
+    setNoMoreQuestionsAvailable(false);
+    setNoMoreQuestionsMessage("");
   };
 
   const allQuestionsAnswered = questions.every((q) =>
@@ -108,169 +151,39 @@ export const SimpleInteractive = () => {
 
       {/* Initial Prompt */}
       {!threadId && (
-        <div className="bg-card border border-border rounded-lg p-6 shadow-sm text-gray-100">
-          <form onSubmit={handlePromptSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="prompt" className="text-base font-medium">
-                What would you like to know?
-              </Label>
-              <Textarea
-                id="prompt"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Type your question here..."
-                rows={4}
-                className="resize-none"
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={!prompt.trim() || isLoading}
-              className="w-full"
-              size="lg"
-            >
-              {isLoading ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin mr-2" />
-                  Processing...
-                </>
-              ) : (
-                "Ask Question"
-              )}
-            </Button>
-          </form>
-        </div>
+        <PromptForm onSubmit={handlePromptSubmit} isLoading={isLoading} />
       )}
 
       {/* Questions */}
       {questions.length > 0 && (
-        <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
-          <div className="space-y-1">
-            <h2 className="text-xl font-semibold text-foreground">
-              Help me understand better
-            </h2>
-            <p className="text-muted-foreground text-sm">
-              Please answer these questions to get a more personalized response
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {questions.map((question, index) => (
-              <div key={index} className="space-y-3">
-                <Label className="text-base font-medium text-foreground">
-                  {question.question}
-                </Label>
-
-                {question.type === "radio" && question.options ? (
-                  <RadioGroup
-                    value={answers[question.question] || ""}
-                    onValueChange={(value) =>
-                      handleAnswerChange(question.question, value)
-                    }
-                    className="space-y-3"
-                  >
-                    {question.options.map((option, optIndex) => (
-                      <div
-                        key={optIndex}
-                        className="flex items-center space-x-3 p-3 rounded-md  hover:bg-muted/50 transition-colors"
-                      >
-                        <RadioGroupItem
-                          value={option}
-                          id={`${index}-${optIndex}`}
-                        />
-                        <Label
-                          htmlFor={`${index}-${optIndex}`}
-                          className="cursor-pointer text-sm flex-1 leading-relaxed"
-                        >
-                          {option}
-                        </Label>
-                      </div>
-                    ))}
-                  </RadioGroup>
-                ) : (
-                  <Textarea
-                    value={answers[question.question] || ""}
-                    onChange={(e) =>
-                      handleAnswerChange(question.question, e.target.value)
-                    }
-                    placeholder="Type your answer here..."
-                    rows={3}
-                    className="resize-none"
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-
-          <Button
-            onClick={handleAnswersSubmit}
-            disabled={!allQuestionsAnswered || isLoading}
-            className="w-full"
-            size="lg"
-          >
-            {isLoading ? (
-              <>
-                <Loader className="w-4 h-4 animate-spin mr-2" />
-                Processing...
-              </>
-            ) : (
-              "Submit Answers"
-            )}
-          </Button>
-        </div>
+        <QuestionsSection
+          questions={questions}
+          answers={answers}
+          onAnswerChange={handleAnswerChange}
+          onChoice={handleChoice}
+          isLoading={isLoading}
+          allQuestionsAnswered={allQuestionsAnswered}
+          previousAnswers={previousAnswers}
+          noMoreQuestionsAvailable={noMoreQuestionsAvailable}
+          noMoreQuestionsMessage={noMoreQuestionsMessage}
+        />
       )}
 
       {/* Final Answer */}
       {finalAnswer && (
-        <div className="space-y-6">
-          <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-4">
-            <h2 className="text-xl font-semibold text-foreground">Answer</h2>
-            <div className="bg-muted/50 border border-border rounded-md p-4">
-              <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
-                {finalAnswer}
-              </div>
-            </div>
-          </div>
-
-          <Button
-            onClick={reset}
-            variant="secondary"
-            className="w-full"
-            size="lg"
-          >
-            Ask Another Question
-          </Button>
-        </div>
+        <AnswerSection
+          answer={finalAnswer}
+          rating={rating}
+          answeredQuestions={allAnsweredQuestions}
+          onReset={reset}
+        />
       )}
 
       {/* Loading */}
-      {isLoading && (
-        <div className="flex items-center justify-center p-8">
-          <div className="flex items-center space-x-3">
-            <Loader className="w-5 h-5 animate-spin text-primary" />
-            <span className="text-muted-foreground font-medium">
-              Processing your request...
-            </span>
-          </div>
-        </div>
-      )}
+      {isLoading && <LoadingSpinner />}
 
       {/* Error */}
-      {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-          <div className="flex items-start space-x-3">
-            <div className="w-5 h-5 rounded-full bg-destructive/20 flex items-center justify-center mt-0.5">
-              <span className="text-xs text-destructive font-bold">!</span>
-            </div>
-            <div className="space-y-1">
-              <p className="text-destructive font-medium text-sm">
-                Something went wrong
-              </p>
-              <p className="text-destructive/80 text-sm">{error.message}</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {error && <ErrorDisplay error={error} />}
     </div>
   );
 };

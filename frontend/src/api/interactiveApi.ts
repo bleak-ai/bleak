@@ -30,7 +30,16 @@ const InteractiveResponseSchema = z.object({
         answer: z.string()
       })
     )
-    .optional()
+    .optional(),
+  previous_answers: z
+    .array(
+      z.object({
+        question: z.string(),
+        answer: z.string()
+      })
+    )
+    .optional(),
+  suggestion: z.string().optional()
 });
 
 // Types
@@ -49,6 +58,8 @@ export interface InteractiveResponse {
   message?: string;
   rating?: number;
   answered_questions?: AnsweredQuestion[];
+  previous_answers?: AnsweredQuestion[];
+  suggestion?: string;
 }
 
 export interface InitialRequest {
@@ -142,5 +153,53 @@ export const resumeInteractiveSession = async (
       );
     }
     throw new Error("Failed to resume interactive session");
+  }
+};
+
+export const makeInteractiveChoice = async (
+  threadId: string,
+  answeredQuestions: AnsweredQuestion[],
+  choice: "more_questions" | "final_answer"
+): Promise<InteractiveResponse> => {
+  console.log("Making interactive choice:", {
+    threadId,
+    answeredQuestions,
+    choice
+  });
+
+  try {
+    const response = await axios.post(
+      `${API_BASE_URL}/bleak/interactive/choice`,
+      {
+        thread_id: threadId,
+        answered_questions: answeredQuestions,
+        choice: choice
+      },
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    console.log("Choice response:", response.data);
+
+    const parsed = InteractiveResponseSchema.safeParse(response.data);
+    if (!parsed.success) {
+      console.error("Invalid choice response:", parsed.error);
+      throw new Error("Invalid choice response format");
+    }
+
+    return parsed.data;
+  } catch (error) {
+    console.error("Error making interactive choice:", error);
+    if (axios.isAxiosError(error)) {
+      throw new Error(
+        `Failed to make interactive choice: ${
+          error.response?.data?.detail || error.message
+        }`
+      );
+    }
+    throw new Error("Failed to make interactive choice");
   }
 };
