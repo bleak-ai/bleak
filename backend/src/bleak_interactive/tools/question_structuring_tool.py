@@ -1,30 +1,12 @@
 from typing import List, Union, Optional
+from bleak_interactive.prompts import QUESTION_STRUCTURING_PROMPT
 from langchain_core.tools import tool
 from langchain_core.prompts import PromptTemplate
 from ..llm_provider import LLMProvider
 from ..configuration import Configuration
 from ..models.models import StructuredQuestions, RadioQuestion, TextQuestion
 
-QUESTION_STRUCTURING_PROMPT = PromptTemplate.from_template(
-    """You are a UX expert that converts questions into appropriate UI components.
 
-Given a list of questions, classify each one as either:
-1. "radio" - Multiple choice questions where users select from predefined options
-2. "text" - Open-ended questions requiring free text input
-
-For radio questions, generate 3-5 relevant options based on the question context.
-For text questions, just provide the question as-is.
-
-Original context: {original_prompt}
-Questions to structure: {questions}
-
-Guidelines:
-- Use "radio" for questions about preferences, categories, locations, or choices with limited options
-- Use "text" for questions requiring specific details, names, numbers, or open-ended responses
-- Generate realistic, helpful options for radio questions
-- Keep questions clear and concise
-"""
-)
 
 @tool
 def structure_questions_tool(

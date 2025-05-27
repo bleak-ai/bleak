@@ -2,7 +2,6 @@ from bleak_interactive.graph.runner import (
     resume_interactive_graph, 
     run_interactive_graph, 
     resume_with_choice,
-    generate_structured_questions_from_text
 )
 from fastapi import FastAPI, HTTPException, Request, APIRouter
 from fastapi.middleware.cors import CORSMiddleware

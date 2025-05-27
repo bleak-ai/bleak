@@ -1,7 +1,10 @@
 from warnings import catch_warnings
+
+from bleak_interactive.llm_provider import LLMProvider
+from bleak_interactive.models.models import StructuredQuestions
+from bleak_interactive.prompts import QUESTION_STRUCTURING_PROMPT
 from ..state import BleakState
 from ..configuration import Configuration
-from ..tools import structure_questions_tool
 
 def structure_questions_node(state: BleakState, config: Configuration) -> BleakState:
     """
@@ -32,13 +35,17 @@ def structure_questions_node(state: BleakState, config: Configuration) -> BleakS
         # })
 
         print("questions to ask", state.questions_to_ask)
+        
+        llm = LLMProvider.get_llm(config)
+        llm_with_structured_output = llm.with_structured_output(StructuredQuestions)
 
-        result = structure_questions_tool.invoke({
-            "questions": state.questions_to_ask,
+        # Chain that structures questions
+        chain = QUESTION_STRUCTURING_PROMPT | llm_with_structured_output
+
+        result = chain.invoke({
             "original_prompt": state.prompt,
-            "config": config
+            "questions": state.questions_to_ask
         })
-
 
         print("structure_questions", result)
 

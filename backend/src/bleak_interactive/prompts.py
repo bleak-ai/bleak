@@ -13,6 +13,27 @@ QUESTION_GENERATOR_PROMPT = PromptTemplate.from_template(
     "You are a helpful assistant. Instead of answering the user's prompt, generate up to 3 specific clarifying questions that would help you better understand the request, avoid these questions that have already been answered {previous_questions}.\n\nUser Prompt: {prompt}\n\nQuestions:"
 )
 
+QUESTION_STRUCTURING_PROMPT = PromptTemplate.from_template(
+    """You are a UX expert that converts questions into appropriate UI components.
+
+Given a list of questions, classify each one as either:
+1. "radio" - Multiple choice questions where users select from predefined options
+2. "text" - Open-ended questions requiring free text input
+
+For radio questions, generate 3-5 relevant options based on the question context.
+For text questions, just provide the question as-is.
+
+Original context: {original_prompt}
+Questions to structure: {questions}
+
+Guidelines:
+- Use "radio" for questions about preferences, categories, locations, or choices with limited options
+- Use "text" for questions requiring specific details, names, numbers, or open-ended responses
+- Generate realistic, helpful options for radio questions
+- Keep questions clear and concise
+"""
+)
+
 # Assessment prompt for determining if more questions are needed
 # Used to evaluate if we have sufficient information or need additional clarifying questions
 # Takes into account ALL previously answered questions, not just the latest ones
