@@ -1,17 +1,17 @@
 import {useState, type FormEvent} from "react";
 import {useMutation} from "@tanstack/react-query";
 import {Loader} from "lucide-react";
-import {Button} from "./ui/button";
-import {Textarea} from "./ui/textarea";
-import {Label} from "./ui/label";
-import {RadioGroup, RadioGroupItem} from "./ui/radio-group";
+import {Button} from "../ui/button";
+import {Textarea} from "../ui/textarea";
+import {Label} from "../ui/label";
+import {RadioGroup, RadioGroupItem} from "../ui/radio-group";
 import {
   startInteractiveSession,
   resumeInteractiveSession,
   type InteractiveResponse,
   type AnsweredQuestion,
   type InteractiveQuestion
-} from "../api/interactiveApi";
+} from "../../api/interactiveApi";
 
 export const SimpleInteractive = () => {
   const [prompt, setPrompt] = useState("");

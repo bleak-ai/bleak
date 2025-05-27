@@ -1,6 +1,6 @@
 import React from "react";
 import {Chatbot} from "./Chatbot";
-import {SimpleInteractive} from "./SimpleInteractive";
+import {SimpleInteractive} from "./chat/SimpleInteractive";
 
 const ChatPage = () => {
   return (
