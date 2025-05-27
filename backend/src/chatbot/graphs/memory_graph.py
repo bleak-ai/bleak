@@ -79,6 +79,7 @@ class State(TypedDict):
 def chatbot_node(state: State) -> dict:
     """Main chatbot node that generates responses using LLM with tools."""
     return {"messages": [llm_with_tools.invoke(state["messages"])]}
+    # return {"messages": [llm.invoke(state["messages"])]}
 
 
 def route_after_chatbot(state: State) -> str:
