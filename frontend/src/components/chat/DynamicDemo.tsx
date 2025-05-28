@@ -23,7 +23,7 @@ export const DynamicDemo: React.FC = () => {
       options: ["JavaScript", "Python", "TypeScript", "Java", "C++", "Go"]
     },
     {
-      type: "input",
+      type: "text",
       question: "What's your preferred development environment?",
       options: ["VS Code", "IntelliJ", "Vim", "Sublime Text", "Atom"]
     },

@@ -1,6 +1,8 @@
 import axios from "axios";
 import {z} from "zod";
 import {logApiCall, logSessionFlow} from "../utils/logger";
+import {AVAILABLE_QUESTION_TYPES, BLEAK_ELEMENTS} from "../types/questionTypes";
+import type {BleakElementType} from "../types/questionTypes";
 
 // API Base URL
 const API_BASE_URL = "http://0.0.0.0:8008";
@@ -8,8 +10,7 @@ const API_BASE_URL = "http://0.0.0.0:8008";
 // Dynamic question schema that can handle any type
 const InteractiveQuestionSchema = z.object({
   question: z.string(),
-  // type: z.enum(["radio", "text", "multiselect", "slider"]), // Restrict to available elements only
-  type: z.enum(["text"]), // Restrict to available elements only
+  type: z.enum(AVAILABLE_QUESTION_TYPES), // Use centralized types
   options: z.array(z.string()).nullish().optional() // Make it truly optional, not nullable
 });
 
@@ -83,35 +84,6 @@ export interface ChoiceRequest {
   choice: "more_questions" | "final_answer";
 }
 
-type BleakElementType = {
-  name: string; // Name of the elements
-  description: string; // Description of the element, has to be accurate so the AI knows what it does
-};
-
-// Updated BleakElements with all available elements
-const BleakElements: BleakElementType[] = [
-  // {
-  //   name: "radio",
-  //   description:
-  //     "Use radio for single-choice questions with predefined options (yes/no, multiple choice, etc.)"
-  // },
-  {
-    name: "text",
-    description:
-      "Use text for open-ended questions, these do not include any options"
-  }
-  // {
-  //   name: "multiselect",
-  //   description:
-  //     "Use multiselect for questions where users can select multiple options from a list"
-  // },
-  // {
-  //   name: "slider",
-  //   description:
-  //     "Use slider for numeric ratings, scales, or range selections (1-10, percentages, etc.)"
-  // }
-];
-
 /**
  * Start a new interactive session with the given prompt.
  *
@@ -128,7 +100,7 @@ export const startInteractiveSession = async (
   const payload = {
     prompt,
     thread_id: null,
-    bleak_elements: BleakElements
+    bleak_elements: BLEAK_ELEMENTS
   };
 
   logSessionFlow("Starting Interactive Session", {prompt});

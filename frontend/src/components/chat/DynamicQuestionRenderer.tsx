@@ -9,6 +9,7 @@ import {
   logComponentRegistry
 } from "../../utils/logger";
 import {TextQuestion} from "./TextQuestion";
+import {QUESTION_TYPES} from "../../types/questionTypes";
 
 interface DynamicQuestionRendererProps {
   question: InteractiveQuestion;
@@ -21,10 +22,10 @@ interface DynamicQuestionRendererProps {
 // Using 'any' here because different components have different prop requirements
 // (some require options, others make them optional)
 const ComponentRegistry: Record<string, React.ComponentType<any>> = {
-  radio: RadioQuestion,
-  text: TextQuestion, // Map to radio for choice-based input
-  multiselect: MultiSelectQuestion,
-  slider: SliderQuestion
+  [QUESTION_TYPES.RADIO]: RadioQuestion,
+  [QUESTION_TYPES.TEXT]: TextQuestion,
+  [QUESTION_TYPES.MULTISELECT]: MultiSelectQuestion,
+  [QUESTION_TYPES.SLIDER]: SliderQuestion
 };
 
 // Log the component registry on module load (only in development)
@@ -34,8 +35,12 @@ if (process.env.NODE_ENV === "development") {
 
 // Function to determine if a question should have options based on component type
 const shouldHaveOptions = (type: string): boolean => {
-  const optionBasedTypes = ["radio", "input", "multiselect", "slider"];
-  return optionBasedTypes.includes(type.toLowerCase());
+  const optionBasedTypes = [
+    QUESTION_TYPES.RADIO,
+    QUESTION_TYPES.MULTISELECT,
+    QUESTION_TYPES.SLIDER
+  ];
+  return optionBasedTypes.includes(type.toLowerCase() as any);
 };
 
 export const DynamicQuestionRenderer: React.FC<
