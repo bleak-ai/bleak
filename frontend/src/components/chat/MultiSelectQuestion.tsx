@@ -1,6 +1,7 @@
-import {useState} from "react";
+import {useState, useEffect, useRef} from "react";
 import {Label} from "../ui/label";
 import {Input} from "../ui/input";
+import {logMultiSelectState, logUserAnswer} from "../../utils/logger";
 
 interface MultiSelectQuestionProps {
   question: string;
@@ -18,9 +19,18 @@ export const MultiSelectQuestion = ({
   questionIndex
 }: MultiSelectQuestionProps) => {
   const [otherValue, setOtherValue] = useState("");
+  const lastLoggedValue = useRef<string>("");
 
   // Parse the current value as a comma-separated list
   const selectedOptions = value ? value.split(", ").filter(Boolean) : [];
+
+  // Log multiselect state changes only when selection actually changes
+  useEffect(() => {
+    if (value !== lastLoggedValue.current && selectedOptions.length > 0) {
+      logMultiSelectState(selectedOptions, options.length);
+      lastLoggedValue.current = value;
+    }
+  }, [selectedOptions, options.length, value]);
 
   const handleOptionToggle = (option: string) => {
     const isSelected = selectedOptions.includes(option);
@@ -32,7 +42,13 @@ export const MultiSelectQuestion = ({
       newSelected = [...selectedOptions, option];
     }
 
-    onChange(newSelected.join(", "));
+    const newValue = newSelected.join(", ");
+    onChange(newValue);
+
+    // Log user interaction only for significant changes
+    if (newValue !== value) {
+      logUserAnswer(question, newValue, "multiselect");
+    }
   };
 
   const handleOtherChange = (text: string) => {
@@ -47,7 +63,13 @@ export const MultiSelectQuestion = ({
       filteredSelected.push(text.trim());
     }
 
-    onChange(filteredSelected.join(", "));
+    const newValue = filteredSelected.join(", ");
+    onChange(newValue);
+
+    // Log user interaction only when text is meaningful
+    if (text.trim() && newValue !== value) {
+      logUserAnswer(question, newValue, "multiselect");
+    }
   };
 
   return (

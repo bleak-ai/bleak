@@ -3,6 +3,7 @@ from ..state import BleakState
 from ..prompts import QUESTION_GENERATOR_PROMPT
 from ..llm_provider import LLMProvider
 from ..configuration import Configuration
+from ..utils.logger import node_start, node_info, node_success, node_end, questions_generated, llm_call, error_occurred
 
 mockQuestions = [
     "When you say 'best,' what qualities are you prioritizing? (e.g., natural beauty, historical significance, affordability, food, nightlife, etc.)", 
@@ -25,22 +26,43 @@ def clarify_node(state: BleakState, config: Configuration) -> BleakState:
     Returns:
         Updated state with follow-up questions
     """
-    prompt = state.prompt
-    llm = LLMProvider.get_llm(config)
-    llm_with_structured_output = llm.with_structured_output(Questions)
+    try:
+        node_start("clarify_node", 1)
+        
+        prompt = state.prompt
+        node_info("Processing user prompt", prompt_length=len(prompt))
+        
+        # Check for previous questions
+        previous_questions = state.all_previous_questions
+        if previous_questions:
+            node_info("Found previous questions", count=len(previous_questions))
+        
+        # Set up LLM
+        llm = LLMProvider.get_llm(config)
+        llm_with_structured_output = llm.with_structured_output(Questions)
+        
+        # Chain that generates questions
+        chain = QUESTION_GENERATOR_PROMPT | llm_with_structured_output
+        
+        # Call LLM
+        llm_call("QUESTION_GENERATOR_PROMPT", f"prompt + {len(previous_questions)} previous questions")
+        result = chain.invoke({"prompt": prompt, "previous_questions": previous_questions})
 
-    # Chain that generates questions - removed StrOutputParser since we want the Questions object
-    chain = QUESTION_GENERATOR_PROMPT | llm_with_structured_output
-
-
-    previous_questions = state.all_previous_questions
-    result = chain.invoke({"prompt": prompt, "previous_questions": previous_questions})
-
-
-    # result = {
-    #     "questions": mockQuestions
-    # }
-
-    state.questions_to_ask = result.questions
-
-    return state
+        # Log the generated questions
+        questions_generated(result.questions)
+        
+        # Update state
+        state.questions_to_ask = result.questions
+        
+        node_success(f"Generated {len(result.questions)} clarifying questions")
+        node_end("clarify_node", True)
+        
+        return state
+        
+    except Exception as e:
+        error_occurred(e, 
+                      node="clarify_node",
+                      prompt_length=len(state.prompt) if state.prompt else 0,
+                      previous_questions_count=len(state.all_previous_questions) if state.all_previous_questions else 0)
+        node_end("clarify_node", False)
+        return state

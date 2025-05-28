@@ -1,5 +1,6 @@
 import axios from "axios";
 import {z} from "zod";
+import {logApiCall, logSessionFlow} from "../utils/logger";
 
 // API Base URL
 const API_BASE_URL = "http://0.0.0.0:8008";
@@ -109,16 +110,19 @@ const BleakElements: BleakElementType[] = [
 export const startInteractiveSession = async (
   prompt: string
 ): Promise<InteractiveResponse> => {
-  console.log("Starting interactive session with prompt:", prompt);
+  const payload = {
+    prompt,
+    thread_id: null,
+    bleak_elements: BleakElements
+  };
+
+  logSessionFlow("Starting Interactive Session", {prompt});
+  logApiCall("/bleak/interactive", payload);
 
   try {
     const response = await axios.post(
       `${API_BASE_URL}/bleak/interactive`,
-      {
-        prompt,
-        thread_id: null,
-        bleak_elements: BleakElements
-      },
+      payload,
       {
         headers: {
           "Content-Type": "application/json"
@@ -127,13 +131,18 @@ export const startInteractiveSession = async (
       }
     );
 
-    console.log("Interactive session response:", response.data);
+    logApiCall("/bleak/interactive", payload, response.data);
 
     const parsed = InteractiveResponseSchema.safeParse(response.data);
     if (!parsed.success) {
       console.error("Invalid interactive response:", parsed.error);
       throw new Error("Invalid interactive response format");
     }
+
+    logSessionFlow("Session Started Successfully", {
+      thread_id: parsed.data.thread_id,
+      questions_count: parsed.data.questions?.length || 0
+    });
 
     return parsed.data;
   } catch (error) {
@@ -160,15 +169,21 @@ export const resumeInteractiveSession = async (
   threadId: string,
   answeredQuestions: AnsweredQuestion[]
 ): Promise<InteractiveResponse> => {
-  console.log("Resuming interactive session:", {threadId, answeredQuestions});
+  const payload = {
+    thread_id: threadId,
+    answered_questions: answeredQuestions
+  };
+
+  logSessionFlow("Resuming Interactive Session", {
+    thread_id: threadId,
+    answered_questions_count: answeredQuestions.length
+  });
+  logApiCall("/bleak/interactive/resume", payload);
 
   try {
     const response = await axios.post(
       `${API_BASE_URL}/bleak/interactive/resume`,
-      {
-        thread_id: threadId,
-        answered_questions: answeredQuestions
-      },
+      payload,
       {
         headers: {
           "Content-Type": "application/json"
@@ -177,13 +192,18 @@ export const resumeInteractiveSession = async (
       }
     );
 
-    console.log("Resume session response:", response.data);
+    logApiCall("/bleak/interactive/resume", payload, response.data);
 
     const parsed = InteractiveResponseSchema.safeParse(response.data);
     if (!parsed.success) {
       console.error("Invalid resume response:", parsed.error);
       throw new Error("Invalid resume response format");
     }
+
+    logSessionFlow("Session Resumed Successfully", {
+      status: parsed.data.status,
+      has_answer: !!parsed.data.answer
+    });
 
     return parsed.data;
   } catch (error) {
@@ -214,11 +234,16 @@ export const makeInteractiveChoice = async (
   answeredQuestions: AnsweredQuestion[],
   choice: "more_questions" | "final_answer"
 ): Promise<InteractiveResponse> => {
-  console.log("Making interactive choice:", {
-    threadId,
-    answeredQuestions,
+  const payload = {
+    thread_id: threadId,
+    answered_questions: answeredQuestions,
+    choice: choice
+  };
+
+  logSessionFlow("Making Interactive Choice", {
+    thread_id: threadId,
     choice,
-    totalQuestions: answeredQuestions.length
+    answered_questions_count: answeredQuestions.length
   });
 
   // Validate choice parameter
@@ -228,14 +253,12 @@ export const makeInteractiveChoice = async (
     );
   }
 
+  logApiCall("/bleak/interactive/choice", payload);
+
   try {
     const response = await axios.post(
       `${API_BASE_URL}/bleak/interactive/choice`,
-      {
-        thread_id: threadId,
-        answered_questions: answeredQuestions,
-        choice: choice
-      },
+      payload,
       {
         headers: {
           "Content-Type": "application/json"
@@ -244,7 +267,7 @@ export const makeInteractiveChoice = async (
       }
     );
 
-    console.log("Choice response:", response.data);
+    logApiCall("/bleak/interactive/choice", payload, response.data);
 
     const parsed = InteractiveResponseSchema.safeParse(response.data);
     if (!parsed.success) {
@@ -255,16 +278,14 @@ export const makeInteractiveChoice = async (
     // Log additional information for debugging
     const result = parsed.data;
     if (result.status === "no_more_questions") {
-      console.log(
-        `No more questions needed. Reason: ${result.reason || "unknown"}`
-      );
-      if (result.total_questions_answered) {
-        console.log(
-          `Total questions answered: ${result.total_questions_answered}`
-        );
-      }
+      logSessionFlow("No More Questions Available", {
+        reason: result.reason || "unknown",
+        total_questions_answered: result.total_questions_answered
+      });
     } else if (result.status === "interrupted" && result.questions) {
-      console.log(`Generated ${result.questions.length} additional questions`);
+      logSessionFlow("Additional Questions Generated", {
+        new_questions_count: result.questions.length
+      });
     }
 
     return result;

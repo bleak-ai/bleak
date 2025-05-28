@@ -31,7 +31,6 @@ def should_ask_more_questions(state: BleakState) -> str:
     Returns:
         String indicating the next node to execute
     """
-    print("should_ask_more_questions", state.user_choice)
     if state.user_choice == "more_questions":
         return "additional_questions_node"
     elif state.user_choice == "final_answer":
@@ -51,9 +50,6 @@ def should_continue_or_answer(state: BleakState) -> str:
     Returns:
         String indicating the next node to execute
     """
-    if state.questions_to_ask:
-        print("should_ask_more_questions", len(state.questions_to_ask))
-
     # If we have questions to ask, go to structure them
     if state.questions_to_ask and len(state.questions_to_ask) > 0:
         return "structure_questions_node"
@@ -62,7 +58,7 @@ def should_continue_or_answer(state: BleakState) -> str:
         return "answer_node"
 
 def create_interactive_graph():
-    """Build and compile the interactive bleak graph with human-in-the-loop"""
+    """Build and compile the interactive graph with human-in-the-loop"""
     builder = StateGraph(
         BleakState,
         input=BleakStateInput,

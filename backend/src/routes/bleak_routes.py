@@ -250,7 +250,6 @@ async def bleak_interactive_choice_endpoint(payload: InteractiveChoiceInput, req
             }
         
         logger.info(f"[{request_id}] Successfully processed choice in {duration_ms:.2f}ms")
-        print("result", result)
 
         # Check if we got new questions or a final answer
         if result.get("answer"):

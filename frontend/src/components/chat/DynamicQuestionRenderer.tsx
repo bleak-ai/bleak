@@ -4,6 +4,11 @@ import {TextQuestion} from "./TextQuestion";
 import {SliderQuestion} from "./SliderQuestion";
 import {MultiSelectQuestion} from "./MultiSelectQuestion";
 import type {InteractiveQuestion} from "../../api/interactiveApi";
+import {
+  logComponentRender,
+  logComponentFallback,
+  logComponentRegistry
+} from "../../utils/logger";
 
 interface DynamicQuestionRendererProps {
   question: InteractiveQuestion;
@@ -35,6 +40,11 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   textinput: TextQuestion
 };
 
+// Log the component registry on module load (only in development)
+if (process.env.NODE_ENV === "development") {
+  logComponentRegistry(ComponentRegistry);
+}
+
 // Function to determine if a question should have options based on component type
 const shouldHaveOptions = (type: string): boolean => {
   const optionBasedTypes = [
@@ -56,9 +66,19 @@ export const DynamicQuestionRenderer: React.FC<
   DynamicQuestionRendererProps
 > = ({question, value, onChange, questionIndex}) => {
   const {type, options} = question;
+  const normalizedType = type.toLowerCase();
 
   // Get the component for this type, fallback to TextQuestion
-  const Component = ComponentRegistry[type.toLowerCase()] || TextQuestion;
+  const Component = ComponentRegistry[normalizedType];
+  const componentName = Component?.name || "Unknown";
+
+  if (Component) {
+    logComponentRender(type, componentName, questionIndex);
+  } else {
+    logComponentFallback(type, "TextQuestion", "Type not found in registry");
+  }
+
+  const FinalComponent = Component || TextQuestion;
 
   // Determine if this component expects options
   const expectsOptions = shouldHaveOptions(type);
@@ -75,7 +95,7 @@ export const DynamicQuestionRenderer: React.FC<
     ...(finalOptions && {options: finalOptions})
   };
 
-  return <Component {...componentProps} />;
+  return <FinalComponent {...componentProps} />;
 };
 
 // Export a function to register new component types dynamically
@@ -84,6 +104,13 @@ export const registerComponent = (
   component: React.ComponentType<any>
 ) => {
   ComponentRegistry[type.toLowerCase()] = component;
+
+  // Log the registration in development
+  if (process.env.NODE_ENV === "development") {
+    console.log(
+      `🎨 Registered new component: ${type} → ${component.name || "Anonymous"}`
+    );
+  }
 };
 
 // Export function to check if a type is supported

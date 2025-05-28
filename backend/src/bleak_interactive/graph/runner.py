@@ -1,6 +1,7 @@
 from typing import Dict, Any, Optional, List
 from .build_graph import create_interactive_graph
 from langgraph.types import Command
+from ..utils.logger import flow_start, flow_resumed, error_occurred
 
 
 def run_interactive_graph(input_data: Dict[str, Any], thread_id: Optional[str] = None) -> Dict[str, Any]:
@@ -18,7 +19,9 @@ def run_interactive_graph(input_data: Dict[str, Any], thread_id: Optional[str] =
         Dictionary containing the graph execution results, including questions or errors
     """
     try:
-        print("Run interactive graph.")
+        # Log the start of graph execution
+        flow_start(input_data["prompt"])
+        
         # Get the interactive graph
         graph = create_interactive_graph()
         
@@ -37,6 +40,10 @@ def run_interactive_graph(input_data: Dict[str, Any], thread_id: Optional[str] =
         
         return result
     except Exception as e:
+        error_occurred(e, 
+                      function="run_interactive_graph",
+                      input_data_type=type(input_data).__name__,
+                      thread_id=thread_id)
         return {"error": str(e)}
 
 
@@ -55,7 +62,8 @@ def resume_interactive_graph(answered_questions: List[Dict[str, str]], thread_id
         Dictionary containing the final answer
     """
     try:
-        print("Resume interactive graph.")
+        # Log the resumption of graph execution
+        flow_resumed(thread_id)
 
         # Get the interactive graph
         graph = create_interactive_graph()
@@ -73,9 +81,10 @@ def resume_interactive_graph(answered_questions: List[Dict[str, str]], thread_id
         return dict(result)
         
     except Exception as e:
-        print(f"Error in resume_interactive_graph: {e}")
-        import traceback
-        traceback.print_exc()
+        error_occurred(e,
+                      function="resume_interactive_graph", 
+                      thread_id=thread_id,
+                      answered_questions_count=len(answered_questions))
         return {"error": str(e)}
 
 
@@ -95,6 +104,9 @@ def resume_with_choice(choice: str, answered_questions: List[Dict[str, str]], th
         Dictionary containing either new questions or the final answer
     """
     try:
+        # Log the resumption of graph execution
+        flow_resumed(thread_id)
+        
         # Get the interactive graph
         graph = create_interactive_graph()
         
@@ -114,7 +126,9 @@ def resume_with_choice(choice: str, answered_questions: List[Dict[str, str]], th
         return dict(result)
         
     except Exception as e:
-        print(f"Error in resume_with_choice: {e}")
-        import traceback
-        traceback.print_exc()
+        error_occurred(e,
+                      function="resume_with_choice",
+                      choice=choice,
+                      thread_id=thread_id,
+                      answered_questions_count=len(answered_questions))
         return {"error": str(e)}

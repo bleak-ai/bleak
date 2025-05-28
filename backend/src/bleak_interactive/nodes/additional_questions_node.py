@@ -9,6 +9,10 @@ from ..llm_provider import LLMProvider
 from ..configuration import Configuration
 from langchain_core.output_parsers import StrOutputParser
 from typing import Dict, Any, Optional, List
+from ..utils.logger import (
+    node_start, node_info, node_success, node_warning, node_end,
+    questions_generated, llm_call, error_occurred
+)
 
 # Maximum number of questions allowed before forcing completion
 MAX_QUESTIONS_LIMIT = 5
@@ -26,44 +30,74 @@ def additional_questions_node(state: BleakState, config: Configuration) -> Bleak
         Updated state with new questions to ask
     """
     
-    # First, assess if more questions are actually needed
-    assessment = assess_question_sufficiency(
-        state.prompt, 
-        state.answered_questions
-    )
-    
-    # If no more questions are needed, skip question generation
-    if not assessment.get("needs_more_questions", False):
-        # Set questions_to_ask to empty to skip the structure_questions_node
-        state.questions_to_ask = []
-        return state
-    
-    # Generate additional questions that are different from previous ones
-    new_questions = generate_additional_questions(
-        state.prompt,
-        state.answered_questions
-    )
-    
-    # Filter out questions that are too similar to previously asked questions
-    filtered_questions = []
-    for new_q in new_questions:
-        is_duplicate = False
-        for prev_q in state.all_previous_questions:
-            # Simple similarity check - could be enhanced with more sophisticated matching
-            if _questions_are_similar(new_q.lower(), prev_q.lower()):
-                is_duplicate = True
-                break
+    try:
+        node_start("additional_questions_node", 4)
         
-        if not is_duplicate:
-            filtered_questions.append(new_q)
-    
-    # Update state with new questions
-    state.questions_to_ask = filtered_questions
-    
-    # Add new questions to the list of all previous questions
-    state.all_previous_questions.extend(filtered_questions)
-    
-    return state
+        # Log node execution
+        node_info("Evaluating need for additional questions",
+                 answered_questions_count=len(state.answered_questions),
+                 total_previous_questions=len(state.all_previous_questions))
+        
+        # First, assess if more questions are actually needed
+        node_info("Assessing if more questions are needed...")
+        assessment = assess_question_sufficiency(
+            state.prompt, 
+            state.answered_questions
+        )
+        
+        # If no more questions are needed, skip question generation
+        if not assessment.get("needs_more_questions", False):
+            node_success(f"No more questions needed: {assessment.get('reason', 'unknown')}")
+            # Set questions_to_ask to empty to skip the structure_questions_node
+            state.questions_to_ask = []
+            node_end("additional_questions_node", True)
+            return state
+        
+        node_info("Generating additional questions...")
+        # Generate additional questions that are different from previous ones
+        new_questions = generate_additional_questions(
+            state.prompt,
+            state.answered_questions
+        )
+        
+        node_info(f"Generated {len(new_questions)} new questions, filtering duplicates...")
+        # Filter out questions that are too similar to previously asked questions
+        filtered_questions = []
+        for new_q in new_questions:
+            is_duplicate = False
+            for prev_q in state.all_previous_questions:
+                # Simple similarity check - could be enhanced with more sophisticated matching
+                if _questions_are_similar(new_q.lower(), prev_q.lower()):
+                    is_duplicate = True
+                    break
+            
+            if not is_duplicate:
+                filtered_questions.append(new_q)
+        
+        # Update state with new questions
+        state.questions_to_ask = filtered_questions
+        
+        # Add new questions to the list of all previous questions
+        state.all_previous_questions.extend(filtered_questions)
+        
+        # Log the generated questions
+        if filtered_questions:
+            questions_generated(filtered_questions)
+        
+        node_success(f"Generated {len(filtered_questions)} unique additional questions")
+        node_end("additional_questions_node", True)
+        
+        return state
+        
+    except Exception as e:
+        error_occurred(e,
+                      node="additional_questions_node",
+                      answered_questions_count=len(state.answered_questions))
+        
+        # Fallback: no additional questions
+        state.questions_to_ask = []
+        node_end("additional_questions_node", False)
+        return state
 
 
 def _questions_are_similar(q1: str, q2: str, threshold: float = 0.7) -> bool:
@@ -116,8 +150,11 @@ def assess_question_sufficiency(
         
         total_questions = len(all_answered_questions)
         
+        node_info(f"Assessing sufficiency: {total_questions}/{MAX_QUESTIONS_LIMIT} questions answered")
+        
         # Enforce maximum question limit
         if total_questions >= MAX_QUESTIONS_LIMIT:
+            node_warning(f"Maximum question limit reached ({MAX_QUESTIONS_LIMIT})")
             return {
                 "needs_more_questions": False,
                 "message": f"Maximum of {MAX_QUESTIONS_LIMIT} questions reached. I have enough information to provide a comprehensive answer.",
@@ -130,19 +167,28 @@ def assess_question_sufficiency(
         # Create assessment chain
         chain = QUESTION_SUFFICIENCY_ASSESSMENT_PROMPT | llm | StrOutputParser()
         
-        # Get assessment from LLM
-        assessment_response = chain.invoke({
+        # Prepare inputs for LLM
+        inputs = {
             "original_prompt": original_prompt,
             "all_answered_context": all_answered_context,
             "total_questions": total_questions
-        }).strip().lower()
+        }
+        
+        # Log LLM invocation
+        llm_call("QUESTION_SUFFICIENCY_ASSESSMENT", f"{total_questions} answered questions")
+        
+        # Get assessment from LLM
+        assessment_response = chain.invoke(inputs).strip().lower()
 
-        print(f"Question sufficiency assessment for {total_questions} questions:")
-        print(f"Original Prompt: {original_prompt}")
-        print(f"Assessment Response: {assessment_response}")
+        node_info(f"LLM Assessment: {assessment_response[:100]}...")
         
         # Parse the assessment response
         needs_more = "need_more" in assessment_response
+        
+        if needs_more:
+            node_info("Assessment: More questions needed")
+        else:
+            node_success("Assessment: Sufficient information available")
         
         return {
             "needs_more_questions": needs_more,
@@ -152,12 +198,12 @@ def assess_question_sufficiency(
         }
             
     except Exception as e:
-        print(f"Error in assess_question_sufficiency: {e}")
+        error_occurred(e, function="assess_question_sufficiency")
+        # Fallback: assume we need more questions if assessment fails
         return {
-            "needs_more_questions": False,
-            "message": "I have enough information to provide an answer.",
-            "error": str(e),
-            "reason": "error_fallback"
+            "needs_more_questions": True,
+            "message": "Unable to assess question sufficiency. Proceeding with additional questions.",
+            "reason": "assessment_error"
         }
 
 
@@ -183,6 +229,7 @@ def generate_additional_questions(
         llm = LLMProvider.get_llm(config)
         llm_with_structured_output = llm.with_structured_output(Questions)
 
+        node_info("Generating additional questions based on previous answers...")
         
         # Format ALL answered questions for context
         all_answered_context = _format_answered_questions(all_answered_questions)
@@ -190,24 +237,36 @@ def generate_additional_questions(
         # Create question generation chain
         chain = ADDITIONAL_QUESTIONS_PROMPT | llm_with_structured_output 
         
-        # Generate new questions
-        result = chain.invoke({
+        # Prepare inputs
+        inputs = {
             "original_prompt": original_prompt,
             "all_answered_context": all_answered_context
-        })
+        }
         
-        # Parse and clean the questions
-        # new_questions = _parse_questions_from_text(new_questions_text)
+        # Log LLM invocation
+        llm_call("ADDITIONAL_QUESTIONS_PROMPT", "Generating additional questions")
         
-        new_questions = result.questions
-        print("new questions", new_questions)
-        print(f"Generated {len(new_questions)} additional questions")
-        return new_questions[:3]  # Limit to 3 questions
+        # Generate new questions
+        result = chain.invoke(inputs)
+        
+        # Extract questions from result
+        if hasattr(result, 'questions'):
+            questions = result.questions
+        elif isinstance(result, dict) and 'questions' in result:
+            questions = result['questions']
+        else:
+            node_warning(f"Unexpected result format: {type(result)}")
+            questions = []
+        
+        node_success(f"Generated {len(questions)} additional questions")
+        for i, q in enumerate(questions, 1):
+            node_info(f"  {i}. {q[:80]}...")
+        
+        return questions
         
     except Exception as e:
-        print(f"Error in generate_additional_questions: {e}")
+        error_occurred(e, function="generate_additional_questions")
         return []
-
 
 
 def _format_answered_questions(answered_questions: List[Dict[str, str]]) -> str:

@@ -74,10 +74,19 @@ export default function Bleak() {
           </div>
         </div>
       </div>
+      <p
+        className={`text-white font-extrabold transition-all duration-2000 animate fade-in mt-10 ${
+          showImage ? "opacity-100" : "opacity-0"
+        }`}
+        style={{fontFamily: "monospace"}}
+      >
+        {" "}
+        Make you Chatbot appealing
+      </p>
 
       <a
         href="/#chat "
-        className={`w-full h-full object-contain transition-all duration-2000 ease-out mt-20 ${
+        className={`w-full h-full object-contain transition-all duration-2000 ease-out mt-10 ${
           showImage ? "opacity-100" : "opacity-0"
         }`}
       >
