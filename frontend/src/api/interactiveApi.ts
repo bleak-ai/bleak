@@ -85,6 +85,24 @@ export interface ChoiceRequest {
 
 // API Functions
 
+type BleakElementType = {
+  name: string; // Name of the elements
+  description: string; // Description of the element, has to be accurate so the AI knows what it does
+};
+
+const BleakElements: BleakElementType[] = [
+  {
+    name: "input",
+    description:
+      "Use input for questions about preferences, categories, locations, or choices with limited options"
+  },
+  {
+    name: "malo",
+    description:
+      "Use malo for questions requiring specific details, names, numbers, or open-ended responses"
+  }
+];
+
 /**
  * Start a new interactive session with the given prompt.
  *
@@ -105,7 +123,8 @@ export const startInteractiveSession = async (
       `${API_BASE_URL}/bleak/interactive`,
       {
         prompt,
-        thread_id: null
+        thread_id: null,
+        bleak_elements: BleakElements
       },
       {
         headers: {

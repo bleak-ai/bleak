@@ -36,7 +36,6 @@ def clarify_node(state: BleakState, config: Configuration) -> BleakState:
     previous_questions = state.all_previous_questions
     result = chain.invoke({"prompt": prompt, "previous_questions": previous_questions})
 
-    print("Clarify node result", result)
 
     # result = {
     #     "questions": mockQuestions

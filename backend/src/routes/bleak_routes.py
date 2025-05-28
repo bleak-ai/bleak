@@ -3,6 +3,7 @@ from bleak_interactive.graph.runner import (
     run_interactive_graph, 
     resume_with_choice,
 )
+from bleak_interactive.models.models import BleakElementType
 from fastapi import FastAPI, HTTPException, Request, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -36,9 +37,12 @@ class AnsweredQuestion(BaseModel):
     answer: str
 
 
+
+
 class InteractiveInput(BaseModel):
     prompt: str
     thread_id: Optional[str] = None
+    bleak_elements: List[BleakElementType]
 
 
 class InteractiveResumeInput(BaseModel):
@@ -71,6 +75,8 @@ async def bleak_interactive_endpoint(payload: InteractiveInput, request: Request
     """
     request_id = str(uuid.uuid4())
     start_time = time.time()
+
+    print("payload", payload)
     
     try:
         logger.info(f"[{request_id}] Starting interactive session with prompt: {payload.prompt}")
@@ -83,7 +89,7 @@ async def bleak_interactive_endpoint(payload: InteractiveInput, request: Request
         result = await loop.run_in_executor(
             None, 
             run_interactive_graph, 
-            {"prompt": payload.prompt}, 
+            {"prompt": payload.prompt, "bleak_elements": payload.bleak_elements}, 
             thread_id
         )
         
