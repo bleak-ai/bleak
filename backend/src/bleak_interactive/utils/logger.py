@@ -102,6 +102,7 @@ class BleakLogger:
     
     def ui_elements_mapped(self, structured_questions: List[DynamicQuestion]):
         """Log UI element mapping in a clean format."""
+        self._print(f"{Fore.RED}│ {Fore.WHITE}🎯 {structured_questions}:")
         self._print(f"{Fore.YELLOW}│ {Fore.CYAN}🎯 UI Element Mapping:")
         for i, sq in enumerate(structured_questions, 1):
             self._print(f"{Fore.YELLOW}│   {Fore.WHITE}{i}. [{Fore.MAGENTA}{sq.type.upper()}{Fore.WHITE}] {sq.question}")

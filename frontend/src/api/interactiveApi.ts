@@ -8,9 +8,14 @@ const API_BASE_URL = "http://0.0.0.0:8008";
 // Dynamic question schema that can handle any type
 const InteractiveQuestionSchema = z.object({
   question: z.string(),
-  type: z.string(), // Dynamic type - can be any string
+  // type: z.enum(["radio", "text", "multiselect", "slider"]), // Restrict to available elements only
+  type: z.enum(["text"]), // Restrict to available elements only
   options: z.array(z.string()).optional() // Optional options array
 });
+
+export type AvailableElements = z.infer<
+  typeof InteractiveQuestionSchema.shape.type
+>;
 
 const InteractiveResponseSchema = z.object({
   thread_id: z.string(),
@@ -83,18 +88,28 @@ type BleakElementType = {
   description: string; // Description of the element, has to be accurate so the AI knows what it does
 };
 
-// Updated BleakElements with new dynamic elements
+// Updated BleakElements with all available elements
 const BleakElements: BleakElementType[] = [
+  // {
+  //   name: "radio",
+  //   description:
+  //     "Use radio for single-choice questions with predefined options (yes/no, multiple choice, etc.)"
+  // },
   {
-    name: "slider",
+    name: "text",
     description:
-      "Use slider for numeric ratings, scales, or range selections (1-10, percentages, etc.)"
-  },
-  {
-    name: "multiselect",
-    description:
-      "Use multiselect for questions where users can select multiple options from a list"
+      "Use text for open-ended questions, these do not include any options"
   }
+  // {
+  //   name: "multiselect",
+  //   description:
+  //     "Use multiselect for questions where users can select multiple options from a list"
+  // },
+  // {
+  //   name: "slider",
+  //   description:
+  //     "Use slider for numeric ratings, scales, or range selections (1-10, percentages, etc.)"
+  // }
 ];
 
 /**

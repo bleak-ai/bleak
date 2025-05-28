@@ -1,6 +1,5 @@
 import React from "react";
 import {RadioQuestion} from "./RadioQuestion";
-import {TextQuestion} from "./TextQuestion";
 import {SliderQuestion} from "./SliderQuestion";
 import {MultiSelectQuestion} from "./MultiSelectQuestion";
 import type {InteractiveQuestion} from "../../api/interactiveApi";
@@ -17,27 +16,14 @@ interface DynamicQuestionRendererProps {
   questionIndex: number;
 }
 
-// Component registry for dynamic UI elements
+// Component registry for available UI elements only
+// Using 'any' here because different components have different prop requirements
+// (some require options, others make them optional)
 const ComponentRegistry: Record<string, React.ComponentType<any>> = {
-  // Legacy types (for backward compatibility)
   radio: RadioQuestion,
-  text: TextQuestion,
-
-  // New dynamic types
   input: RadioQuestion, // Map to radio for choice-based input
-  malo: TextQuestion, // Map to text for open-ended input
-  slider: SliderQuestion,
   multiselect: MultiSelectQuestion,
-
-  // Fallback mappings for common types
-  select: RadioQuestion,
-  dropdown: RadioQuestion,
-  checkbox: MultiSelectQuestion,
-  range: SliderQuestion,
-  scale: SliderQuestion,
-  rating: SliderQuestion,
-  textarea: TextQuestion,
-  textinput: TextQuestion
+  slider: SliderQuestion
 };
 
 // Log the component registry on module load (only in development)
@@ -47,18 +33,7 @@ if (process.env.NODE_ENV === "development") {
 
 // Function to determine if a question should have options based on component type
 const shouldHaveOptions = (type: string): boolean => {
-  const optionBasedTypes = [
-    "radio",
-    "select",
-    "dropdown",
-    "input",
-    "multiselect",
-    "checkbox",
-    "slider",
-    "range",
-    "scale",
-    "rating"
-  ];
+  const optionBasedTypes = ["radio", "input", "multiselect", "slider"];
   return optionBasedTypes.includes(type.toLowerCase());
 };
 
@@ -68,17 +43,17 @@ export const DynamicQuestionRenderer: React.FC<
   const {type, options} = question;
   const normalizedType = type.toLowerCase();
 
-  // Get the component for this type, fallback to TextQuestion
+  // Get the component for this type, fallback to RadioQuestion for unsupported types
   const Component = ComponentRegistry[normalizedType];
   const componentName = Component?.name || "Unknown";
 
   if (Component) {
     logComponentRender(type, componentName, questionIndex);
   } else {
-    logComponentFallback(type, "TextQuestion", "Type not found in registry");
+    logComponentFallback(type, "RadioQuestion", "Type not found in registry");
   }
 
-  const FinalComponent = Component || TextQuestion;
+  const FinalComponent = Component || RadioQuestion;
 
   // Determine if this component expects options
   const expectsOptions = shouldHaveOptions(type);

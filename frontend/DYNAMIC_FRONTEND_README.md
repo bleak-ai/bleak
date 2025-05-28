@@ -1,20 +1,44 @@
 # Dynamic Frontend Components
 
-The frontend now supports **any** UI element types dynamically! No more hardcoded "radio" and "text" limitations.
+The frontend now supports **specific** UI element types for interactive questions with strict type validation.
 
 ## Overview
 
-The frontend has been completely refactored to handle dynamic UI component types through:
+The frontend has been refactored to handle only the supported UI component types through:
 
-1. **Dynamic Question Schema** - Accepts any `type` string
-2. **Component Registry** - Maps types to React components
+1. **Restricted Question Schema** - Accepts only supported `type` values
+2. **Component Registry** - Maps supported types to React components
 3. **Dynamic Renderer** - Automatically selects the right component
-4. **New Components** - Added `slider` and `multiselect` types
-5. **Extensible Architecture** - Easy to add new component types
+4. **Available Components** - `radio`, `input`, `multiselect`, and `slider` types
+5. **Type Safety** - Strict validation ensures only supported types are used
 
-## New Components Added
+## Supported Components
 
-### 1. SliderQuestion
+### 1. RadioQuestion (type: "radio")
+
+For single-choice questions with predefined options.
+
+```typescript
+{
+  type: "radio",
+  question: "What's your experience level?",
+  options: ["Beginner", "Intermediate", "Advanced", "Expert"]
+}
+```
+
+### 2. Input (type: "input")
+
+For single-choice questions where users select from a dropdown or list of options (maps to RadioQuestion).
+
+```typescript
+{
+  type: "input",
+  question: "What's your preferred development environment?",
+  options: ["VS Code", "IntelliJ", "Vim", "Sublime Text"]
+}
+```
+
+### 3. SliderQuestion (type: "slider")
 
 For numeric ratings, scales, and ranges.
 
@@ -33,7 +57,7 @@ For numeric ratings, scales, and ranges.
 - Real-time value display
 - Responsive design
 
-### 2. MultiSelectQuestion
+### 4. MultiSelectQuestion (type: "multiselect")
 
 For multiple choice selections with checkboxes.
 
@@ -58,31 +82,16 @@ The `DynamicQuestionRenderer` uses a registry system to map types to components:
 
 ```typescript
 const ComponentRegistry: Record<string, React.ComponentType<any>> = {
-  // Legacy types (backward compatibility)
   radio: RadioQuestion,
-  text: TextQuestion,
-
-  // New dynamic types
-  input: RadioQuestion, // Choice-based input
-  malo: TextQuestion, // Open-ended input
-  slider: SliderQuestion, // Numeric ranges
-  multiselect: MultiSelectQuestion, // Multiple choices
-
-  // Fallback mappings
-  select: RadioQuestion,
-  dropdown: RadioQuestion,
-  checkbox: MultiSelectQuestion,
-  range: SliderQuestion,
-  scale: SliderQuestion,
-  rating: SliderQuestion,
-  textarea: TextQuestion,
-  textinput: TextQuestion
+  input: RadioQuestion, // Maps to radio for choice-based input
+  multiselect: MultiSelectQuestion,
+  slider: SliderQuestion
 };
 ```
 
 ## Usage Examples
 
-### Backend Sends Dynamic Types
+### Backend Sends Supported Types
 
 ```json
 {
@@ -98,8 +107,9 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
       "options": ["Tech", "Sports", "Music"]
     },
     {
-      "type": "customtype",
-      "question": "Any question with any type!"
+      "type": "radio",
+      "question": "What's your experience level?",
+      "options": ["Beginner", "Intermediate", "Advanced"]
     }
   ]
 }
@@ -119,11 +129,39 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
 
 ## Adding New Component Types
 
-### Step 1: Create the Component
+### Step 1: Update Available Types
+
+```typescript
+// In interactiveApi.ts
+export type AvailableElements =
+  | "radio"
+  | "input"
+  | "multiselect"
+  | "slider"
+  | "yournewtype";
+
+// Update the schema
+const InteractiveQuestionSchema = z.object({
+  question: z.string(),
+  type: z.enum(["radio", "input", "multiselect", "slider", "yournewtype"]),
+  options: z.array(z.string()).optional()
+});
+
+// Update BleakElements
+const BleakElements: BleakElementType[] = [
+  // ... existing elements
+  {
+    name: "yournewtype",
+    description: "Description of when to use your new type"
+  }
+];
+```
+
+### Step 2: Create the Component
 
 ```tsx
-// components/chat/MyCustomQuestion.tsx
-export const MyCustomQuestion = ({question, options, value, onChange}) => {
+// components/chat/YourNewQuestion.tsx
+export const YourNewQuestion = ({question, options, value, onChange}) => {
   return (
     <div>
       <Label>{question}</Label>
@@ -133,100 +171,77 @@ export const MyCustomQuestion = ({question, options, value, onChange}) => {
 };
 ```
 
-### Step 2: Register the Component
+### Step 3: Register the Component
 
 ```tsx
-import {registerComponent} from "./DynamicQuestionRenderer";
-import {MyCustomQuestion} from "./MyCustomQuestion";
+// In DynamicQuestionRenderer.tsx
+import {YourNewQuestion} from "./YourNewQuestion";
 
-// Register your new component type
-registerComponent("mycustom", MyCustomQuestion);
-```
-
-### Step 3: Use It
-
-Backend can now send:
-
-```json
-{
-  "type": "mycustom",
-  "question": "Your custom question",
-  "options": ["any", "options", "needed"]
-}
+const ComponentRegistry: Record<string, React.ComponentType<any>> = {
+  radio: RadioQuestion,
+  input: RadioQuestion,
+  multiselect: MultiSelectQuestion,
+  slider: SliderQuestion,
+  yournewtype: YourNewQuestion
+};
 ```
 
 ## API Changes
 
-### Before (Hardcoded)
+### Current (Type-Safe)
 
 ```typescript
-// Old schema - only "radio" and "text"
-const InteractiveQuestionSchema = z.discriminatedUnion("type", [
-  z.object({
-    question: z.string(),
-    type: z.literal("radio"),
-    options: z.array(z.string()).min(1)
-  }),
-  z.object({
-    question: z.string(),
-    type: z.literal("text")
-  })
-]);
-```
-
-### After (Dynamic)
-
-```typescript
-// New schema - any type string
+// Restricted schema - only supported types
 const InteractiveQuestionSchema = z.object({
   question: z.string(),
-  type: z.string(), // Any string!
+  type: z.enum(["radio", "input", "multiselect", "slider"]), // Restricted to available elements only
   options: z.array(z.string()).optional()
 });
 ```
 
-## Updated BleakElements
+## Available Elements Configuration
 
 ```typescript
 const BleakElements: BleakElementType[] = [
   {
+    name: "radio",
+    description:
+      "Use radio for single-choice questions with predefined options (yes/no, multiple choice, etc.)"
+  },
+  {
     name: "input",
     description:
-      "Use input for questions about preferences, categories, locations, or choices with limited options"
-  },
-  {
-    name: "malo",
-    description:
-      "Use malo for questions requiring specific details, names, numbers, or open-ended responses"
-  },
-  {
-    name: "slider",
-    description:
-      "Use slider for numeric ratings, scales, or range selections (1-10, percentages, etc.)"
+      "Use input for single-choice questions where users select from a dropdown or list of options"
   },
   {
     name: "multiselect",
     description:
       "Use multiselect for questions where users can select multiple options from a list"
+  },
+  {
+    name: "slider",
+    description:
+      "Use slider for numeric ratings, scales, or range selections (1-10, percentages, etc.)"
   }
 ];
 ```
 
-## Backward Compatibility
+## Type Safety
 
-✅ **Fully backward compatible!**
+✅ **Fully type-safe!**
 
-- Existing "radio" and "text" types still work
-- Old API responses are handled correctly
-- No breaking changes for existing code
+- Only supported types are accepted
+- Frontend and backend schemas are aligned
+- TypeScript provides compile-time validation
+- Runtime validation through Zod schemas
 
 ## Error Handling
 
 ### Unknown Types
 
-If backend sends an unknown type, frontend:
+If backend sends an unsupported type, the system:
 
-1. Falls back to `TextQuestion` component
+1. Falls back to `RadioQuestion` component
 2. Logs a warning to console
 3. Continues working normally
 

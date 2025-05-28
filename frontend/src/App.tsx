@@ -5,6 +5,7 @@ import Landing from "./components/Landing";
 import ChatPage from "./components/ChatPage";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import {DynamicDemo} from "./components/chat/DynamicDemo";
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState("");
@@ -32,6 +33,8 @@ function App() {
     switch (currentRoute) {
       case "chat":
         return <ChatPage />;
+      case "demo":
+        return <DynamicDemo />;
       default:
         return <Landing />;
     }

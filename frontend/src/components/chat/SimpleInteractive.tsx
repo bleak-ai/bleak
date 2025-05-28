@@ -137,11 +137,14 @@ export const SimpleInteractive = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-8">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">AI Assistant</h1>
-        <p className="text-muted-foreground">
-          Ask me anything, and I'll help you find the answer
+      <div className="space-y-2 text-left">
+        <p className=" text-xl">How it works</p>
+        <p className=" ">
+          1. Make a general question to see the questions in form of UI Bleak
+          Elements
         </p>
+        <p className="">2. Answer the questions</p>
+        <p>3. Get the answer to your original questions</p>
       </div>
 
       {/* Initial Prompt */}

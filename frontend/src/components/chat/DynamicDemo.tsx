@@ -10,7 +10,7 @@ import type {InteractiveQuestion} from "../../api/interactiveApi";
 export const DynamicDemo: React.FC = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
 
-  // Demo questions showcasing different dynamic types
+  // Demo questions showcasing different available types
   const demoQuestions: InteractiveQuestion[] = [
     {
       type: "slider",
@@ -28,17 +28,9 @@ export const DynamicDemo: React.FC = () => {
       options: ["VS Code", "IntelliJ", "Vim", "Sublime Text", "Atom"]
     },
     {
-      type: "malo",
-      question: "Describe your ideal project in detail"
-    },
-    {
       type: "radio",
       question: "What's your experience level?",
       options: ["Beginner", "Intermediate", "Advanced", "Expert"]
-    },
-    {
-      type: "text",
-      question: "What's your name?"
     }
   ];
 
@@ -57,7 +49,7 @@ export const DynamicDemo: React.FC = () => {
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold">Dynamic UI Components Demo</h1>
         <p className="text-muted-foreground">
-          Frontend now supports any UI element type dynamically!
+          Frontend now supports specific UI element types with type validation!
         </p>
       </div>
 
@@ -74,9 +66,6 @@ export const DynamicDemo: React.FC = () => {
             </span>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground mt-2">
-          ✨ Add any new type to the registry and it works automatically!
-        </p>
       </Card>
 
       {/* Demo Questions */}
@@ -93,7 +82,7 @@ export const DynamicDemo: React.FC = () => {
         {demoQuestions.map((question, index) => (
           <Card key={index} className="p-4">
             <div className="mb-2">
-              <span className="text-xs bg-gray-100 px-2 py-1 rounded font-mono">
+              <span className="text-xs  px-2 py-1 rounded font-mono">
                 type: "{question.type}"
               </span>
             </div>
@@ -126,15 +115,13 @@ export const DynamicDemo: React.FC = () => {
 
       {/* Instructions */}
       <Card className="p-4 bg-green-50 border-green-200">
-        <h3 className="font-semibold text-green-800 mb-2">
-          🎉 Frontend is now Dynamic!
-        </h3>
+        <h3 className="font-semibold text-green-800 mb-2">Answers</h3>
         <ul className="text-sm text-green-700 space-y-1">
-          <li>✅ Backend can send ANY UI element type</li>
+          <li>✅ Backend can only send supported UI element types</li>
           <li>✅ Frontend automatically renders the appropriate component</li>
           <li>✅ Easy to add new component types to the registry</li>
-          <li>✅ Backward compatible with existing "radio" and "text" types</li>
-          <li>✅ Fallback to TextQuestion for unknown types</li>
+          <li>✅ Type-safe with compile-time validation</li>
+          <li>✅ Fallback to RadioQuestion for unsupported types</li>
         </ul>
       </Card>
     </div>

@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI
 from ..state import BleakState
 from ..prompts import QUESTION_STRUCTURING_PROMPT
 from ..models.models import DynamicQuestion, BleakElementType
-from ..models.dynamic_models import create_dynamic_question_schema, create_simple_dynamic_model
+from ..models.dynamic_models import create_dynamic_question_schema
 from ..utils.logger import (
     node_start, node_info, node_success, node_warning, node_end, 
     ui_elements_mapped, llm_call, error_occurred
@@ -67,7 +67,7 @@ def structure_questions_node(state: BleakState, config: Configuration) -> BleakS
         structured_questions = []
         
         try:
-            # Try dynamic schema approach first
+            # Use dynamic schema approach
             if state.bleak_elements:
                 node_info("Using dynamic JSON schema approach")
                 
@@ -86,52 +86,48 @@ def structure_questions_node(state: BleakState, config: Configuration) -> BleakS
                 # Convert to DynamicQuestion objects
                 if isinstance(result, dict) and "questions" in result:
                     for q_data in result["questions"]:
-                        structured_questions.append(DynamicQuestion(
-                            type=q_data["type"],
-                            question=q_data["question"],
-                            options=q_data.get("options")
-                        ))
-                
+                        # Only include options if they exist and are not empty
+                        question_kwargs = {
+                            "type": q_data["type"],
+                            "question": q_data["question"]
+                        }
+                        
+                        # Only add options if they exist and are not empty
+                        if q_data.get("options") and q_data["options"] != None:
+                            question_kwargs["options"] = q_data["options"]
+
+                        print("q_data.get('options')", q_data.get("options"))
+                        print("type q_data.get('options')", type(q_data.get("options")))
+                        
+                        structured_questions.append(DynamicQuestion(**question_kwargs))
+
+                print("$$$$$$$$$$$$$$$$$structured_questions", structured_questions)
                 node_success(f"Successfully structured {len(structured_questions)} questions using JSON schema")
                 
             else:
-                raise ValueError("No bleak_elements provided")
+                # Simple fallback: create text questions
+                node_info("No bleak_elements provided, creating text questions")
+                for question in state.questions_to_ask:
+                    structured_questions.append(DynamicQuestion(
+                        type="text",
+                        question=question
+                    ))
                 
-        except Exception as schema_error:
-            node_warning(f"JSON schema approach failed: {str(schema_error)}")
-            node_info("Falling back to dynamic Pydantic model approach")
+                node_success(f"Created {len(structured_questions)} text questions")
+                
+        except Exception as e:
+            node_warning(f"Schema approach failed: {str(e)}")
+            node_info("Falling back to simple text questions")
             
-            try:
-                # Fallback to dynamic Pydantic model
-                DynamicModel = create_simple_dynamic_model(state.bleak_elements or [])
-                
-                # Create chain with dynamic model
-                chain = QUESTION_STRUCTURING_PROMPT | llm.with_structured_output(DynamicModel)
-                
-                # Log LLM invocation
-                llm_call("QUESTION_STRUCTURING_PROMPT", f"Dynamic Model with {questions_count} questions")
-                
-                # Invoke the chain
-                result = chain.invoke(prompt_inputs)
-                
-                structured_questions = result.questions if hasattr(result, 'questions') else []
-                
-                node_success(f"Successfully structured {len(structured_questions)} questions using dynamic model")
-                
-            except Exception as model_error:
-                node_warning(f"Dynamic model approach failed: {str(model_error)}")
-                node_info("Falling back to simple text questions")
-                
-                # Final fallback: create simple text questions
-                if state.questions_to_ask:
-                    for question in state.questions_to_ask:
-                        structured_questions.append(DynamicQuestion(
-                            type="text",
-                            question=question,
-                            options=None
-                        ))
-                
-                node_success(f"Created {len(structured_questions)} fallback text questions")
+            # Final fallback: create simple text questions
+            structured_questions = []
+            for question in state.questions_to_ask:
+                structured_questions.append(DynamicQuestion(
+                    type="text",
+                    question=question
+                ))
+            
+            node_success(f"Created {len(structured_questions)} fallback text questions")
         
         # Log the final UI element mapping
         if structured_questions:
@@ -157,8 +153,7 @@ def structure_questions_node(state: BleakState, config: Configuration) -> BleakS
             for question in state.questions_to_ask:
                 fallback_questions.append(DynamicQuestion(
                     type="text",
-                    question=question,
-                    options=None
+                    question=question
                 ))
         
         state.structured_questions = fallback_questions

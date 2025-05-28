@@ -1,7 +1,6 @@
 import {useState} from "react";
 import {Label} from "../ui/label";
 import {RadioGroup, RadioGroupItem} from "../ui/radio-group";
-import {Textarea} from "../ui/textarea";
 import {Input} from "../ui/input";
 
 interface RadioQuestionProps {

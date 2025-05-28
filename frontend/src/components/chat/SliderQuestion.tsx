@@ -99,7 +99,7 @@ export const SliderQuestion = ({
 
         <div className="flex justify-between text-sm text-muted-foreground px-3">
           <span>{actualMin}</span>
-          <span className="font-medium text-foreground bg-blue-50 px-2 py-1 rounded">
+          <span className="font-medium text-foreground px-2 py-1 rounded">
             {numericValue}
           </span>
           <span>{actualMax}</span>
