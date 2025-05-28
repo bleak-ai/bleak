@@ -143,67 +143,6 @@ export const startInteractiveSession = async (
 };
 
 /**
- * Resume an interactive session with user answers to clarifying questions.
- *
- * This function continues the conversation flow and generates the final answer.
- *
- * @param threadId - The conversation thread identifier
- * @param answeredQuestions - List of questions and their answers
- * @returns Promise resolving to the final answer
- * @throws Error if the request fails or response format is invalid
- */
-export const resumeInteractiveSession = async (
-  threadId: string,
-  answeredQuestions: AnsweredQuestion[]
-): Promise<InteractiveResponse> => {
-  const payload = {
-    thread_id: threadId,
-    answered_questions: answeredQuestions
-  };
-
-  logSessionFlow("Resuming Interactive Session", {
-    thread_id: threadId,
-    answered_questions_count: answeredQuestions.length
-  });
-  logApiCall("/bleak/interactive/resume", payload);
-
-  try {
-    const response = await axios.post(
-      `${API_BASE_URL}/bleak/interactive/resume`,
-      payload,
-      {
-        headers: {
-          "Content-Type": "application/json"
-        },
-        timeout: 60000 // 60 second timeout for answer generation
-      }
-    );
-
-    logApiCall("/bleak/interactive/resume", payload, response.data);
-
-    const parsed = InteractiveResponseSchema.safeParse(response.data);
-    if (!parsed.success) {
-      console.error("Invalid resume response:", parsed.error);
-      throw new Error("Invalid resume response format");
-    }
-
-    logSessionFlow("Session Resumed Successfully", {
-      status: parsed.data.status,
-      has_answer: !!parsed.data.answer
-    });
-
-    return parsed.data;
-  } catch (error) {
-    console.error("Error resuming interactive session:", error);
-    if (axios.isAxiosError(error)) {
-      const errorMessage = error.response?.data?.detail || error.message;
-      throw new Error(`Failed to resume interactive session: ${errorMessage}`);
-    }
-    throw new Error("Failed to resume interactive session");
-  }
-};
-
-/**
  * Make a choice in an interactive session to either get more questions or proceed to final answer.
  *
  * This function handles the user's decision after answering initial questions:
