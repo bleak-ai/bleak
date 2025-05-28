@@ -2,7 +2,6 @@ from typing import Annotated
 
 from chatbot.configuration import Configuration
 from chatbot.llm_provider import LLMProvider
-from langchain_tavily import TavilySearch
 from langchain_core.messages import BaseMessage
 from typing_extensions import TypedDict
 from dotenv import load_dotenv

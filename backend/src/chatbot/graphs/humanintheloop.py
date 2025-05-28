@@ -9,7 +9,6 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
 from langchain_core.tools import tool
 from langchain_core.messages import ToolMessage
-from langchain_tavily import TavilySearch
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import Command, interrupt
 from langgraph.prebuilt import ToolNode, tools_condition
