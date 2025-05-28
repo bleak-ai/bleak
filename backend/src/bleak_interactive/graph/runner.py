@@ -112,7 +112,6 @@ def resume_with_choice(choice: str, answered_questions: List[Dict[str, str]], th
         
         # Configure thread for state persistence
         config = {"configurable": {"thread_id": thread_id}}
-        print("Answered questions", answered_questions)
         # Create a command to resume with user choice
         command = Command(resume={
             "choice": choice,

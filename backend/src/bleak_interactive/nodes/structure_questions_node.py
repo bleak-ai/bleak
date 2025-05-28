@@ -96,12 +96,8 @@ def structure_questions_node(state: BleakState, config: Configuration) -> BleakS
                         if q_data.get("options") and q_data["options"] != None:
                             question_kwargs["options"] = q_data["options"]
 
-                        print("q_data.get('options')", q_data.get("options"))
-                        print("type q_data.get('options')", type(q_data.get("options")))
-                        
                         structured_questions.append(DynamicQuestion(**question_kwargs))
 
-                print("$$$$$$$$$$$$$$$$$structured_questions", structured_questions)
                 node_success(f"Successfully structured {len(structured_questions)} questions using JSON schema")
                 
             else:
