@@ -10,7 +10,7 @@ const InteractiveQuestionSchema = z.object({
   question: z.string(),
   // type: z.enum(["radio", "text", "multiselect", "slider"]), // Restrict to available elements only
   type: z.enum(["text"]), // Restrict to available elements only
-  options: z.array(z.string()).optional() // Optional options array
+  options: z.array(z.string()).nullish().optional() // Make it truly optional, not nullable
 });
 
 export type AvailableElements = z.infer<

@@ -8,6 +8,7 @@ import {
   logComponentFallback,
   logComponentRegistry
 } from "../../utils/logger";
+import {TextQuestion} from "./TextQuestion";
 
 interface DynamicQuestionRendererProps {
   question: InteractiveQuestion;
@@ -21,7 +22,7 @@ interface DynamicQuestionRendererProps {
 // (some require options, others make them optional)
 const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   radio: RadioQuestion,
-  input: RadioQuestion, // Map to radio for choice-based input
+  text: TextQuestion, // Map to radio for choice-based input
   multiselect: MultiSelectQuestion,
   slider: SliderQuestion
 };
@@ -47,6 +48,7 @@ export const DynamicQuestionRenderer: React.FC<
   const Component = ComponentRegistry[normalizedType];
   const componentName = Component?.name || "Unknown";
 
+  console.log("Component", Component);
   if (Component) {
     logComponentRender(type, componentName, questionIndex);
   } else {
