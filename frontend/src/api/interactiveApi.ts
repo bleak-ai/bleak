@@ -4,18 +4,12 @@ import {z} from "zod";
 // API Base URL
 const API_BASE_URL = "http://0.0.0.0:8008";
 
-// Response Schemas
-const InteractiveQuestionSchema = z.discriminatedUnion("type", [
-  z.object({
-    question: z.string(),
-    type: z.literal("radio"),
-    options: z.array(z.string()).min(1)
-  }),
-  z.object({
-    question: z.string(),
-    type: z.literal("text")
-  })
-]);
+// Dynamic question schema that can handle any type
+const InteractiveQuestionSchema = z.object({
+  question: z.string(),
+  type: z.string(), // Dynamic type - can be any string
+  options: z.array(z.string()).optional() // Optional options array
+});
 
 const InteractiveResponseSchema = z.object({
   thread_id: z.string(),
@@ -83,23 +77,22 @@ export interface ChoiceRequest {
   choice: "more_questions" | "final_answer";
 }
 
-// API Functions
-
 type BleakElementType = {
   name: string; // Name of the elements
   description: string; // Description of the element, has to be accurate so the AI knows what it does
 };
 
+// Updated BleakElements with new dynamic elements
 const BleakElements: BleakElementType[] = [
   {
-    name: "input",
+    name: "slider",
     description:
-      "Use input for questions about preferences, categories, locations, or choices with limited options"
+      "Use slider for numeric ratings, scales, or range selections (1-10, percentages, etc.)"
   },
   {
-    name: "malo",
+    name: "multiselect",
     description:
-      "Use malo for questions requiring specific details, names, numbers, or open-ended responses"
+      "Use multiselect for questions where users can select multiple options from a list"
   }
 ];
 

@@ -1,7 +1,6 @@
 import {Loader} from "lucide-react";
 import {Button} from "../ui/button";
-import {RadioQuestion} from "./RadioQuestion";
-import {TextQuestion} from "./TextQuestion";
+import {DynamicQuestionRenderer} from "./DynamicQuestionRenderer";
 import type {
   InteractiveQuestion,
   AnsweredQuestion
@@ -49,97 +48,58 @@ export const QuestionsSection = ({
       <div className="space-y-6">
         {questions.map((question, index) => (
           <div key={index}>
-            {question.type === "radio" && question.options ? (
-              <RadioQuestion
-                question={question.question}
-                options={question.options}
-                value={answers[question.question] || ""}
-                onChange={(value) => onAnswerChange(question.question, value)}
-                questionIndex={index}
-              />
-            ) : (
-              <TextQuestion
-                question={question.question}
-                value={answers[question.question] || ""}
-                onChange={(value) => onAnswerChange(question.question, value)}
-              />
-            )}
+            <DynamicQuestionRenderer
+              question={question}
+              value={answers[question.question] || ""}
+              onChange={(value) => onAnswerChange(question.question, value)}
+              questionIndex={index}
+            />
           </div>
         ))}
       </div>
 
       {/* Choice buttons */}
-      <div className="space-y-3">
-        {noMoreQuestionsAvailable ? (
-          // Show only final answer option when no more questions are available
-          <div className="space-y-3">
-            {noMoreQuestionsMessage && (
-              <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-                <p className="text-blue-800 text-sm">
-                  {noMoreQuestionsMessage}
-                </p>
-              </div>
+      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
+        {!noMoreQuestionsAvailable && (
+          <Button
+            onClick={() => onChoice("more_questions")}
+            variant="outline"
+            disabled={!allQuestionsAnswered || isLoading}
+            className="flex-1"
+          >
+            {isLoading ? (
+              <>
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                Getting more questions...
+              </>
+            ) : (
+              "Ask more questions"
             )}
-            <Button
-              onClick={() => onChoice("final_answer")}
-              disabled={!allQuestionsAnswered || isLoading}
-              className="w-full"
-              size="lg"
-            >
-              {isLoading ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin mr-2" />
-                  Processing...
-                </>
-              ) : (
-                "Get Final Answer"
-              )}
-            </Button>
-          </div>
-        ) : (
-          // Show both options when more questions might be available
-          <div className="flex gap-3">
-            <Button
-              onClick={() => onChoice("final_answer")}
-              disabled={!allQuestionsAnswered || isLoading}
-              className="flex-1"
-              size="lg"
-            >
-              {isLoading ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin mr-2" />
-                  Processing...
-                </>
-              ) : (
-                "Get Final Answer"
-              )}
-            </Button>
-
-            <Button
-              onClick={() => onChoice("more_questions")}
-              disabled={!allQuestionsAnswered || isLoading}
-              variant="outline"
-              className="flex-1"
-              size="lg"
-            >
-              {isLoading ? (
-                <>
-                  <Loader className="w-4 h-4 animate-spin mr-2" />
-                  Processing...
-                </>
-              ) : (
-                "Ask More Questions"
-              )}
-            </Button>
-          </div>
+          </Button>
         )}
 
-        <p className="text-xs text-muted-foreground text-center">
-          {noMoreQuestionsAvailable
-            ? "Ready to provide your answer based on the information gathered."
-            : 'Choose "Get Final Answer" to proceed, or "Ask More Questions" for additional clarification'}
-        </p>
+        <Button
+          onClick={() => onChoice("final_answer")}
+          disabled={!allQuestionsAnswered || isLoading}
+          className="flex-1"
+        >
+          {isLoading ? (
+            <>
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
+              Generating answer...
+            </>
+          ) : (
+            "Get my answer"
+          )}
+        </Button>
       </div>
+
+      {/* No more questions message */}
+      {noMoreQuestionsAvailable && noMoreQuestionsMessage && (
+        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+          <p className="text-sm text-blue-800">{noMoreQuestionsMessage}</p>
+        </div>
+      )}
     </div>
   );
 };
