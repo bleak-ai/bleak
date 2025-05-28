@@ -21,8 +21,20 @@ export const MultiSelectQuestion = ({
   const [otherValue, setOtherValue] = useState("");
   const lastLoggedValue = useRef<string>("");
 
-  // Parse the current value as a comma-separated list
-  const selectedOptions = value ? value.split(", ").filter(Boolean) : [];
+  // Parse the current value as a JSON array, fallback to comma-separated for backward compatibility
+  const parseSelectedOptions = (value: string): string[] => {
+    if (!value) return [];
+
+    // Try to parse as JSON array first
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+
+    return [];
+  };
+
+  const selectedOptions = parseSelectedOptions(value);
 
   // Log multiselect state changes only when selection actually changes
   useEffect(() => {
@@ -35,19 +47,18 @@ export const MultiSelectQuestion = ({
   const handleOptionToggle = (option: string) => {
     const isSelected = selectedOptions.includes(option);
     let newSelected: string[];
-
     if (isSelected) {
       newSelected = selectedOptions.filter((item) => item !== option);
     } else {
       newSelected = [...selectedOptions, option];
     }
 
-    const newValue = newSelected.join(", ");
+    const newValue = JSON.stringify(newSelected);
     onChange(newValue);
 
     // Log user interaction only for significant changes
     if (newValue !== value) {
-      logUserAnswer(question, newValue, "multiselect");
+      logUserAnswer(question, newSelected.join(", "), "multiselect");
     }
   };
 
@@ -63,12 +74,12 @@ export const MultiSelectQuestion = ({
       filteredSelected.push(text.trim());
     }
 
-    const newValue = filteredSelected.join(", ");
+    const newValue = JSON.stringify(filteredSelected);
     onChange(newValue);
 
     // Log user interaction only when text is meaningful
     if (text.trim() && newValue !== value) {
-      logUserAnswer(question, newValue, "multiselect");
+      logUserAnswer(question, filteredSelected.join(", "), "multiselect");
     }
   };
 
