@@ -53,7 +53,7 @@ class LLMProvider:
                 model=config.model_name,
                 temperature=0,
             )
-            print(f"Using Ollama model: {config.model_name}")
+            # print(f"Using Ollama model: {config.model_name}")
         
         # Add structured output if specified
         if structured_output:
