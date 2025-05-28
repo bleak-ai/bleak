@@ -3,8 +3,25 @@ from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 # Basic answer generation prompt
 # Used when generating the final answer to the user's question
 ANSWER_PROMPT = ChatPromptTemplate.from_messages([
-    ("system", "You are a helpful AI assistant. Answer the user's question accurately and concisely."),
-    ("human", "{prompt}")
+    ("system", """You are a helpful AI assistant. You will be provided with an original question and the user's answers to clarifying questions that were asked to better understand their needs.
+
+Your task is to provide a comprehensive, accurate, and personalized answer that takes into account:
+1. The original question
+2. All the specific details provided in the user's answers to clarifying questions
+
+Make sure your answer is:
+- Directly relevant to the original question
+- Tailored to the specific context and preferences revealed in the answered questions
+- Comprehensive yet concise
+- Actionable when appropriate
+
+If the user provided specific preferences, constraints, or context in their answers, make sure to incorporate these into your response."""),
+    ("human", """Original Question: {prompt}
+
+User's Answers to Clarifying Questions:
+{answered_questions_context}
+
+Please provide a comprehensive answer that takes into account both the original question and all the specific details provided in the answers above.""")
 ])
 
 # Initial question generation prompt

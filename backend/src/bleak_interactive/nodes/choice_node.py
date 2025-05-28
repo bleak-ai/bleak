@@ -50,9 +50,20 @@ def choice_node(state: BleakState, config: Configuration) -> BleakState:
         })
 
         # This code will run when the graph is resumed
-        if user_input and "choice" in user_input:
-            user_choice_received(user_input["choice"])
-            node_success("User choice received and processed")
+        if user_input:
+            # Handle user choice
+            if "choice" in user_input:
+                state.user_choice = user_input["choice"]
+                user_choice_received(user_input["choice"])
+                node_info(f"User choice set to: {user_input['choice']}")
+            
+            # Handle answered questions from resume command
+            if "answered_questions" in user_input:
+                # Update state with the answered questions from the resume command
+                state.answered_questions = user_input["answered_questions"]
+                node_info(f"Updated state with {len(user_input['answered_questions'])} answered questions")
+            
+            node_success("User choice and answered questions processed")
         
         node_end("choice_node", True)
         return state
