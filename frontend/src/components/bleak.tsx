@@ -1,6 +1,7 @@
 import {useState, useEffect} from "react";
 import {ArrowDown} from "lucide-react";
 import {Label} from "./ui/label";
+import {Button} from "./ui/button";
 
 const DELAY_PER_LETTER = 180;
 const INITIAL_DELAY = 50;
@@ -29,7 +30,7 @@ export default function Bleak() {
   }, []);
 
   return (
-    <div className="relative flex flex-col items-center pt-[40%] min-h-screen overflow-hidden">
+    <div className="relative flex flex-col items-center pt-[30%] min-h-screen overflow-hidden">
       {/* Main content */}
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-16 px-4">
         {/* Title with animated letters */}
@@ -73,6 +74,15 @@ export default function Bleak() {
           </div>
         </div>
       </div>
+
+      <a
+        href="/#chat "
+        className={`w-full h-full object-contain transition-all duration-2000 ease-out mt-20 ${
+          showImage ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <Button className="">See bleak in Action!</Button>
+      </a>
 
       <Label className="absolute bottom-30 opacity-50">
         How it works <ArrowDown className="animate-pulse" />
