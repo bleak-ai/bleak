@@ -4,7 +4,6 @@ from bleak_interactive.nodes import (
     answer_node, 
     clarify_node, 
     structure_questions_node, 
-    wait_for_human_node,
     choice_node,
     additional_questions_node
 )
@@ -68,7 +67,6 @@ def create_interactive_graph():
     # Add all nodes for the interactive flow
     builder.add_node("clarify_node", create_node_wrapper(clarify_node))
     builder.add_node("structure_questions_node", create_node_wrapper(structure_questions_node))
-    builder.add_node("wait_for_human", create_node_wrapper(wait_for_human_node))
     builder.add_node("choice_node", create_node_wrapper(choice_node))
     builder.add_node("additional_questions_node", create_node_wrapper(additional_questions_node))
     builder.add_node("answer_node", create_node_wrapper(answer_node))
@@ -102,10 +100,10 @@ def create_interactive_graph():
     builder.add_edge("answer_node", END)
 
     # Use the shared checkpointer for state persistence
-    # Compile with checkpointer and interrupt before wait_for_human and choice nodes
+    # Compile with checkpointer and interrupt before choice node
     return builder.compile(
         checkpointer=_shared_checkpointer, 
-        interrupt_before=["wait_for_human", "choice_node"]
+        interrupt_before=["choice_node"]
     )
 
 # Export the graph variable that langgraph.json expects
