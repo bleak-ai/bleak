@@ -57,8 +57,7 @@ export const BleakSliderQuestion: React.FC<QuestionComponentProps> = ({
   question,
   value,
   onChange,
-  options,
-  questionIndex = 0
+  options
 }) => {
   return (
     <SliderQuestion
@@ -66,7 +65,6 @@ export const BleakSliderQuestion: React.FC<QuestionComponentProps> = ({
       value={value}
       onChange={onChange}
       options={options}
-      questionIndex={questionIndex}
     />
   );
 };

@@ -19,7 +19,7 @@ import {
 const components = createComponentRegistry()
   .add("text", BleakTextQuestion as any)
   .add("radio", BleakRadioQuestion as any)
-  .add("multiselect", BleakMultiSelectQuestion as any)
+  .add("multi_select", BleakMultiSelectQuestion as any)
   .add("slider", BleakSliderQuestion as any)
   .build();
 
@@ -28,7 +28,7 @@ const config = createDefaultConfig(components, {
   enableLogging: true,
   fallbackComponent: BleakRadioQuestion as any, // Use radio as fallback
   customShouldHaveOptions: (type) =>
-    ["radio", "multiselect", "slider"].includes(type),
+    ["radio", "multi_select", "slider"].includes(type),
   customDefaultOptions: (type) => {
     if (type === "radio") return ["Yes", "No"];
     if (type === "slider") return ["1", "10", "1"];
@@ -47,7 +47,7 @@ export const DynamicDemo: React.FC = () => {
       options: ["1", "10", "1"] // min, max, step
     },
     {
-      type: "multiselect",
+      type: "multi_select",
       question: "Which programming languages do you know?",
       options: ["JavaScript", "Python", "TypeScript", "Java", "C++", "Go"]
     },

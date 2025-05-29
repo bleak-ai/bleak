@@ -1,16 +1,15 @@
 # BleakAI - Dynamic Question Renderer Library
 
-A powerful, flexible React library for rendering dynamic question components. BleakAI allows you to register custom UI components and dynamically render them based on question types, making it perfect for surveys, forms, chatbots, and interactive questionnaires.
+A simple, straightforward React library for rendering dynamic question components. Define your question types once and use them directly in both React frontend and API backend.
 
 ## Features
 
-- 🎨 **Component Registry**: Register any React component for specific question types
-- 🔄 **Dynamic Rendering**: Automatically select and render the right component based on question type
-- 🪝 **React Hooks**: Easy-to-use hooks for state management
-- 🌍 **Context Provider**: Share renderer configuration across your app
+- 🎯 **Simple**: Just define your components and descriptions - no complex setup
+- 🔄 **Dynamic Rendering**: Automatically render the right component based on question type
+- 🌍 **Framework Agnostic**: Works with any React components
+- 🚀 **Backend Ready**: Use descriptions directly in your API/AI prompting
 - 📝 **TypeScript Support**: Full type safety and IntelliSense
-- 🔧 **Configurable**: Customize behavior with options, fallbacks, and logging
-- 🚀 **Lightweight**: Minimal dependencies, tree-shakeable
+- 🪝 **React Hooks**: Easy-to-use hooks for state management
 
 ## Installation
 
@@ -18,28 +17,23 @@ A powerful, flexible React library for rendering dynamic question components. Bl
 npm install bleakai
 ```
 
-## Basic Usage
+## Quick Start
 
-### 1. Register Your Components
+### 1. Define Your Question Configuration
 
 ```tsx
 import React from "react";
-import {
-  BleakProvider,
-  ContextualDynamicQuestionRenderer,
-  createDefaultConfig,
-  createComponentRegistry
-} from "bleakai";
+import {type QuestionConfig} from "bleakai";
 
-// Your custom components
-const TextInput = ({question, value, onChange}) => (
+// Your custom components (use any React components!)
+const MyTextInput = ({question, value, onChange}) => (
   <div>
     <label>{question}</label>
     <input value={value} onChange={(e) => onChange(e.target.value)} />
   </div>
 );
 
-const RadioGroup = ({question, options, value, onChange}) => (
+const MyRadioGroup = ({question, options, value, onChange}) => (
   <div>
     <label>{question}</label>
     {options?.map((option, index) => (
@@ -56,37 +50,34 @@ const RadioGroup = ({question, options, value, onChange}) => (
   </div>
 );
 
-// Create component registry
-const components = createComponentRegistry()
-  .add("text", TextInput)
-  .add("radio", RadioGroup)
-  .build();
-
-// Create configuration
-const config = createDefaultConfig(components, {
-  enableLogging: true
-});
-
-function App() {
-  return (
-    <BleakProvider config={config}>
-      <MyForm />
-    </BleakProvider>
-  );
-}
+// Simple configuration - define once, use everywhere
+export const QUESTION_CONFIG = {
+  text: {
+    component: MyTextInput,
+    description:
+      "Use for text input fields where users type free-form responses"
+  },
+  radio: {
+    component: MyRadioGroup,
+    description: "Use for single-choice questions with predefined options"
+  }
+} satisfies QuestionConfig;
 ```
 
-### 2. Render Dynamic Questions
+### 2. Use in React (Frontend)
 
 ```tsx
-const MyForm = () => {
+// Extract components directly from your config
+export const QUESTION_COMPONENTS = {
+  text: QUESTION_CONFIG.text.component,
+  radio: QUESTION_CONFIG.radio.component
+};
+
+function App() {
   const [answers, setAnswers] = useState({});
 
   const questions = [
-    {
-      type: "text",
-      question: "What is your name?"
-    },
+    {type: "text", question: "What is your name?"},
     {
       type: "radio",
       question: "What is your experience level?",
@@ -94,75 +85,180 @@ const MyForm = () => {
     }
   ];
 
-  return (
-    <div>
-      {questions.map((question, index) => (
-        <ContextualDynamicQuestionRenderer
-          key={index}
-          question={question}
+  const renderQuestion = (question, index) => {
+    const Component = QUESTION_COMPONENTS[question.type];
+
+    if (!Component) {
+      // Fallback
+      const FallbackComponent = QUESTION_COMPONENTS.radio;
+      return (
+        <FallbackComponent
+          question={question.question}
           value={answers[question.question] || ""}
           onChange={(value) =>
-            setAnswers((prev) => ({
-              ...prev,
-              [question.question]: value
-            }))
+            setAnswers((prev) => ({...prev, [question.question]: value}))
           }
-          questionIndex={index}
+          options={question.options || ["Yes", "No"]}
         />
-      ))}
-    </div>
-  );
-};
-```
-
-## Advanced Usage
-
-### Using the Hook API
-
-```tsx
-import {useBleakRenderer, DynamicQuestionRenderer} from "bleakai";
-
-const MyComponent = () => {
-  const {renderer, registerComponent} = useBleakRenderer({
-    components: {
-      text: TextInput,
-      radio: RadioGroup
+      );
     }
-  });
 
-  // Register a new component dynamically
-  const addSliderSupport = () => {
-    registerComponent("slider", SliderComponent);
+    return (
+      <Component
+        question={question.question}
+        value={answers[question.question] || ""}
+        onChange={(value) =>
+          setAnswers((prev) => ({...prev, [question.question]: value}))
+        }
+        options={question.options}
+      />
+    );
   };
 
   return (
     <div>
-      <button onClick={addSliderSupport}>Add Slider Support</button>
-
-      <DynamicQuestionRenderer
-        question={{type: "text", question: "Enter your email"}}
-        value=""
-        onChange={console.log}
-        config={{components: renderer.config.components}}
-      />
+      {questions.map((question, index) => (
+        <div key={index}>{renderQuestion(question, index)}</div>
+      ))}
     </div>
   );
-};
+}
 ```
 
-### Custom Configuration
+### 3. Use with Backend/API
 
 ```tsx
-const advancedConfig = createDefaultConfig(components, {
-  enableLogging: true,
-  fallbackComponent: DefaultQuestionComponent,
-  customShouldHaveOptions: (type) =>
-    ["radio", "select", "multiselect"].includes(type),
-  customDefaultOptions: (type) => {
-    if (type === "radio") return ["Yes", "No"];
-    if (type === "rating") return ["1", "2", "3", "4", "5"];
-    return [];
+// Extract descriptions directly from your config
+export const BLEAK_ELEMENTS = [
+  {name: "text", description: QUESTION_CONFIG.text.description},
+  {name: "radio", description: QUESTION_CONFIG.radio.description}
+];
+
+// Send to your backend for AI prompting
+const startAISession = async (prompt: string) => {
+  const response = await fetch("/api/start-session", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      prompt,
+      questionTypes: BLEAK_ELEMENTS // AI knows about your question types!
+    })
+  });
+
+  return response.json();
+};
+
+// The AI will generate questions using your exact question types:
+// { "type": "text", "question": "What's your name?" }
+// { "type": "radio", "question": "Experience?", "options": ["Beginner", "Expert"] }
+```
+
+## Why This Approach?
+
+- **No Magic**: Everything is explicit and clear
+- **No Functions**: No complex conversion functions to learn
+- **Direct Access**: Use `.component` and `.description` directly from your config
+- **Simple**: Define once, extract what you need where you need it
+- **Framework Agnostic**: No forced dependencies
+
+## Component Props Interface
+
+All your components should accept these props:
+
+```tsx
+interface QuestionComponentProps {
+  question: string;
+  value: string;
+  onChange: (value: string) => void;
+  options?: string[]; // Only for components that need options
+  [key: string]: any; // Additional custom props
+}
+```
+
+## Examples
+
+### Custom Question Types
+
+```tsx
+const ADVANCED_CONFIG = {
+  datepicker: {
+    component: MyDatePicker,
+    description: "Use for date selection questions"
+  },
+  fileupload: {
+    component: MyFileUpload,
+    description: "Use for file attachment questions"
+  },
+  slider: {
+    component: MySlider,
+    description: "Use for numeric ranges and ratings"
   }
+} satisfies QuestionConfig;
+
+// Use directly:
+const components = {
+  datepicker: ADVANCED_CONFIG.datepicker.component,
+  fileupload: ADVANCED_CONFIG.fileupload.component,
+  slider: ADVANCED_CONFIG.slider.component
+};
+
+const descriptions = [
+  {name: "datepicker", description: ADVANCED_CONFIG.datepicker.description},
+  {name: "fileupload", description: ADVANCED_CONFIG.fileupload.description},
+  {name: "slider", description: ADVANCED_CONFIG.slider.description}
+];
+```
+
+### Framework Integration
+
+Works with any React component library:
+
+```tsx
+// Material-UI
+import {TextField, RadioGroup} from "@mui/material";
+
+// Chakra UI
+import {Input, Radio} from "@chakra-ui/react";
+
+// Ant Design
+import {Input, Radio} from "antd";
+
+// Your custom design system
+import {MyInput, MyRadio} from "./design-system";
+```
+
+## TypeScript Support
+
+```tsx
+// Define your config type
+interface MyQuestionConfig extends QuestionConfig {
+  text: {component: typeof MyTextInput; description: string};
+  radio: {component: typeof MyRadioGroup; description: string};
+}
+
+// Get type-safe question types
+type MyQuestionType = keyof MyQuestionConfig; // "text" | "radio"
+```
+
+## Legacy API (Advanced Usage)
+
+For more complex setups, the library still provides advanced utilities:
+
+```tsx
+import {
+  BleakProvider,
+  createDefaultConfig,
+  createComponentRegistry
+} from "bleakai";
+
+// Advanced setup with providers and configurations
+const components = createComponentRegistry()
+  .add("text", MyTextInput)
+  .add("radio", MyRadioGroup)
+  .build();
+
+const config = createDefaultConfig(components, {
+  enableLogging: true
 });
 ```
 
@@ -170,109 +266,51 @@ const advancedConfig = createDefaultConfig(components, {
 
 ### Types
 
-#### `QuestionComponentProps`
+#### `QuestionConfig`
 
 ```tsx
-interface QuestionComponentProps {
-  question: string;
-  value: string;
-  onChange: (value: string) => void;
-  questionIndex?: number;
-  options?: string[];
-  [key: string]: any; // Additional custom props
+interface QuestionConfig {
+  [questionType: string]: {
+    component: React.ComponentType<any>;
+    description: string;
+  };
 }
 ```
 
-#### `BleakQuestion`
+## Real Example
+
+Check your current configuration - this is exactly how it should work:
 
 ```tsx
-interface BleakQuestion {
-  type: string;
-  question: string;
-  options?: string[];
-}
+export const QUESTION_CONFIG = {
+  text: {
+    component: TextQuestion,
+    description: "Use text for open-ended questions..."
+  },
+  radio: {
+    component: RadioQuestion,
+    description: "Use radio for single-choice questions..."
+  }
+} satisfies QuestionConfig;
+
+// For React
+export const QUESTION_COMPONENTS = {
+  text: QUESTION_CONFIG.text.component,
+  radio: QUESTION_CONFIG.radio.component
+};
+
+// For API
+export const BLEAK_ELEMENTS = [
+  {name: "text", description: QUESTION_CONFIG.text.description},
+  {name: "radio", description: QUESTION_CONFIG.radio.description}
+];
 ```
 
-### Components
-
-#### `BleakProvider`
-
-Provides renderer configuration to child components.
-
-```tsx
-<BleakProvider config={rendererConfig}>{children}</BleakProvider>
-```
-
-#### `DynamicQuestionRenderer`
-
-Renders a question component based on its type.
-
-```tsx
-<DynamicQuestionRenderer
-  question={question}
-  value={value}
-  onChange={onChange}
-  questionIndex={0}
-  config={config}
-/>
-```
-
-### Hooks
-
-#### `useBleakRenderer(config)`
-
-Returns a managed renderer instance with helper methods.
-
-#### `useBleakContext()`
-
-Access the renderer from BleakProvider context.
-
-### Utilities
-
-#### `createDefaultConfig(components, options)`
-
-Creates a renderer configuration with sensible defaults.
-
-#### `createComponentRegistry()`
-
-Fluent builder for component registries.
-
-```tsx
-const registry = createComponentRegistry()
-  .add("text", TextComponent)
-  .add("radio", RadioComponent)
-  .addMany({
-    slider: SliderComponent,
-    multiselect: MultiSelectComponent
-  })
-  .build();
-```
-
-## Migration from Existing Code
-
-If you're migrating from an existing dynamic renderer, the process is straightforward:
-
-1. **Extract your components**: Move your question components to separate files
-2. **Update prop interfaces**: Ensure they match `QuestionComponentProps`
-3. **Replace the registry**: Use BleakAI's component registry
-4. **Update imports**: Replace your old renderer with BleakAI components
-
-## Examples
-
-Check out the `/examples` directory for complete working examples:
-
-- Basic form with text and radio inputs
-- Advanced survey with multiple question types
-- Custom component integration
-- Dynamic component registration
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
+Simple, clear, and no magic!
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT
 
 ## Local Development & Testing
 

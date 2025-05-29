@@ -136,7 +136,7 @@ export const SimpleInteractive = () => {
   );
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-8">
+    <div className="max-w-4xl mx-auto p-6 space-y-8">
       <div className="space-y-2 text-left">
         <p className=" text-xl">How it works</p>
         <p className=" ">

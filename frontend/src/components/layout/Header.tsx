@@ -31,7 +31,10 @@ const Header = () => {
       <div className="max-w-6xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => navigateTo("")}
+          >
             <div className="w-8 h-8">
               <img
                 src="/bleaktreewhite.png"
@@ -40,9 +43,8 @@ const Header = () => {
               />
             </div>
             <span
-              className="font-bold text-xl text-white cursor-pointer"
+              className="font-bold text-xl text-white "
               style={{fontFamily: "'Orbitron', monospace"}}
-              onClick={() => navigateTo("")}
             >
               bleak
             </span>

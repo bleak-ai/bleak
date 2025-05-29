@@ -7,15 +7,13 @@ interface SliderQuestionProps {
   options?: string[];
   value: string;
   onChange: (value: string) => void;
-  questionIndex: number;
 }
 
 export const SliderQuestion = ({
   question,
   options,
   value,
-  onChange,
-  questionIndex
+  onChange
 }: SliderQuestionProps) => {
   const hasLoggedConfig = useRef(false);
   const lastLoggedValue = useRef<string>("");

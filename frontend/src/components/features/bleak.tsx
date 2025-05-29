@@ -81,7 +81,7 @@ export default function Bleak() {
         style={{fontFamily: "monospace"}}
       >
         {" "}
-        Make you Chatbot appealing
+        Make your Chatbot appealing
       </p>
 
       <a

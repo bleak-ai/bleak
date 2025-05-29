@@ -8,6 +8,14 @@ export type {
   BleakElementType
 } from "./types";
 
+// Simple configuration (NEW - Simple approach for users)
+export type {
+  QuestionConfig,
+  QuestionTypeFromConfig,
+  ComponentRegistry as SimpleComponentRegistry,
+  ElementDefinitions
+} from "./utils/simple";
+
 // Core classes
 export {BleakRenderer} from "./core/BleakRenderer";
 
@@ -32,7 +40,7 @@ export {
   useTemporaryRenderer
 } from "./components/useBleakRenderer";
 
-// Utilities
+// Utilities (legacy - for backward compatibility)
 export {
   createDefaultConfig,
   createQuestionTypes,
