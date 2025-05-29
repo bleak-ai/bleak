@@ -90,16 +90,18 @@ export interface ChoiceRequest {
  * along with a thread_id for maintaining conversation state.
  *
  * @param prompt - The user's initial question or request
+ * @param customBleakElements - Optional custom configuration for bleak elements
  * @returns Promise resolving to the interactive response with questions
  * @throws Error if the request fails or response format is invalid
  */
 export const startInteractiveSession = async (
-  prompt: string
+  prompt: string,
+  customBleakElements?: Array<{name: string; description: string}>
 ): Promise<InteractiveResponse> => {
   const payload = {
     prompt,
     thread_id: null,
-    bleak_elements: BLEAK_ELEMENTS
+    bleak_elements: customBleakElements || BLEAK_ELEMENTS
   };
 
   logSessionFlow("Starting Interactive Session", {prompt});

@@ -1,6 +1,24 @@
+import {useState} from "react";
 import {SimpleInteractive} from "../chat/interactive/SimpleInteractive";
+import {
+  QuestionConfigEditor,
+  type CustomQuestionConfig
+} from "../chat/config/QuestionConfigEditor";
 
 const ChatPage = () => {
+  const [customConfig, setCustomConfig] = useState<CustomQuestionConfig | null>(
+    null
+  );
+  const [isConfigCollapsed, setIsConfigCollapsed] = useState(true);
+
+  const handleConfigChange = (config: CustomQuestionConfig) => {
+    setCustomConfig(config);
+  };
+
+  const handleToggleCollapse = () => {
+    setIsConfigCollapsed(!isConfigCollapsed);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white py-12">
       {/* Animated Background Elements */}
@@ -17,12 +35,57 @@ const ChatPage = () => {
             </span>
           </h1>
           <p className="text-xl text-white/70 max-w-2xl mx-auto">
-            Experience our interactive AI assistant that provides personalized
-            responses through dynamic UI components.
+            Experience our interactive AI assistant that asks questions through
+            dynamic UI components.
           </p>
         </div>
 
-        <SimpleInteractive />
+        {/* How it works section */}
+        <div className="max-w-4xl mx-auto mb-8 p-6">
+          <div className="bg-white/5 rounded-lg border border-white/10 p-6">
+            <div className="space-y-3">
+              <p className="text-xl font-semibold text-white">How it works</p>
+              <div className="space-y-2 text-white/80 leading-relaxed">
+                <p>
+                  <span className="text-rose-400 font-medium">1.</span>{" "}
+                  <strong className="text-white">
+                    Configure Question Types:
+                  </strong>{" "}
+                  Customize how the AI generates questions using the
+                  configuration panel below
+                </p>
+                <p>
+                  <span className="text-rose-400 font-medium">2.</span>{" "}
+                  <strong className="text-white">Ask Your Question:</strong>{" "}
+                  Make a general question to see personalized UI elements appear
+                </p>
+                <p>
+                  <span className="text-rose-400 font-medium">3.</span>{" "}
+                  <strong className="text-white">Answer Questions:</strong>{" "}
+                  Interact with the AI-generated questions in predesigned or
+                  custom UI components
+                </p>
+                <p>
+                  <span className="text-rose-400 font-medium">4.</span>{" "}
+                  <strong className="text-white">Get Your Answer:</strong>{" "}
+                  Receive a comprehensive response based on your interactions
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Question Configuration Editor */}
+        <div className="mb-8">
+          <QuestionConfigEditor
+            onConfigChange={handleConfigChange}
+            isCollapsed={isConfigCollapsed}
+            onToggleCollapse={handleToggleCollapse}
+          />
+        </div>
+
+        {/* Interactive Chat Component */}
+        <SimpleInteractive customConfig={customConfig} />
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import type {
 } from "../../../api/interactiveApi";
 // Import the simple configuration
 import {QUESTION_COMPONENTS} from "../../../config/questionConfig";
+import type {CustomQuestionConfig} from "../config/QuestionConfigEditor";
 
 interface QuestionsSectionProps {
   questions: InteractiveQuestion[];
@@ -18,6 +19,7 @@ interface QuestionsSectionProps {
   previousAnswers?: AnsweredQuestion[];
   noMoreQuestionsAvailable?: boolean;
   noMoreQuestionsMessage?: string;
+  customConfig?: CustomQuestionConfig | null;
 }
 
 export const QuestionsSection = ({
@@ -29,13 +31,27 @@ export const QuestionsSection = ({
   allQuestionsAnswered,
   previousAnswers,
   noMoreQuestionsAvailable = false,
-  noMoreQuestionsMessage
+  noMoreQuestionsMessage,
+  customConfig
 }: QuestionsSectionProps) => {
   // Create simple renderer config using the components directly
   const rendererConfig = {
     components: QUESTION_COMPONENTS,
     fallbackComponent: QUESTION_COMPONENTS.radio
   };
+
+  // Get active question types for display
+  const getActiveQuestionTypes = () => {
+    if (!customConfig) return null;
+
+    const activeTypes = Object.entries(customConfig)
+      .filter(([_, config]) => config.enabled)
+      .map(([_type, config]) => config.name);
+
+    return activeTypes.length > 0 ? activeTypes : null;
+  };
+
+  const activeTypes = getActiveQuestionTypes();
 
   return (
     <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
@@ -49,6 +65,11 @@ export const QuestionsSection = ({
         {previousAnswers && previousAnswers.length > 0 && (
           <p className="text-muted-foreground text-xs">
             Building on your previous {previousAnswers.length} answer(s)
+          </p>
+        )}
+        {activeTypes && (
+          <p className="text-muted-foreground text-xs">
+            Using custom question types: {activeTypes.join(", ")}
           </p>
         )}
       </div>

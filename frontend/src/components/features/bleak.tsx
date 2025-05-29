@@ -86,7 +86,7 @@ export default function Bleak() {
 
       <a
         href="/#chat "
-        className={`w-full h-full object-contain transition-all duration-3000  ease-in mt-10 ${
+        className={`w-full h-full object-contain transition-all duration-2000  ease-in mt-10 ${
           showImage ? "opacity-100" : "opacity-0"
         }`}
       >

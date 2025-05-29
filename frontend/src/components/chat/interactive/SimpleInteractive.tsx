@@ -11,8 +11,13 @@ import {PromptForm} from "../utils/PromptForm";
 import {QuestionsSection} from "../questions/QuestionsSection";
 import {AnswerSection} from "../utils/AnswerSection";
 import {ErrorDisplay} from "../utils/ErrorDisplay";
+import type {CustomQuestionConfig} from "../config/QuestionConfigEditor";
 
-export const SimpleInteractive = () => {
+interface SimpleInteractiveProps {
+  customConfig?: CustomQuestionConfig | null;
+}
+
+export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
   const [threadId, setThreadId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<InteractiveQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -28,9 +33,22 @@ export const SimpleInteractive = () => {
   const [noMoreQuestionsMessage, setNoMoreQuestionsMessage] =
     useState<string>("");
 
+  // Convert custom config to API format
+  const getCustomBleakElements = () => {
+    if (!customConfig) return undefined;
+
+    return Object.entries(customConfig)
+      .filter(([_, config]) => config.enabled)
+      .map(([name, config]) => ({
+        name,
+        description: config.description
+      }));
+  };
+
   // Start session mutation
   const startMutation = useMutation<InteractiveResponse, Error, string>({
-    mutationFn: startInteractiveSession,
+    mutationFn: (prompt: string) =>
+      startInteractiveSession(prompt, getCustomBleakElements()),
     onSuccess: (data) => {
       setThreadId(data.thread_id);
       if (data.questions && data.questions.length > 0) {
@@ -137,16 +155,6 @@ export const SimpleInteractive = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <div className="space-y-2 text-left">
-        <p className=" text-xl">How it works</p>
-        <p className=" ">
-          1. Make a general question to see the questions in form of UI Bleak
-          Elements
-        </p>
-        <p className="">2. Answer the questions</p>
-        <p>3. Get the answer to your original questions</p>
-      </div>
-
       {/* Initial Prompt */}
       {!threadId && (
         <PromptForm onSubmit={handlePromptSubmit} isLoading={isLoading} />
@@ -164,6 +172,7 @@ export const SimpleInteractive = () => {
           previousAnswers={previousAnswers}
           noMoreQuestionsAvailable={noMoreQuestionsAvailable}
           noMoreQuestionsMessage={noMoreQuestionsMessage}
+          customConfig={customConfig}
         />
       )}
 
