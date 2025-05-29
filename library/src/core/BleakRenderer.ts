@@ -1,4 +1,3 @@
-import {ComponentType} from "react";
 import {
   BleakQuestion,
   BleakRendererConfig,
@@ -18,24 +17,25 @@ export class BleakRenderer {
   }
 
   /**
-   * Update the renderer configuration
+   * Log the component registry on construction
    */
-  updateConfig(newConfig: Partial<BleakRendererConfig>): void {
-    this.config = {...this.config, ...newConfig};
-    this.logRegistration();
+  private logRegistration(): void {
+    if (this.config.logger?.onRegistration) {
+      Object.entries(this.config.components).forEach(([type, component]) => {
+        this.config.logger!.onRegistration!(type, component.name || "Unknown");
+      });
+    }
   }
 
   /**
    * Register a new component type
    */
-  registerComponent(
-    type: string,
-    component: ComponentType<QuestionComponentProps>
-  ): void {
-    this.config.components[type.toLowerCase()] = component;
+  registerComponent(type: string, component: any): void {
+    this.config.components[type] = component;
 
+    // Log registration
     if (this.config.logger?.onRegistration) {
-      this.config.logger.onRegistration(type, component.name || "Anonymous");
+      this.config.logger.onRegistration(type, component.name || "Unknown");
     }
   }
 
@@ -47,10 +47,17 @@ export class BleakRenderer {
   }
 
   /**
-   * Get all supported types
+   * Get list of supported types
    */
   getSupportedTypes(): string[] {
     return Object.keys(this.config.components);
+  }
+
+  /**
+   * Update configuration
+   */
+  updateConfig(newConfig: Partial<BleakRendererConfig>): void {
+    this.config = {...this.config, ...newConfig};
   }
 
   /**
@@ -62,11 +69,14 @@ export class BleakRenderer {
     onChange: (value: string) => void,
     questionIndex?: number
   ): {
-    Component: ComponentType<QuestionComponentProps>;
+    Component: any;
     props: QuestionComponentProps;
   } {
     const {type, options} = question;
     const normalizedType = type.toLowerCase();
+
+    // Normalize null options to undefined for better compatibility
+    const normalizedOptions = options === null ? undefined : options;
 
     // Get the component for this type
     const Component = this.config.components[normalizedType];
@@ -100,8 +110,8 @@ export class BleakRenderer {
     const expectsOptions = this.shouldHaveOptions(type);
 
     // For components that expect options but don't have them, provide defaults
-    let finalOptions = options;
-    if (expectsOptions && !options && this.config.getDefaultOptions) {
+    let finalOptions = normalizedOptions;
+    if (expectsOptions && !normalizedOptions && this.config.getDefaultOptions) {
       finalOptions = this.config.getDefaultOptions(type);
     }
 
@@ -137,24 +147,5 @@ export class BleakRenderer {
       "dropdown"
     ];
     return optionBasedTypes.includes(type.toLowerCase());
-  }
-
-  /**
-   * Log component registry (for debugging)
-   */
-  private logRegistration(): void {
-    if (this.config.logger?.onRegistration) {
-      const entries = Object.keys(this.config.components).map((key) => [
-        key,
-        this.config.components[key]
-      ]);
-      for (const [type, component] of entries) {
-        this.config.logger.onRegistration(
-          type as string,
-          (component as ComponentType<QuestionComponentProps>).name ||
-            "Anonymous"
-        );
-      }
-    }
   }
 }

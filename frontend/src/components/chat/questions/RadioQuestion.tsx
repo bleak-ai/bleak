@@ -1,23 +1,16 @@
-import React, {useState, useEffect} from "react";
+import {useState} from "react";
 import {Label} from "../../ui/label";
 import {RadioGroup, RadioGroupItem} from "../../ui/radio-group";
 import {Input} from "../../ui/input";
-
-interface RadioQuestionProps {
-  question: string;
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
-  questionIndex: number;
-}
+import type {QuestionComponentProps} from "bleakai";
 
 export const RadioQuestion = ({
   question,
-  options,
+  options = [],
   value,
   onChange,
   questionIndex
-}: RadioQuestionProps) => {
+}: QuestionComponentProps) => {
   const [otherValue, setOtherValue] = useState("");
   const isOtherSelected =
     value === "other" || (!options.includes(value) && value !== "");
@@ -71,12 +64,6 @@ export const RadioQuestion = ({
         <div className="space-y-3">
           <div className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
             <RadioGroupItem value="other" id={`${questionIndex}-other`} />
-            {/* <Label
-              htmlFor={`${questionIndex}-other`}
-              className="cursor-pointer text-sm flex-1 leading-relaxed"
-            >
-              Other
-            </Label> */}
             <Input
               value={otherValue}
               onChange={(e) => handleOtherTextChange(e.target.value)}
@@ -85,9 +72,7 @@ export const RadioQuestion = ({
             />
           </div>
 
-          {/* {isOtherSelected && ( */}
           <div className="ml-8"></div>
-          {/* )} */}
         </div>
       </RadioGroup>
     </div>

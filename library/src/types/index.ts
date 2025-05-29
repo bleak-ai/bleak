@@ -1,10 +1,10 @@
-import {ComponentType} from "react";
+import React from "react";
 
 // Core question interface that all questions must implement
 export interface BleakQuestion {
   type: string;
   question: string;
-  options?: string[];
+  options?: string[] | null;
 }
 
 // Props that every question component will receive
@@ -18,11 +18,8 @@ export interface QuestionComponentProps {
   [key: string]: any;
 }
 
-// Type for component registry
-export type ComponentRegistry = Record<
-  string,
-  ComponentType<QuestionComponentProps>
->;
+// Type for component registry - using any for maximum compatibility across React versions
+export type ComponentRegistry = Record<string, any>;
 
 // Configuration for the renderer
 export interface BleakRendererConfig {
@@ -36,7 +33,7 @@ export interface BleakRendererConfig {
   getDefaultOptions?: (type: string) => string[];
 
   // Optional: Fallback component for unsupported types
-  fallbackComponent?: ComponentType<QuestionComponentProps>;
+  fallbackComponent?: any;
 
   // Optional: Logger functions
   logger?: {

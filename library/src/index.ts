@@ -1,30 +1,36 @@
-// Core functionality
+// Core types
+export type {
+  BleakQuestion,
+  QuestionComponentProps,
+  BleakRendererConfig,
+  DynamicQuestionRendererProps,
+  ComponentRegistry,
+  BleakElementType
+} from "./types";
+
+// Core classes
 export {BleakRenderer} from "./core/BleakRenderer";
 
 // React components
 export {DynamicQuestionRenderer} from "./components/DynamicQuestionRenderer";
 export {
   BleakProvider,
-  useBleakContext,
-  ContextualDynamicQuestionRenderer
+  ContextualDynamicQuestionRenderer,
+  useBleakContext
 } from "./components/BleakProvider";
+
+// Component adaptation utilities
+export {
+  adaptComponent,
+  createAdaptedRegistry,
+  quickSetup
+} from "./utils/componentAdapter";
 
 // React hooks
 export {
   useBleakRenderer,
   useTemporaryRenderer
 } from "./components/useBleakRenderer";
-
-// Types
-export type {
-  BleakQuestion,
-  QuestionComponentProps,
-  ComponentRegistry,
-  BleakRendererConfig,
-  DynamicQuestionRendererProps,
-  QuestionType,
-  BleakElementType
-} from "./types";
 
 // Utilities
 export {
