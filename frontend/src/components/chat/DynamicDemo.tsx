@@ -1,11 +1,40 @@
 import React, {useState} from "react";
 import {
-  DynamicQuestionRenderer,
-  getSupportedTypes
-} from "./DynamicQuestionRenderer";
+  BleakProvider,
+  ContextualDynamicQuestionRenderer,
+  createDefaultConfig,
+  createComponentRegistry
+} from "bleakai";
 import {Button} from "../ui/button";
 import {Card} from "../ui/card";
 import type {InteractiveQuestion} from "../../api/interactiveApi";
+import {
+  BleakTextQuestion,
+  BleakRadioQuestion,
+  BleakMultiSelectQuestion,
+  BleakSliderQuestion
+} from "./adapters/BleakAdapters";
+
+// Create component registry using BleakAI
+const components = createComponentRegistry()
+  .add("text", BleakTextQuestion as any)
+  .add("radio", BleakRadioQuestion as any)
+  .add("multiselect", BleakMultiSelectQuestion as any)
+  .add("slider", BleakSliderQuestion as any)
+  .build();
+
+// Create configuration with logging enabled
+const config = createDefaultConfig(components, {
+  enableLogging: true,
+  fallbackComponent: BleakRadioQuestion as any, // Use radio as fallback
+  customShouldHaveOptions: (type) =>
+    ["radio", "multiselect", "slider"].includes(type),
+  customDefaultOptions: (type) => {
+    if (type === "radio") return ["Yes", "No"];
+    if (type === "slider") return ["1", "10", "1"];
+    return [];
+  }
+});
 
 export const DynamicDemo: React.FC = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -25,7 +54,7 @@ export const DynamicDemo: React.FC = () => {
     {
       type: "text",
       question: "What's your preferred development environment?",
-      options: ["VS Code", "IntelliJ", "Vim", "Sublime Text", "Atom"]
+      options: undefined
     },
     {
       type: "radio",
@@ -42,88 +71,98 @@ export const DynamicDemo: React.FC = () => {
     setAnswers({});
   };
 
-  const supportedTypes = getSupportedTypes();
+  const supportedTypes = Object.keys(components);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold">Dynamic UI Components Demo</h1>
-        <p className="text-muted-foreground">
-          Frontend now supports specific UI element types with type validation!
-        </p>
-      </div>
-
-      {/* Supported Types */}
-      <Card className="p-4">
-        <h3 className="font-semibold mb-2">Supported Component Types:</h3>
-        <div className="flex flex-wrap gap-2">
-          {supportedTypes.map((type) => (
-            <span
-              key={type}
-              className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
-            >
-              {type}
-            </span>
-          ))}
-        </div>
-      </Card>
-
-      {/* Demo Questions */}
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
-            Try Different Component Types
-          </h2>
-          <Button onClick={clearAnswers} variant="outline" size="sm">
-            Clear All
-          </Button>
+    <BleakProvider config={config}>
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold">Dynamic UI Components Demo</h1>
+          <p className="text-muted-foreground">
+            Frontend now supports specific UI element types with type validation
+            using BleakAI!
+          </p>
         </div>
 
-        {demoQuestions.map((question, index) => (
-          <Card key={index} className="p-4">
-            <div className="mb-2">
-              <span className="text-xs  px-2 py-1 rounded font-mono">
-                type: "{question.type}"
-              </span>
-            </div>
-            <DynamicQuestionRenderer
-              question={question}
-              value={answers[question.question] || ""}
-              onChange={(value) => handleAnswerChange(question.question, value)}
-              questionIndex={index}
-            />
-          </Card>
-        ))}
-      </div>
-
-      {/* Results */}
-      {Object.keys(answers).length > 0 && (
+        {/* Supported Types */}
         <Card className="p-4">
-          <h3 className="font-semibold mb-3">Current Answers:</h3>
-          <div className="space-y-2">
-            {Object.entries(answers).map(([question, answer]) => (
-              <div key={question} className="text-sm">
-                <strong className="text-blue-600">Q:</strong> {question}
-                <br />
-                <strong className="text-green-600">A:</strong>{" "}
-                {answer || "(empty)"}
-              </div>
+          <h3 className="font-semibold mb-2">Supported Component Types:</h3>
+          <div className="flex flex-wrap gap-2">
+            {supportedTypes.map((type) => (
+              <span
+                key={type}
+                className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
+              >
+                {type}
+              </span>
             ))}
           </div>
         </Card>
-      )}
 
-      {/* Instructions */}
-      <Card className="p-4 bg-green-50 border-green-200">
-        <h3 className="font-semibold text-green-800 mb-2">Answers</h3>
-        <ul className="text-sm text-green-700 space-y-1">
-          <li>✅ Backend can only send supported UI element types</li>
-          <li>✅ Frontend automatically renders the appropriate component</li>
-          <li>✅ Easy to add new component types to the registry</li>
-          <li>✅ Type-safe with compile-time validation</li>
-          <li>✅ Fallback to RadioQuestion for unsupported types</li>
-        </ul>
-      </Card>
-    </div>
+        {/* Demo Questions */}
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">
+              Try Different Component Types
+            </h2>
+            <Button onClick={clearAnswers} variant="outline" size="sm">
+              Clear All
+            </Button>
+          </div>
+
+          {demoQuestions.map((question, index) => (
+            <Card key={index} className="p-4">
+              <div className="mb-2">
+                <span className="text-xs px-2 py-1 rounded font-mono bg-gray-100">
+                  type: "{question.type}"
+                </span>
+              </div>
+              <ContextualDynamicQuestionRenderer
+                question={{
+                  type: question.type,
+                  question: question.question,
+                  options: question.options || undefined
+                }}
+                value={answers[question.question] || ""}
+                onChange={(value) =>
+                  handleAnswerChange(question.question, value)
+                }
+                questionIndex={index}
+              />
+            </Card>
+          ))}
+        </div>
+
+        {/* Results */}
+        {Object.keys(answers).length > 0 && (
+          <Card className="p-4">
+            <h3 className="font-semibold mb-3">Current Answers:</h3>
+            <div className="space-y-2">
+              {Object.entries(answers).map(([question, answer]) => (
+                <div key={question} className="text-sm">
+                  <strong className="text-blue-600">Q:</strong> {question}
+                  <br />
+                  <strong className="text-green-600">A:</strong>{" "}
+                  {answer || "(empty)"}
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* Instructions */}
+        <Card className="p-4 bg-green-50 border-green-200">
+          <h3 className="font-semibold text-green-800 mb-2">Features</h3>
+          <ul className="text-sm text-green-700 space-y-1">
+            <li>✅ Uses BleakAI library for dynamic rendering</li>
+            <li>✅ Component registry with adapter pattern</li>
+            <li>✅ Context provider for configuration</li>
+            <li>✅ Type-safe with compile-time validation</li>
+            <li>✅ Configurable fallback components</li>
+            <li>✅ Custom options handling per type</li>
+          </ul>
+        </Card>
+      </div>
+    </BleakProvider>
   );
 };

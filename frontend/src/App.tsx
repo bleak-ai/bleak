@@ -6,6 +6,7 @@ import ChatPage from "./components/ChatPage";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import {DynamicDemo} from "./components/chat/DynamicDemo";
+import {TestBleakAI} from "./test-bleakai";
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState("");
@@ -34,7 +35,7 @@ function App() {
       case "chat":
         return <ChatPage />;
       case "demo":
-        return <DynamicDemo />;
+        return <TestBleakAI />;
       default:
         return <Landing />;
     }

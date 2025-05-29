@@ -53,7 +53,6 @@ export const DynamicQuestionRenderer: React.FC<
   const Component = ComponentRegistry[normalizedType];
   const componentName = Component?.name || "Unknown";
 
-  console.log("Component", Component);
   if (Component) {
     logComponentRender(type, componentName, questionIndex);
   } else {
