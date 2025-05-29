@@ -1,5 +1,6 @@
 import {Button} from "../../ui/button";
 import type {AnsweredQuestion} from "../../../api/interactiveApi";
+import MarkdownPreview from "@uiw/react-markdown-preview";
 
 interface AnswerSectionProps {
   answer: string;
@@ -20,7 +21,7 @@ export const AnswerSection = ({
         </div>
         <div className="bg-muted/50 border border-border rounded-md p-4">
           <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
-            {answer}
+            <MarkdownPreview source={answer} style={{padding: 16}} />
           </div>
         </div>
 
