@@ -1,5 +1,5 @@
-import {Label} from "../ui/label";
-import {logSliderConfig, logUserAnswer} from "../../utils/logger";
+import {Label} from "../../ui/label";
+import {logSliderConfig, logUserAnswer} from "../../../utils/logger";
 import {useEffect, useRef} from "react";
 
 interface SliderQuestionProps {

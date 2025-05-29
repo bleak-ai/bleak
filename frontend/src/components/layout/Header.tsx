@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from "react";
-import {Button} from "./ui/button";
+import {Button} from "../ui/button";
 
 const Header = () => {
   const [currentHash, setCurrentHash] = useState("");

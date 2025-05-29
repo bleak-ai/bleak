@@ -1,9 +1,9 @@
 import React from "react";
 import type {QuestionComponentProps} from "bleakai";
-import {TextQuestion} from "../TextQuestion";
-import {RadioQuestion} from "../RadioQuestion";
-import {MultiSelectQuestion} from "../MultiSelectQuestion";
-import {SliderQuestion} from "../SliderQuestion";
+import {TextQuestion} from "../questions/TextQuestion";
+import {RadioQuestion} from "../questions/RadioQuestion";
+import {MultiSelectQuestion} from "../questions/MultiSelectQuestion";
+import {SliderQuestion} from "../questions/SliderQuestion";
 
 // Adapter for TextQuestion to match BleakAI interface
 export const BleakTextQuestion: React.FC<QuestionComponentProps> = ({

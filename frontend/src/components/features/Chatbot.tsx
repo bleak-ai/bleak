@@ -1,10 +1,10 @@
 import React, {useState, useRef, useEffect} from "react";
 import {useMutation, useQuery} from "@tanstack/react-query";
 import {Send, Bot, User, Loader, History, Edit2, RotateCcw} from "lucide-react";
-import {Button} from "./ui/button";
-import {Input} from "./ui/input";
-import {Avatar, AvatarFallback} from "./ui/avatar";
-import {Card} from "./ui/card";
+import {Button} from "../ui/button";
+import {Input} from "../ui/input";
+import {Avatar, AvatarFallback} from "../ui/avatar";
+import {Card} from "../ui/card";
 
 interface Message {
   id: string;

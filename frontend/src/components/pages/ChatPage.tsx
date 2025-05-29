@@ -1,4 +1,4 @@
-import {SimpleInteractive} from "./chat/SimpleInteractive";
+import {SimpleInteractive} from "../chat/interactive/SimpleInteractive";
 
 const ChatPage = () => {
   return (

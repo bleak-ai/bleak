@@ -6,11 +6,11 @@ import {
   type InteractiveResponse,
   type AnsweredQuestion,
   type InteractiveQuestion
-} from "../../api/interactiveApi";
-import {PromptForm} from "./PromptForm";
-import {QuestionsSection} from "./QuestionsSection";
-import {AnswerSection} from "./AnswerSection";
-import {ErrorDisplay} from "./ErrorDisplay";
+} from "../../../api/interactiveApi";
+import {PromptForm} from "../utils/PromptForm";
+import {QuestionsSection} from "../questions/QuestionsSection";
+import {AnswerSection} from "../utils/AnswerSection";
+import {ErrorDisplay} from "../utils/ErrorDisplay";
 
 export const SimpleInteractive = () => {
   const [threadId, setThreadId] = useState<string | null>(null);

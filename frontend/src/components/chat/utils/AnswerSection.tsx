@@ -1,5 +1,5 @@
-import {Button} from "../ui/button";
-import type {AnsweredQuestion} from "../../api/interactiveApi";
+import {Button} from "../../ui/button";
+import type {AnsweredQuestion} from "../../../api/interactiveApi";
 
 interface AnswerSectionProps {
   answer: string;

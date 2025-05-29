@@ -1,14 +1,14 @@
 import React from "react";
-import {RadioQuestion} from "./RadioQuestion";
-import {SliderQuestion} from "./SliderQuestion";
-import {MultiSelectQuestion} from "./MultiSelectQuestion";
+import {RadioQuestion} from "./questions/RadioQuestion";
+import {SliderQuestion} from "./questions/SliderQuestion";
+import {MultiSelectQuestion} from "./questions/MultiSelectQuestion";
 import type {InteractiveQuestion} from "../../api/interactiveApi";
 import {
   logComponentRender,
   logComponentFallback,
   logComponentRegistry
 } from "../../utils/logger";
-import {TextQuestion} from "./TextQuestion";
+import {TextQuestion} from "./questions/TextQuestion";
 import {QUESTION_TYPES} from "../../types/questionTypes";
 
 interface DynamicQuestionRendererProps {
@@ -80,26 +80,26 @@ export const DynamicQuestionRenderer: React.FC<
 };
 
 // Export a function to register new component types dynamically
-export const registerComponent = (
-  type: string,
-  component: React.ComponentType<any>
-) => {
-  ComponentRegistry[type.toLowerCase()] = component;
+// export const registerComponent = (
+//   type: string,
+//   component: React.ComponentType<any>
+// ) => {
+//   ComponentRegistry[type.toLowerCase()] = component;
 
-  // Log the registration in development
-  if (process.env.NODE_ENV === "development") {
-    console.log(
-      `🎨 Registered new component: ${type} → ${component.name || "Anonymous"}`
-    );
-  }
-};
+//   // Log the registration in development
+//   if (process.env.NODE_ENV === "development") {
+//     console.log(
+//       `🎨 Registered new component: ${type} → ${component.name || "Anonymous"}`
+//     );
+//   }
+// };
 
-// Export function to check if a type is supported
-export const isSupportedType = (type: string): boolean => {
-  return type.toLowerCase() in ComponentRegistry;
-};
+// // Export function to check if a type is supported
+// export const isSupportedType = (type: string): boolean => {
+//   return type.toLowerCase() in ComponentRegistry;
+// };
 
-// Export function to get all supported types
-export const getSupportedTypes = (): string[] => {
-  return Object.keys(ComponentRegistry);
-};
+// // Export function to get all supported types
+// export const getSupportedTypes = (): string[] => {
+//   return Object.keys(ComponentRegistry);
+// };

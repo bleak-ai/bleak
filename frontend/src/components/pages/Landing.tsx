@@ -1,9 +1,9 @@
 import React, {useState, useEffect} from "react";
-import {Button} from "./ui/button";
-import {Input} from "./ui/input";
-import {Card, CardContent} from "./ui/card";
-import {Badge} from "./ui/badge";
-import {Avatar, AvatarFallback, AvatarImage} from "./ui/avatar";
+import {Button} from "../ui/button";
+import {Input} from "../ui/input";
+import {Card, CardContent} from "../ui/card";
+import {Badge} from "../ui/badge";
+import {Avatar, AvatarFallback, AvatarImage} from "../ui/avatar";
 import {
   ArrowRight,
   Code,
@@ -16,8 +16,8 @@ import {
   CheckCircle,
   Mail
 } from "lucide-react";
-import {storeEmailLocally} from "../api/emailService";
-import Bleak from "./bleak";
+import {storeEmailLocally} from "../../api/emailService";
+import Bleak from "../features/bleak";
 
 export default function Landing() {
   const [showContent, setShowContent] = useState(false);

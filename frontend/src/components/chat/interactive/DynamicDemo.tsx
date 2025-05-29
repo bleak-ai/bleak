@@ -5,15 +5,15 @@ import {
   createDefaultConfig,
   createComponentRegistry
 } from "bleakai";
-import {Button} from "../ui/button";
-import {Card} from "../ui/card";
-import type {InteractiveQuestion} from "../../api/interactiveApi";
+import {Button} from "../../ui/button";
+import {Card} from "../../ui/card";
+import type {InteractiveQuestion} from "../../../api/interactiveApi";
 import {
   BleakTextQuestion,
   BleakRadioQuestion,
   BleakMultiSelectQuestion,
   BleakSliderQuestion
-} from "./adapters/BleakAdapters";
+} from "../adapters/BleakAdapters";
 
 // Create component registry using BleakAI
 const components = createComponentRegistry()

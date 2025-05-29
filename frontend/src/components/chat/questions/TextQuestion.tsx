@@ -1,5 +1,5 @@
-import {Label} from "../ui/label";
-import {Textarea} from "../ui/textarea";
+import {Label} from "../../ui/label";
+import {Textarea} from "../../ui/textarea";
 
 interface TextQuestionProps {
   question: string;

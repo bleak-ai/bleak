@@ -1,8 +1,8 @@
 import {useState, type FormEvent} from "react";
 import {Loader} from "lucide-react";
-import {Button} from "../ui/button";
-import {Textarea} from "../ui/textarea";
-import {Label} from "../ui/label";
+import {Button} from "../../ui/button";
+import {Textarea} from "../../ui/textarea";
+import {Label} from "../../ui/label";
 
 interface PromptFormProps {
   onSubmit: (prompt: string) => void;

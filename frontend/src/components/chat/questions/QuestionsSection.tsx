@@ -1,10 +1,11 @@
+import React from "react";
 import {Loader} from "lucide-react";
-import {Button} from "../ui/button";
-import {DynamicQuestionRenderer} from "./DynamicQuestionRenderer";
+import {Button} from "../../ui/button";
+import {DynamicQuestionRenderer} from "../DynamicQuestionRenderer";
 import type {
   InteractiveQuestion,
   AnsweredQuestion
-} from "../../api/interactiveApi";
+} from "../../../api/interactiveApi";
 
 interface QuestionsSectionProps {
   questions: InteractiveQuestion[];

@@ -2,7 +2,6 @@ import axios from "axios";
 import {z} from "zod";
 import {logApiCall, logSessionFlow} from "../utils/logger";
 import {AVAILABLE_QUESTION_TYPES, BLEAK_ELEMENTS} from "../types/questionTypes";
-import type {BleakElementType} from "../types/questionTypes";
 
 // API Base URL
 const API_BASE_URL = "http://0.0.0.0:8008";

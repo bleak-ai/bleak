@@ -1,7 +1,7 @@
 import {useState, useEffect} from "react";
 import {ArrowDown} from "lucide-react";
-import {Label} from "./ui/label";
-import {Button} from "./ui/button";
+import {Label} from "../ui/label";
+import {Button} from "../ui/button";
 
 const DELAY_PER_LETTER = 180;
 const INITIAL_DELAY = 50;

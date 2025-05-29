@@ -1,12 +1,10 @@
 import "./App.css";
 import "./styles/animations.css";
 import {useState, useEffect} from "react";
-import Landing from "./components/Landing";
-import ChatPage from "./components/ChatPage";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import {DynamicDemo} from "./components/chat/DynamicDemo";
-import {TestBleakAI} from "./test-bleakai";
+import {Landing, ChatPage} from "./components/pages";
+import {Header, Footer} from "./components/layout";
+// import {DynamicDemo} from "./components/chat/interactive";
+import {TestBleakAI} from "./components/demo";
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState("");
