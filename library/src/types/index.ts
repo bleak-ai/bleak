@@ -14,7 +14,6 @@ export interface QuestionComponentProps {
   onChange: (value: string) => void;
   questionIndex?: number;
   options?: string[];
-  // Allow additional custom props
   [key: string]: any;
 }
 

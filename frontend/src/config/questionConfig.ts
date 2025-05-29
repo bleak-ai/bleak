@@ -4,7 +4,6 @@ import {MultiSelectQuestion} from "../components/chat/questions/MultiSelectQuest
 import {SliderQuestion} from "../components/chat/questions/SliderQuestion";
 import {type QuestionConfig} from "bleakai";
 
-// Simple configuration - define once, use everywhere
 export const QUESTION_CONFIG = {
   text: {
     component: TextQuestion,

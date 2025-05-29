@@ -8,6 +8,18 @@ export type {
   BleakElementType
 } from "./types";
 
+// Core functionality
+export {BleakRenderer} from "./core/BleakRenderer";
+
+// React components
+export {DynamicQuestionRenderer} from "./components/DynamicQuestionRenderer";
+
+// Hooks
+export {useBleakRenderer} from "./components/useBleakRenderer";
+
+// Utilities
+export {createDefaultConfig, createComponentRegistry} from "./utils";
+
 // Simple configuration (NEW - Simple approach for users)
 export type {
   QuestionConfig,
@@ -16,37 +28,17 @@ export type {
   ElementDefinitions
 } from "./utils/simple";
 
-// Core classes
-export {BleakRenderer} from "./core/BleakRenderer";
-
-// React components
-export {DynamicQuestionRenderer} from "./components/DynamicQuestionRenderer";
-export {
-  BleakProvider,
-  ContextualDynamicQuestionRenderer,
-  useBleakContext
-} from "./components/BleakProvider";
-
 // Component adaptation utilities
-export {
-  adaptComponent,
-  createAdaptedRegistry,
-  quickSetup
-} from "./utils/componentAdapter";
+export {createAdaptedRegistry, quickSetup} from "./utils/componentAdapter";
 
 // React hooks
-export {
-  useBleakRenderer,
-  useTemporaryRenderer
-} from "./components/useBleakRenderer";
+export {useTemporaryRenderer} from "./components/useBleakRenderer";
 
 // Utilities (legacy - for backward compatibility)
 export {
-  createDefaultConfig,
   createQuestionTypes,
   createTypeValidator,
   createElementDefinitions,
-  createComponentRegistry,
   ComponentRegistryBuilder
 } from "./utils";
 

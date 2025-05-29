@@ -86,11 +86,11 @@ export default function Bleak() {
 
       <a
         href="/#chat "
-        className={`w-full h-full object-contain transition-all duration-2000 ease-out mt-10 ${
+        className={`w-full h-full object-contain transition-all duration-3000  ease-in mt-10 ${
           showImage ? "opacity-100" : "opacity-0"
         }`}
       >
-        <Button className="">See bleak in Action!</Button>
+        <Button>See bleak in Action!</Button>
       </a>
 
       <Label className="absolute bottom-30 opacity-50">

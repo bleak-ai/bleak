@@ -1,7 +1,6 @@
 import React, {useState} from "react";
 import {
-  BleakProvider,
-  ContextualDynamicQuestionRenderer,
+  DynamicQuestionRenderer,
   createDefaultConfig,
   createComponentRegistry
 } from "bleakai";
@@ -39,130 +38,86 @@ const config = createDefaultConfig(components, {
 export const DynamicDemo: React.FC = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
 
-  // Demo questions showcasing different available types
   const demoQuestions: InteractiveQuestion[] = [
     {
-      type: "slider",
-      question: "Rate your experience from 1 to 10",
-      options: ["1", "10", "1"] // min, max, step
-    },
-    {
-      type: "multi_select",
-      question: "Which programming languages do you know?",
-      options: ["JavaScript", "Python", "TypeScript", "Java", "C++", "Go"]
-    },
-    {
       type: "text",
-      question: "What's your preferred development environment?",
-      options: undefined
+      question: "What's your name?"
     },
     {
       type: "radio",
       question: "What's your experience level?",
-      options: ["Beginner", "Intermediate", "Advanced", "Expert"]
+      options: ["Beginner", "Intermediate", "Advanced"]
+    },
+    {
+      type: "multi_select",
+      question: "Which technologies interest you?",
+      options: ["React", "Vue", "Angular", "Svelte", "TypeScript", "JavaScript"]
+    },
+    {
+      type: "slider",
+      question: "How satisfied are you with our service?",
+      options: ["1", "10", "1"] // min, max, step
     }
   ];
 
   const handleAnswerChange = (question: string, value: string) => {
-    setAnswers((prev) => ({...prev, [question]: value}));
+    setAnswers((prev) => ({
+      ...prev,
+      [question]: value
+    }));
   };
 
-  const clearAnswers = () => {
+  const handleReset = () => {
     setAnswers({});
   };
 
-  const supportedTypes = Object.keys(components);
-
   return (
-    <BleakProvider config={config}>
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Dynamic UI Components Demo</h1>
-          <p className="text-muted-foreground">
-            Frontend now supports specific UI element types with type validation
-            using BleakAI!
-          </p>
-        </div>
+    <div className="max-w-2xl mx-auto p-6 space-y-6">
+      <Card className="p-6">
+        <h1 className="text-2xl font-bold mb-4">Dynamic Questions Demo</h1>
+        <p className="text-muted-foreground mb-6">
+          This demo shows different question types being rendered dynamically
+          using the direct config approach.
+        </p>
 
-        {/* Supported Types */}
-        <Card className="p-4">
-          <h3 className="font-semibold mb-2">Supported Component Types:</h3>
-          <div className="flex flex-wrap gap-2">
-            {supportedTypes.map((type) => (
-              <span
-                key={type}
-                className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm"
-              >
-                {type}
-              </span>
-            ))}
-          </div>
-        </Card>
-
-        {/* Demo Questions */}
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">
-              Try Different Component Types
-            </h2>
-            <Button onClick={clearAnswers} variant="outline" size="sm">
-              Clear All
-            </Button>
-          </div>
-
           {demoQuestions.map((question, index) => (
-            <Card key={index} className="p-4">
-              <div className="mb-2">
-                <span className="text-xs px-2 py-1 rounded font-mono bg-gray-100">
-                  type: "{question.type}"
-                </span>
-              </div>
-              <ContextualDynamicQuestionRenderer
-                question={{
-                  type: question.type,
-                  question: question.question,
-                  options: question.options || undefined
-                }}
+            <div key={index} className="border rounded-lg p-4">
+              <DynamicQuestionRenderer
+                config={config}
+                question={question}
                 value={answers[question.question] || ""}
                 onChange={(value) =>
                   handleAnswerChange(question.question, value)
                 }
                 questionIndex={index}
               />
-            </Card>
+            </div>
           ))}
         </div>
 
-        {/* Results */}
-        {Object.keys(answers).length > 0 && (
-          <Card className="p-4">
-            <h3 className="font-semibold mb-3">Current Answers:</h3>
-            <div className="space-y-2">
-              {Object.entries(answers).map(([question, answer]) => (
-                <div key={question} className="text-sm">
-                  <strong className="text-blue-600">Q:</strong> {question}
-                  <br />
-                  <strong className="text-green-600">A:</strong>{" "}
-                  {answer || "(empty)"}
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
+        <div className="flex gap-4 mt-6">
+          <Button onClick={handleReset} variant="outline">
+            Reset Answers
+          </Button>
+          <Button
+            onClick={() =>
+              console.log("Current answers:", JSON.stringify(answers, null, 2))
+            }
+          >
+            Log Answers
+          </Button>
+        </div>
 
-        {/* Instructions */}
-        <Card className="p-4 bg-green-50 border-green-200">
-          <h3 className="font-semibold text-green-800 mb-2">Features</h3>
-          <ul className="text-sm text-green-700 space-y-1">
-            <li>✅ Uses BleakAI library for dynamic rendering</li>
-            <li>✅ Component registry with adapter pattern</li>
-            <li>✅ Context provider for configuration</li>
-            <li>✅ Type-safe with compile-time validation</li>
-            <li>✅ Configurable fallback components</li>
-            <li>✅ Custom options handling per type</li>
-          </ul>
-        </Card>
-      </div>
-    </BleakProvider>
+        {Object.keys(answers).length > 0 && (
+          <div className="mt-6 p-4 bg-muted rounded-lg">
+            <h3 className="font-semibold mb-2">Current Answers:</h3>
+            <pre className="text-sm overflow-x-auto">
+              {JSON.stringify(answers, null, 2)}
+            </pre>
+          </div>
+        )}
+      </Card>
+    </div>
   );
 };

@@ -1,10 +1,6 @@
 import {Loader} from "lucide-react";
 import {Button} from "../../ui/button";
-import {
-  BleakProvider,
-  ContextualDynamicQuestionRenderer,
-  DynamicQuestionRenderer
-} from "bleakai";
+import {DynamicQuestionRenderer} from "bleakai";
 import type {
   InteractiveQuestion,
   AnsweredQuestion
@@ -23,104 +19,6 @@ interface QuestionsSectionProps {
   noMoreQuestionsAvailable?: boolean;
   noMoreQuestionsMessage?: string;
 }
-
-export const QuestionsSection2 = ({
-  questions,
-  answers,
-  onAnswerChange,
-  onChoice,
-  isLoading,
-  allQuestionsAnswered,
-  previousAnswers,
-  noMoreQuestionsAvailable = false,
-  noMoreQuestionsMessage
-}: QuestionsSectionProps) => {
-  // Create simple renderer config using the components directly
-  const rendererConfig = {
-    components: QUESTION_COMPONENTS,
-    fallbackComponent: QUESTION_COMPONENTS.radio
-  };
-
-  return (
-    <BleakProvider config={rendererConfig}>
-      <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
-        <div className="space-y-1">
-          <h2 className="text-xl font-semibold text-foreground">
-            Help me understand better
-          </h2>
-          <p className="text-muted-foreground text-sm">
-            Please answer these questions to get a more personalized response
-          </p>
-          {previousAnswers && previousAnswers.length > 0 && (
-            <p className="text-muted-foreground text-xs">
-              Building on your previous {previousAnswers.length} answer(s)
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-6">
-          {questions.map((question, index) => (
-            <div key={index}>
-              <ContextualDynamicQuestionRenderer
-                question={{
-                  type: question.type,
-                  question: question.question,
-                  options: question.options || undefined
-                }}
-                value={answers[question.question] || ""}
-                onChange={(value) => onAnswerChange(question.question, value)}
-                questionIndex={index}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Choice buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
-          {!noMoreQuestionsAvailable && (
-            <Button
-              onClick={() => onChoice("more_questions")}
-              variant="outline"
-              disabled={!allQuestionsAnswered || isLoading}
-              className="flex-1"
-            >
-              {isLoading ? (
-                <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  Getting more questions...
-                </>
-              ) : (
-                "Ask more questions"
-              )}
-            </Button>
-          )}
-
-          <Button
-            onClick={() => onChoice("final_answer")}
-            disabled={!allQuestionsAnswered || isLoading}
-            className="flex-1"
-          >
-            {isLoading ? (
-              <>
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Generating answer...
-              </>
-            ) : (
-              "Get my answer"
-            )}
-          </Button>
-        </div>
-
-        {/* No more questions message */}
-        {noMoreQuestionsAvailable && noMoreQuestionsMessage && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-sm text-blue-800">{noMoreQuestionsMessage}</p>
-          </div>
-        )}
-      </div>
-    </BleakProvider>
-  );
-};
 
 export const QuestionsSection = ({
   questions,

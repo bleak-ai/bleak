@@ -5,6 +5,8 @@ import {
   BleakElementType
 } from "../types";
 
+// Re-export from componentAdapter
+
 /**
  * Create a default renderer configuration
  */
