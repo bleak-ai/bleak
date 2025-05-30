@@ -15,8 +15,6 @@ from routes.bleak_routes import bleak_router
 from routes.chatbot_routes import chatbot_router
 
 # Import chatbot graph
-# from chatbot.graph import graph
-from chatbot.graphs.time_travel import graph
 
 
 # Configure logging
@@ -30,7 +28,6 @@ app = FastAPI(
 )
 
 app.include_router(bleak_router)
-app.include_router(chatbot_router)
 
 # Configure CORS
 app.add_middleware(
