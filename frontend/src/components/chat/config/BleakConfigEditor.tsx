@@ -24,9 +24,9 @@ import {
   BarChart3,
   X
 } from "lucide-react";
-import {QUESTION_CONFIG} from "../../../config/questionConfig";
+import {BLEAK_ELEMENT_CONFIG} from "../../../config/bleakConfig";
 
-export interface CustomQuestionConfig {
+export interface CustomBleakElementConfig {
   [key: string]: {
     name: string;
     description: string;
@@ -34,28 +34,26 @@ export interface CustomQuestionConfig {
   };
 }
 
-interface QuestionConfigEditorProps {
-  onConfigChange: (config: CustomQuestionConfig) => void;
+interface BleakElementConfigEditorProps {
+  onConfigChange: (config: CustomBleakElementConfig) => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 }
 
-const QUESTION_ICONS = {
+const BLEAK_ELEMENT_ICONS = {
   text: Type,
   radio: CheckCircle,
   multi_select: List,
   slider: BarChart3
 } as const;
 
-export const QuestionConfigEditor: React.FC<QuestionConfigEditorProps> = ({
-  onConfigChange,
-  isCollapsed = true,
-  onToggleCollapse
-}) => {
-  // Initialize config from default QUESTION_CONFIG
-  const [config, setConfig] = useState<CustomQuestionConfig>(() => {
-    const initialConfig: CustomQuestionConfig = {};
-    Object.entries(QUESTION_CONFIG).forEach(([key, value]) => {
+export const BleakElementConfigEditor: React.FC<
+  BleakElementConfigEditorProps
+> = ({onConfigChange, isCollapsed = true, onToggleCollapse}) => {
+  // Initialize config from default BLEAK_ELEMENT_CONFIG
+  const [config, setConfig] = useState<CustomBleakElementConfig>(() => {
+    const initialConfig: CustomBleakElementConfig = {};
+    Object.entries(BLEAK_ELEMENT_CONFIG).forEach(([key, value]) => {
       initialConfig[key] = {
         name: key.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase()),
         description: value.description,
@@ -107,8 +105,8 @@ export const QuestionConfigEditor: React.FC<QuestionConfigEditorProps> = ({
   };
 
   const handleReset = () => {
-    const resetConfig: CustomQuestionConfig = {};
-    Object.entries(QUESTION_CONFIG).forEach(([key, value]) => {
+    const resetConfig: CustomBleakElementConfig = {};
+    Object.entries(BLEAK_ELEMENT_CONFIG).forEach(([key, value]) => {
       resetConfig[key] = {
         name: key.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase()),
         description: value.description,
@@ -145,10 +143,10 @@ export const QuestionConfigEditor: React.FC<QuestionConfigEditorProps> = ({
               <Settings className="h-5 w-5 text-white/70" />
               <div>
                 <h3 className="font-semibold text-white">
-                  Question Configuration
+                  Bleak Element Configuration
                 </h3>
                 <p className="text-sm text-white/60">
-                  {enabledCount} question types active
+                  {enabledCount} element types active
                 </p>
               </div>
             </div>
@@ -177,10 +175,10 @@ export const QuestionConfigEditor: React.FC<QuestionConfigEditorProps> = ({
               <Settings className="h-6 w-6 text-white/70" />
               <div>
                 <h3 className="text-xl font-semibold text-white">
-                  Question Configuration
+                  Bleak Element Configuration
                 </h3>
                 <p className="text-sm text-white/60">
-                  Customize how AI generates questions for your users
+                  Customize how AI generates bleak elements for your users
                 </p>
               </div>
             </div>
@@ -206,11 +204,12 @@ export const QuestionConfigEditor: React.FC<QuestionConfigEditorProps> = ({
             </div>
           </div>
 
-          {/* Question Type Cards */}
+          {/* Bleak Element Type Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Object.entries(config).map(([type, typeConfig]) => {
               const IconComponent =
-                QUESTION_ICONS[type as keyof typeof QUESTION_ICONS] || Type;
+                BLEAK_ELEMENT_ICONS[type as keyof typeof BLEAK_ELEMENT_ICONS] ||
+                Type;
 
               return (
                 <Card
@@ -302,12 +301,12 @@ export const QuestionConfigEditor: React.FC<QuestionConfigEditorProps> = ({
           {/* Summary */}
           <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
             <p className="text-sm text-white/70">
-              <strong className="text-white">Active Question Types:</strong>{" "}
+              <strong className="text-white">Active Element Types:</strong>{" "}
               {enabledCount} of {Object.keys(config).length}
               <br />
               <span className="text-white/60">
-                These configurations will guide how the AI generates questions
-                for your users.
+                These configurations will guide how the AI generates bleak
+                elements for your users.
               </span>
             </p>
           </div>
@@ -322,20 +321,20 @@ export const QuestionConfigEditor: React.FC<QuestionConfigEditorProps> = ({
               {editingType && (
                 <>
                   {React.createElement(
-                    QUESTION_ICONS[
-                      editingType as keyof typeof QUESTION_ICONS
+                    BLEAK_ELEMENT_ICONS[
+                      editingType as keyof typeof BLEAK_ELEMENT_ICONS
                     ] || Type,
                     {
                       className: "h-5 w-5 text-rose-400"
                     }
                   )}
-                  Edit {config[editingType]?.name} Question Type
+                  Edit {config[editingType]?.name} Element Type
                 </>
               )}
             </DialogTitle>
             <DialogDescription className="text-white/60">
-              Customize how the AI uses this question type. Your changes will
-              guide the AI's behavior when generating questions.
+              Customize how the AI uses this element type. Your changes will
+              guide the AI's behavior when generating bleak elements.
             </DialogDescription>
           </DialogHeader>
 
@@ -349,7 +348,7 @@ export const QuestionConfigEditor: React.FC<QuestionConfigEditorProps> = ({
                 onChange={(e) =>
                   setTempConfig((prev) => ({...prev, name: e.target.value}))
                 }
-                placeholder="Question type name"
+                placeholder="Element type name"
                 className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-rose-400"
               />
             </div>
@@ -366,12 +365,12 @@ export const QuestionConfigEditor: React.FC<QuestionConfigEditorProps> = ({
                     description: e.target.value
                   }))
                 }
-                placeholder="Describe when and how this question type should be used..."
+                placeholder="Describe when and how this element type should be used..."
                 className="min-h-[120px] bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-rose-400"
               />
               <p className="text-xs text-white/40">
                 These instructions help the AI understand when and how to use
-                this question type.
+                this element type.
               </p>
             </div>
           </div>
@@ -394,3 +393,9 @@ export const QuestionConfigEditor: React.FC<QuestionConfigEditorProps> = ({
     </>
   );
 };
+
+// Legacy aliases for backwards compatibility
+/** @deprecated Use CustomBleakElementConfig instead */
+export type CustomQuestionConfig = CustomBleakElementConfig;
+/** @deprecated Use BleakElementConfigEditor instead */
+export const QuestionConfigEditor = BleakElementConfigEditor;

@@ -4,19 +4,13 @@ import {Input} from "../../ui/input";
 import {logMultiSelectState, logUserAnswer} from "../../../utils/logger";
 import type {BleakElementProps} from "@bleakai/core";
 
-export const MultiSelectQuestion = ({
+export const MultiSelectBleakElement = ({
   text,
-  question,
   options = [],
   value,
   onChange,
-  elementIndex,
-  questionIndex = 0
-}: BleakElementProps & {question?: string; questionIndex?: number}) => {
-  // Use text if available, otherwise fall back to question for backward compatibility
-  const displayText = text || question || "";
-  const displayIndex = elementIndex ?? questionIndex ?? 0;
-
+  elementIndex = 0
+}: BleakElementProps) => {
   const [otherValue, setOtherValue] = useState("");
   const lastLoggedValue = useRef<string>("");
 
@@ -57,7 +51,7 @@ export const MultiSelectQuestion = ({
 
     // Log user interaction only for significant changes
     if (newValue !== value) {
-      logUserAnswer(displayText, newSelected.join(", "), "multiselect");
+      logUserAnswer(text, newSelected.join(", "), "multiselect");
     }
   };
 
@@ -78,15 +72,13 @@ export const MultiSelectQuestion = ({
 
     // Log user interaction only when text is meaningful
     if (text.trim() && newValue !== value) {
-      logUserAnswer(displayText, filteredSelected.join(", "), "multiselect");
+      logUserAnswer(text, filteredSelected.join(", "), "multiselect");
     }
   };
 
   return (
     <div className="space-y-3">
-      <Label className="text-base font-medium text-foreground">
-        {displayText}
-      </Label>
+      <Label className="text-base font-medium text-foreground">{text}</Label>
 
       <div className="space-y-2">
         {options.map((option, optIndex) => (
@@ -96,13 +88,13 @@ export const MultiSelectQuestion = ({
           >
             <input
               type="checkbox"
-              id={`${displayIndex}-${optIndex}`}
+              id={`${elementIndex}-${optIndex}`}
               checked={selectedOptions.includes(option)}
               onChange={() => handleOptionToggle(option)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <Label
-              htmlFor={`${displayIndex}-${optIndex}`}
+              htmlFor={`${elementIndex}-${optIndex}`}
               className="cursor-pointer text-sm flex-1 leading-relaxed"
             >
               {option}
@@ -114,7 +106,7 @@ export const MultiSelectQuestion = ({
         <div className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
           <input
             type="checkbox"
-            id={`${displayIndex}-other`}
+            id={`${elementIndex}-other`}
             checked={otherValue.trim() !== ""}
             onChange={() => {}} // Controlled by text input
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"

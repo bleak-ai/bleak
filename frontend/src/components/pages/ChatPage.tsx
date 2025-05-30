@@ -3,7 +3,7 @@ import {SimpleInteractive} from "../chat/interactive/SimpleInteractive";
 import {
   QuestionConfigEditor,
   type CustomQuestionConfig
-} from "../chat/config/QuestionConfigEditor";
+} from "../chat/config/BleakConfigEditor";
 
 const ChatPage = () => {
   const [customConfig, setCustomConfig] = useState<CustomQuestionConfig | null>(

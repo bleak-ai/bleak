@@ -1,29 +1,29 @@
 /**
- * Core types for the framework-agnostic question resolver
+ * Core types for the framework-agnostic bleak element resolver
  */
 
-export interface Question {
+export interface BleakElement {
   type: string;
-  question: string;
+  text: string;
   options?: string[] | null;
 }
 
-export interface QuestionProps {
-  question: string;
+export interface BleakElementProps {
+  text: string;
   value: string;
   onChange: (value: string) => void;
-  questionIndex?: number;
+  elementIndex?: number;
   options?: string[];
 }
 
 export interface ComponentResolution {
   type: string;
   componentKey: string;
-  props: QuestionProps;
+  props: BleakElementProps;
 }
 
 export interface ComponentRegistry {
-  [questionType: string]: string;
+  [elementType: string]: string;
 }
 
 export interface ResolverOptions {
@@ -37,28 +37,42 @@ export interface ResolverOptions {
 }
 
 /**
- * Type for a single question type configuration
+ * Type for a single bleak element type configuration
  * This enforces the structure that users must follow
  */
-export interface QuestionTypeConfig<TComponent = any> {
+export interface BleakElementTypeConfig<TComponent = any> {
   component: TComponent;
   description: string;
 }
 
 /**
- * Type for the complete question configuration object
+ * Type for the complete bleak element configuration object
  * This is what users must implement - single source of truth
  */
-export interface QuestionConfig<TComponent = any> {
-  [questionType: string]: QuestionTypeConfig<TComponent>;
+export interface BleakElementConfig<TComponent = any> {
+  [elementType: string]: BleakElementTypeConfig<TComponent>;
 }
 
 /**
- * Utility type to extract the question types from a config
+ * Utility type to extract the element types from a config
  */
-export type QuestionType<T extends QuestionConfig> = keyof T;
+export type BleakElementType<T extends BleakElementConfig> = keyof T;
 
 /**
  * Utility type to extract the component type from a config
  */
-export type ComponentType<T extends QuestionConfig> = T[keyof T]["component"];
+export type ComponentType<T extends BleakElementConfig> =
+  T[keyof T]["component"];
+
+// Legacy aliases for backwards compatibility
+/** @deprecated Use BleakElement instead */
+export type Question = BleakElement;
+/** @deprecated Use BleakElementProps instead */
+export type QuestionProps = BleakElementProps;
+/** @deprecated Use BleakElementConfig instead */
+export type QuestionConfig<TComponent = any> = BleakElementConfig<TComponent>;
+/** @deprecated Use BleakElementTypeConfig instead */
+export type QuestionTypeConfig<TComponent = any> =
+  BleakElementTypeConfig<TComponent>;
+/** @deprecated Use BleakElementType instead */
+export type QuestionType<T extends BleakElementConfig> = BleakElementType<T>;

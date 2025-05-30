@@ -1,7 +1,7 @@
 {
   "name": "@bleakai/core",
   "version": "2.0.0",
-  "description": "Framework-agnostic dynamic question component resolver",
+  "description": "Framework-agnostic dynamic bleak element component resolver",
   "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
   "types": "dist/index.d.ts",
@@ -24,7 +24,8 @@
     "dynamic",
     "forms",
     "components",
-    "questions",
+    "bleak",
+    "elements",
     "resolver",
     "typescript"
   ],

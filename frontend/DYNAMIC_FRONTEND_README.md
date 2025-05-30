@@ -1,12 +1,12 @@
 # Dynamic Frontend Components
 
-The frontend now supports **specific** UI element types for interactive questions with strict type validation.
+The frontend now supports **specific** UI element types for interactive bleak elements with strict type validation.
 
 ## Overview
 
 The frontend has been refactored to handle only the supported UI component types through:
 
-1. **Restricted Question Schema** - Accepts only supported `type` values
+1. **Restricted Element Schema** - Accepts only supported `type` values
 2. **Component Registry** - Maps supported types to React components
 3. **Dynamic Renderer** - Automatically selects the right component
 4. **Available Components** - `radio`, `input`, `multiselect`, and `slider` types
@@ -14,38 +14,38 @@ The frontend has been refactored to handle only the supported UI component types
 
 ## Supported Components
 
-### 1. RadioQuestion (type: "radio")
+### 1. RadioBleakElement (type: "radio")
 
-For single-choice questions with predefined options.
+For single-choice elements with predefined options.
 
 ```typescript
 {
   type: "radio",
-  question: "What's your experience level?",
+  text: "What's your experience level?",
   options: ["Beginner", "Intermediate", "Advanced", "Expert"]
 }
 ```
 
 ### 2. Input (type: "input")
 
-For single-choice questions where users select from a dropdown or list of options (maps to RadioQuestion).
+For single-choice elements where users select from a dropdown or list of options (maps to RadioBleakElement).
 
 ```typescript
 {
   type: "input",
-  question: "What's your preferred development environment?",
+  text: "What's your preferred development environment?",
   options: ["VS Code", "IntelliJ", "Vim", "Sublime Text"]
 }
 ```
 
-### 3. SliderQuestion (type: "slider")
+### 3. SliderBleakElement (type: "slider")
 
 For numeric ratings, scales, and ranges.
 
 ```typescript
 {
   type: "slider",
-  question: "Rate your experience from 1 to 10",
+  text: "Rate your experience from 1 to 10",
   options: ["1", "10", "1"] // [min, max, step]
 }
 ```
@@ -57,14 +57,14 @@ For numeric ratings, scales, and ranges.
 - Real-time value display
 - Responsive design
 
-### 4. MultiSelectQuestion (type: "multiselect")
+### 4. MultiSelectBleakElement (type: "multiselect")
 
 For multiple choice selections with checkboxes.
 
 ```typescript
 {
   type: "multiselect",
-  question: "Which programming languages do you know?",
+  text: "Which programming languages do you know?",
   options: ["JavaScript", "Python", "TypeScript", "Java"]
 }
 ```
@@ -78,14 +78,14 @@ For multiple choice selections with checkboxes.
 
 ## Component Registry
 
-The `DynamicQuestionRenderer` uses a registry system to map types to components:
+The `DynamicBleakElementRenderer` uses a registry system to map types to components:
 
 ```typescript
 const ComponentRegistry: Record<string, React.ComponentType<any>> = {
-  radio: RadioQuestion,
-  input: RadioQuestion, // Maps to radio for choice-based input
-  multiselect: MultiSelectQuestion,
-  slider: SliderQuestion
+  radio: RadioBleakElement,
+  input: RadioBleakElement, // Maps to radio for choice-based input
+  multiselect: MultiSelectBleakElement,
+  slider: SliderBleakElement
 };
 ```
 
@@ -98,17 +98,17 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   "questions": [
     {
       "type": "slider",
-      "question": "How satisfied are you?",
+      "text": "How satisfied are you?",
       "options": ["1", "5"]
     },
     {
       "type": "multiselect",
-      "question": "Select your interests",
+      "text": "Select your interests",
       "options": ["Tech", "Sports", "Music"]
     },
     {
       "type": "radio",
-      "question": "What's your experience level?",
+      "text": "What's your experience level?",
       "options": ["Beginner", "Intermediate", "Advanced"]
     }
   ]
@@ -119,11 +119,11 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
 
 ```tsx
 // Automatically selects the right component based on type
-<DynamicQuestionRenderer
-  question={question}
+<DynamicBleakElementRenderer
+  element={element}
   value={value}
   onChange={onChange}
-  questionIndex={index}
+  elementIndex={index}
 />
 ```
 
@@ -141,8 +141,8 @@ export type AvailableElements =
   | "yournewtype";
 
 // Update the schema
-const InteractiveQuestionSchema = z.object({
-  question: z.string(),
+const InteractiveElementSchema = z.object({
+  text: z.string(),
   type: z.enum(["radio", "input", "multiselect", "slider", "yournewtype"]),
   options: z.array(z.string()).optional()
 });
@@ -160,11 +160,11 @@ const BleakElements: BleakElementType[] = [
 ### Step 2: Create the Component
 
 ```tsx
-// components/chat/YourNewQuestion.tsx
-export const YourNewQuestion = ({question, options, value, onChange}) => {
+// components/chat/elements/YourNewBleakElement.tsx
+export const YourNewBleakElement = ({text, options, value, onChange}) => {
   return (
     <div>
-      <Label>{question}</Label>
+      <Label>{text}</Label>
       {/* Your custom UI here */}
     </div>
   );
@@ -174,15 +174,15 @@ export const YourNewQuestion = ({question, options, value, onChange}) => {
 ### Step 3: Register the Component
 
 ```tsx
-// In DynamicQuestionRenderer.tsx
-import {YourNewQuestion} from "./YourNewQuestion";
+// In DynamicBleakElementRenderer.tsx
+import {YourNewBleakElement} from "./elements/YourNewBleakElement";
 
 const ComponentRegistry: Record<string, React.ComponentType<any>> = {
-  radio: RadioQuestion,
-  input: RadioQuestion,
-  multiselect: MultiSelectQuestion,
-  slider: SliderQuestion,
-  yournewtype: YourNewQuestion
+  radio: RadioBleakElement,
+  input: RadioBleakElement,
+  multiselect: MultiSelectBleakElement,
+  slider: SliderBleakElement,
+  yournewtype: YourNewBleakElement
 };
 ```
 
@@ -192,8 +192,8 @@ const ComponentRegistry: Record<string, React.ComponentType<any>> = {
 
 ```typescript
 // Restricted schema - only supported types
-const InteractiveQuestionSchema = z.object({
-  question: z.string(),
+const InteractiveElementSchema = z.object({
+  text: z.string(),
   type: z.enum(["radio", "input", "multiselect", "slider"]), // Restricted to available elements only
   options: z.array(z.string()).optional()
 });
@@ -241,7 +241,7 @@ const BleakElements: BleakElementType[] = [
 
 If backend sends an unsupported type, the system:
 
-1. Falls back to `RadioQuestion` component
+1. Falls back to `RadioBleakElement` component
 2. Logs a warning to console
 3. Continues working normally
 

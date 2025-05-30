@@ -1,2 +1,2 @@
-export {QuestionConfigEditor} from "./QuestionConfigEditor";
-export type {CustomQuestionConfig} from "./QuestionConfigEditor";
+export {QuestionConfigEditor} from "./BleakConfigEditor";
+export type {CustomQuestionConfig} from "./BleakConfigEditor";

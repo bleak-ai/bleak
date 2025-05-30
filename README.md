@@ -1,6 +1,6 @@
 # Bleak - AI Chatbot with Time Travel
 
-A modern AI chatbot application built with FastAPI backend and React frontend, featuring LangGraph-powered conversation management and time travel capabilities.
+A modern AI chatbot application built with FastAPI backend and React frontend, featuring LangGraph-powered conversation management, time travel capabilities, and dynamic bleak element rendering.
 
 ## Features
 
@@ -9,6 +9,7 @@ A modern AI chatbot application built with FastAPI backend and React frontend, f
 - **AI-Powered Conversations**: Intelligent chatbot using LangGraph for conversation flow
 - **Real-time Chat Interface**: Modern, responsive chat UI with message history
 - **Persistent Conversations**: Conversation state is maintained across sessions
+- **Dynamic Bleak Elements**: Framework-agnostic component resolution for interactive elements
 
 ### ⏰ Time Travel Features
 
@@ -16,6 +17,13 @@ A modern AI chatbot application built with FastAPI backend and React frontend, f
 - **Message Editing**: Edit any previous user message and see how the conversation would have evolved differently
 - **Checkpoint Resume**: Jump back to any point in the conversation and continue from there
 - **Visual Timeline**: See all conversation states with timestamps and navigation controls
+
+### 🎯 Bleak Element System
+
+- **Framework-Agnostic**: Component resolution logic works with any UI framework
+- **Type-Safe**: Full TypeScript support for element configuration
+- **Extensible**: Easy to add new element types and components
+- **Intelligent Fallbacks**: Graceful handling of unsupported element types
 
 ## Time Travel Usage
 
@@ -44,6 +52,44 @@ A modern AI chatbot application built with FastAPI backend and React frontend, f
 - **Escape**: Cancel editing
 - **Shift+Enter**: New line in edit mode
 
+## Bleak Element System
+
+The application includes a sophisticated element resolution system powered by the `@bleakai/core` library:
+
+### Supported Element Types
+
+- **Text Elements**: Open-ended text input fields
+- **Radio Elements**: Single-choice selection with predefined options
+- **Multi-select Elements**: Multiple choice selections with checkboxes
+- **Slider Elements**: Numeric ratings and range selections
+
+### Configuration
+
+Elements are configured through a type-safe configuration system:
+
+```typescript
+const BLEAK_ELEMENT_CONFIG = {
+  text: {
+    component: TextBleakElement,
+    description: "Use for open-ended text input"
+  },
+  radio: {
+    component: RadioBleakElement,
+    description: "Use for single-choice questions"
+  }
+  // ... more configurations
+} satisfies BleakElementConfig;
+```
+
+### Dynamic Resolution
+
+The system automatically resolves element types to appropriate UI components:
+
+```typescript
+const {Component, props} = resolve(element, value, onChange);
+return <Component {...props} />;
+```
+
 ## Technical Implementation
 
 ### Backend (FastAPI + LangGraph)
@@ -51,12 +97,21 @@ A modern AI chatbot application built with FastAPI backend and React frontend, f
 - **Checkpoint System**: Uses LangGraph's MemorySaver for state persistence
 - **Time Travel API**: RESTful endpoints for history management
 - **State Management**: Conversation states are stored with unique checkpoint IDs
+- **Element Generation**: AI-powered generation of appropriate bleak elements
 
 ### Frontend (React + TypeScript)
 
 - **Real-time Updates**: React Query for efficient data fetching and caching
 - **Responsive Design**: Modern UI with Tailwind CSS
 - **Interactive History**: Intuitive interface for browsing and editing conversation history
+- **Component Resolution**: Framework-agnostic element rendering system
+
+### Bleak Core Library
+
+- **Framework Agnostic**: Pure TypeScript logic without UI dependencies
+- **Type Safety**: Comprehensive TypeScript definitions and validation
+- **Extensible**: Easy to add new element types and behaviors
+- **Lightweight**: Minimal bundle size with zero framework dependencies
 
 ## API Endpoints
 
@@ -96,6 +151,15 @@ npm install
 npm run dev
 ```
 
+### Library Development
+
+```bash
+cd library
+npm install
+npm run build
+npm link  # For local development
+```
+
 ### Environment Variables
 
 Create a `.env` file in the backend directory:
@@ -107,12 +171,21 @@ OPENAI_API_KEY=your_openai_api_key_here
 
 ## Architecture
 
-The application follows the LangGraph time travel tutorial pattern:
+The application follows modern patterns with separation of concerns:
+
+### LangGraph Time Travel
 
 - **State Persistence**: Every conversation step is checkpointed
 - **Immutable History**: Previous states are preserved when editing
 - **Branching Conversations**: Edits create new conversation branches
 - **Efficient Storage**: Only state differences are stored between checkpoints
+
+### Bleak Element System
+
+- **Component Resolution**: Framework-agnostic logic determines UI components
+- **Type Safety**: Strict TypeScript validation prevents runtime errors
+- **Extensibility**: Plugin-like architecture for adding new element types
+- **Fallback Handling**: Graceful degradation for unsupported elements
 
 ## Contributing
 
@@ -121,6 +194,13 @@ The application follows the LangGraph time travel tutorial pattern:
 3. Make your changes
 4. Add tests if applicable
 5. Submit a pull request
+
+### Adding New Element Types
+
+1. Define the element configuration in the library
+2. Create the UI component in the frontend
+3. Register the component in the element registry
+4. Update type definitions and documentation
 
 ## License
 

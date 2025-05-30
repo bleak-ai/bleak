@@ -4,19 +4,13 @@ import {RadioGroup, RadioGroupItem} from "../../ui/radio-group";
 import {Input} from "../../ui/input";
 import type {BleakElementProps} from "@bleakai/core";
 
-export const RadioQuestion = ({
+export const RadioBleakElement = ({
   text,
-  question,
   options = [],
   value,
   onChange,
-  elementIndex,
-  questionIndex
-}: BleakElementProps & {question?: string; questionIndex?: number}) => {
-  // Use text if available, otherwise fall back to question for backward compatibility
-  const displayText = text || question;
-  const displayIndex = elementIndex ?? questionIndex ?? 0;
-
+  elementIndex
+}: BleakElementProps) => {
   const [otherValue, setOtherValue] = useState("");
   const isOtherSelected =
     value === "other" || (!options.includes(value) && value !== "");
@@ -39,9 +33,7 @@ export const RadioQuestion = ({
 
   return (
     <div className="space-y-3">
-      <Label className="text-base font-medium text-foreground">
-        {displayText}
-      </Label>
+      <Label className="text-base font-medium text-foreground">{text}</Label>
 
       <RadioGroup
         value={isOtherSelected ? "other" : value}
@@ -53,9 +45,9 @@ export const RadioQuestion = ({
             key={optIndex}
             className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors"
           >
-            <RadioGroupItem value={option} id={`${displayIndex}-${optIndex}`} />
+            <RadioGroupItem value={option} id={`${elementIndex}-${optIndex}`} />
             <Label
-              htmlFor={`${displayIndex}-${optIndex}`}
+              htmlFor={`${elementIndex}-${optIndex}`}
               className="cursor-pointer text-sm flex-1 leading-relaxed"
             >
               {option}
@@ -66,7 +58,7 @@ export const RadioQuestion = ({
         {/* Other option */}
         <div className="space-y-3">
           <div className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
-            <RadioGroupItem value="other" id={`${displayIndex}-other`} />
+            <RadioGroupItem value="other" id={`${elementIndex}-other`} />
             <Input
               value={otherValue}
               onChange={(e) => handleOtherTextChange(e.target.value)}

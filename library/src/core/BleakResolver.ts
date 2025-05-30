@@ -1,13 +1,17 @@
 import type {
-  Question,
-  QuestionProps,
+  BleakElement,
+  BleakElementProps,
   ComponentResolution,
   ComponentRegistry,
   ResolverOptions,
+  BleakElementConfig,
+  // Legacy aliases for backwards compatibility
+  Question,
+  QuestionProps,
   QuestionConfig
 } from "../types/core";
 
-export class QuestionResolver {
+export class BleakResolver {
   private components: ComponentRegistry;
   private options: ResolverOptions;
 
@@ -23,49 +27,49 @@ export class QuestionResolver {
   }
 
   resolve(
-    question: Question,
+    element: BleakElement,
     value: string,
     onChange: (value: string) => void,
-    questionIndex?: number
+    elementIndex?: number
   ): ComponentResolution {
-    // Get the component key for this question type
+    // Get the component key for this element type
     const componentKey =
-      this.components[question.type] || this.options.fallbackComponent!;
+      this.components[element.type] || this.options.fallbackComponent!;
 
     // Log if we're using fallback
-    if (!this.components[question.type] && this.options.logger?.onFallback) {
+    if (!this.components[element.type] && this.options.logger?.onFallback) {
       this.options.logger.onFallback(
-        question.type,
+        element.type,
         componentKey,
-        `No component found for type "${question.type}"`
+        `No component found for type "${element.type}"`
       );
     }
 
     // Log successful resolution
     if (this.options.logger?.onResolve) {
-      this.options.logger.onResolve(question.type, componentKey);
+      this.options.logger.onResolve(element.type, componentKey);
     }
 
-    // Determine if this question type should have options
-    const shouldHaveOptions = this.options.shouldHaveOptions!(question.type);
-    let options = question.options || [];
+    // Determine if this element type should have options
+    const shouldHaveOptions = this.options.shouldHaveOptions!(element.type);
+    let options = element.options || [];
 
     // If no options provided but type should have options, use defaults
     if (shouldHaveOptions && (!options || options.length === 0)) {
-      options = this.options.getDefaultOptions!(question.type);
+      options = this.options.getDefaultOptions!(element.type);
     }
 
     // Build the props
-    const props: QuestionProps = {
-      question: question.question,
+    const props: BleakElementProps = {
+      text: element.text,
       value,
       onChange,
-      questionIndex,
+      elementIndex,
       ...(options.length > 0 && {options})
     };
 
     return {
-      type: question.type,
+      type: element.type,
       componentKey,
       props
     };
@@ -73,20 +77,20 @@ export class QuestionResolver {
 }
 
 /**
- * Create a resolver from a QuestionConfig object
+ * Create a resolver from a BleakElementConfig object
  * This is the smooth integration function that works with the user's config
  */
-export function createResolverFromConfig<T extends QuestionConfig>(
+export function createResolverFromConfig<T extends BleakElementConfig>(
   config: T,
   options: ResolverOptions = {}
 ): {
-  resolver: QuestionResolver;
+  resolver: BleakResolver;
   components: Record<string, T[keyof T]["component"]>;
   resolve: (
-    question: Question,
+    element: BleakElement,
     value: string,
     onChange: (value: string) => void,
-    questionIndex?: number
+    elementIndex?: number
   ) => ComponentResolution & {Component: T[keyof T]["component"]};
 } {
   // Extract component mapping from config
@@ -98,21 +102,16 @@ export function createResolverFromConfig<T extends QuestionConfig>(
     componentMap[type] = config.component;
   });
 
-  const resolver = new QuestionResolver(componentRegistry, options);
+  const resolver = new BleakResolver(componentRegistry, options);
 
   // Enhanced resolve function that returns both resolution and actual component
   const resolve = (
-    question: Question,
+    element: BleakElement,
     value: string,
     onChange: (value: string) => void,
-    questionIndex?: number
+    elementIndex?: number
   ) => {
-    const resolution = resolver.resolve(
-      question,
-      value,
-      onChange,
-      questionIndex
-    );
+    const resolution = resolver.resolve(element, value, onChange, elementIndex);
     const Component = componentMap[resolution.componentKey];
 
     return {
@@ -133,9 +132,43 @@ export function createResolver(
   components: ComponentRegistry,
   options: ResolverOptions = {}
 ) {
-  return new QuestionResolver(components, options);
+  return new BleakResolver(components, options);
 }
 
+export function resolveElement(
+  element: BleakElement,
+  value: string,
+  onChange: (value: string) => void,
+  componentMap: ComponentRegistry,
+  elementIndex?: number
+): ComponentResolution {
+  const resolver = new BleakResolver(componentMap);
+  return resolver.resolve(element, value, onChange, elementIndex);
+}
+
+export function resolveElements(
+  elements: BleakElement[],
+  values: Record<string, string>,
+  onChange: (elementText: string, value: string) => void,
+  componentMap: ComponentRegistry
+): ComponentResolution[] {
+  const resolver = new BleakResolver(componentMap);
+
+  return elements.map((element, index) =>
+    resolver.resolve(
+      element,
+      values[element.text] || "",
+      (value) => onChange(element.text, value),
+      index
+    )
+  );
+}
+
+// Legacy aliases for backwards compatibility
+/** @deprecated Use BleakResolver instead */
+export const QuestionResolver = BleakResolver;
+
+/** @deprecated Use resolveElement instead */
 export function resolveQuestion(
   question: Question,
   value: string,
@@ -143,24 +176,15 @@ export function resolveQuestion(
   componentMap: ComponentRegistry,
   questionIndex?: number
 ): ComponentResolution {
-  const resolver = new QuestionResolver(componentMap);
-  return resolver.resolve(question, value, onChange, questionIndex);
+  return resolveElement(question, value, onChange, componentMap, questionIndex);
 }
 
+/** @deprecated Use resolveElements instead */
 export function resolveQuestions(
   questions: Question[],
   values: Record<string, string>,
   onChange: (question: string, value: string) => void,
   componentMap: ComponentRegistry
 ): ComponentResolution[] {
-  const resolver = new QuestionResolver(componentMap);
-
-  return questions.map((question, index) =>
-    resolver.resolve(
-      question,
-      values[question.question] || "",
-      (value) => onChange(question.question, value),
-      index
-    )
-  );
+  return resolveElements(questions, values, onChange, componentMap);
 }

@@ -1,6 +1,6 @@
-# @bleakai/core - Framework-Agnostic Question Component Resolver
+# @bleakai/core - Framework-Agnostic Bleak Element Component Resolver
 
-A truly framework-agnostic library that handles the **logic** of determining which component to use for dynamic questions. No rendering, no framework dependencies - just pure component resolution logic.
+A truly framework-agnostic library that handles the **logic** of determining which component to use for dynamic bleak elements. No rendering, no framework dependencies - just pure component resolution logic.
 
 ## 🌟 Features
 
@@ -25,11 +25,11 @@ npm install @bleakai/core
 3. **Get components and props** directly - no manual mapping needed!
 
 ```typescript
-import {createResolverFromConfig, type QuestionConfig} from "@bleakai/core";
+import {createResolverFromConfig, type BleakElementConfig} from "@bleakai/core";
 import {TextInput, RadioGroup, TextArea} from "./my-components";
 
 // 1. Define your config - enforced by library types!
-const QUESTION_CONFIG = {
+const BLEAK_CONFIG = {
   text: {
     component: TextInput,
     description: "Use for open-ended text input"
@@ -42,14 +42,14 @@ const QUESTION_CONFIG = {
     component: TextArea,
     description: "Use for longer text input"
   }
-} satisfies QuestionConfig;
+} satisfies BleakElementConfig;
 
 // 2. Create resolver from config (super smooth!)
-const {resolve} = createResolverFromConfig(QUESTION_CONFIG);
+const {resolve} = createResolverFromConfig(BLEAK_CONFIG);
 
 // 3. Use it - get Component and props directly!
-function DynamicQuestion({question, value, onChange}) {
-  const {Component, props} = resolve(question, value, onChange);
+function DynamicBleakElement({element, value, onChange}) {
+  const {Component, props} = resolve(element, value, onChange);
   return <Component {...props} />;
 }
 ```
@@ -83,9 +83,9 @@ const componentMap = {
   textarea: "TextArea"
 };
 
-function DynamicQuestion({question, value, onChange}) {
+function DynamicBleakElement({element, value, onChange}) {
   const resolver = createResolver(componentMap);
-  const {componentKey, props} = resolver.resolve(question, value, onChange);
+  const {componentKey, props} = resolver.resolve(element, value, onChange);
 
   // Get the actual component from your registry
   const Component = components[componentKey];
@@ -96,10 +96,10 @@ function DynamicQuestion({question, value, onChange}) {
 // Usage
 function App() {
   const [value, setValue] = useState("");
-  const question = {type: "text", question: "Enter your name:"};
+  const element = {type: "text", text: "Enter your name:"};
 
   return (
-    <DynamicQuestion question={question} value={value} onChange={setValue} />
+    <DynamicBleakElement element={element} value={value} onChange={setValue} />
   );
 }
 ```
@@ -117,7 +117,7 @@ import {createResolver} from "@bleakai/core";
 import TextInput from "./TextInput.vue";
 import RadioGroup from "./RadioGroup.vue";
 
-const props = defineProps(["question", "value", "onChange"]);
+const props = defineProps(["element", "value", "onChange"]);
 
 // Your component registry
 const components = {
@@ -134,7 +134,7 @@ const componentMap = {
 const resolver = createResolver(componentMap);
 
 const resolved = computed(() =>
-  resolver.resolve(props.question, props.value, props.onChange)
+  resolver.resolve(props.element, props.value, props.onChange)
 );
 
 const resolvedComponent = computed(
@@ -155,14 +155,14 @@ const components = {
     const input = document.createElement("input");
     input.type = "text";
     input.value = props.value;
-    input.placeholder = props.question;
+    input.placeholder = props.text;
     input.addEventListener("input", (e) => props.onChange(e.target.value));
     return input;
   },
 
   RadioGroup: (props) => {
     const container = document.createElement("div");
-    container.innerHTML = `<label>${props.question}</label>`;
+    container.innerHTML = `<label>${props.text}</label>`;
 
     props.options?.forEach((option) => {
       const label = document.createElement("label");
@@ -188,22 +188,24 @@ const componentMap = {
 };
 
 // Usage
-function renderQuestion(targetElement, question, value, onChange) {
+function renderBleakElement(targetElement, element, value, onChange) {
   const resolver = createResolver(componentMap);
-  const {componentKey, props} = resolver.resolve(question, value, onChange);
+  const {componentKey, props} = resolver.resolve(element, value, onChange);
 
   // Get the factory function and create the element
   const factory = components[componentKey];
-  const element = factory(props);
+  const domElement = factory(props);
 
   targetElement.innerHTML = "";
-  targetElement.appendChild(element);
+  targetElement.appendChild(domElement);
 }
 
 // Example usage
-const targetEl = document.getElementById("question-container");
-const question = {type: "text", question: "Enter your email:"};
-renderQuestion(targetEl, question, "", (value) => console.log("Value:", value));
+const targetEl = document.getElementById("element-container");
+const element = {type: "text", text: "Enter your email:"};
+renderBleakElement(targetEl, element, "", (value) =>
+  console.log("Value:", value)
+);
 ```
 
 ## 🎨 Advanced Usage
@@ -211,19 +213,19 @@ renderQuestion(targetEl, question, "", (value) => console.log("Value:", value));
 ### Batch Processing
 
 ```typescript
-import {resolveQuestions} from "@bleakai/core";
+import {resolveElements} from "@bleakai/core";
 
-const questions = [
-  {type: "text", question: "Name?"},
-  {type: "radio", question: "Experience?", options: ["Beginner", "Expert"]}
+const elements = [
+  {type: "text", text: "Name?"},
+  {type: "radio", text: "Experience?", options: ["Beginner", "Expert"]}
 ];
 
 const values = {"Name?": "John", "Experience?": "Expert"};
 
-const resolved = resolveQuestions(
-  questions,
+const resolved = resolveElements(
+  elements,
   values,
-  (questionText, value) => console.log(questionText, "=", value),
+  (elementText, value) => console.log(elementText, "=", value),
   {text: "TextInput", radio: "RadioGroup"}
 );
 
@@ -236,9 +238,9 @@ resolved.forEach(({componentKey, props}, index) => {
 ### Custom Resolver with Options
 
 ```typescript
-import {QuestionResolver} from "@bleakai/core";
+import {BleakResolver} from "@bleakai/core";
 
-const resolver = new QuestionResolver({
+const resolver = new BleakResolver({
   components: {
     text: "TextInput",
     radio: "RadioGroup",
@@ -255,11 +257,7 @@ const resolver = new QuestionResolver({
   }
 });
 
-const result = resolver.resolve(
-  {type: "unknown", question: "Test?"},
-  "",
-  () => {}
-);
+const result = resolver.resolve({type: "unknown", text: "Test?"}, "", () => {});
 // Will use fallback component
 ```
 
@@ -268,37 +266,37 @@ const result = resolver.resolve(
 ### Types
 
 ```typescript
-interface Question {
+interface BleakElement {
   type: string;
-  question: string;
+  text: string;
   options?: string[] | null;
 }
 
-interface QuestionProps {
-  question: string;
+interface BleakElementProps {
+  text: string;
   value: string;
   onChange: (value: string) => void;
-  questionIndex?: number;
+  elementIndex?: number;
   options?: string[];
 }
 
 interface ComponentResolution {
   type: string;
   componentKey: string;
-  props: QuestionProps;
+  props: BleakElementProps;
 }
 ```
 
 ### Functions
 
 - `createResolver(componentMap, options?)` - Quick resolver setup
-- `resolveQuestion(question, value, onChange, componentMap)` - One-off resolution
-- `resolveQuestions(questions, values, onChange, componentMap)` - Batch resolution
+- `resolveElement(element, value, onChange, componentMap)` - One-off resolution
+- `resolveElements(elements, values, onChange, componentMap)` - Batch resolution
 - `createStandardComponentMap(customComponents?)` - Helper for common component types
 
 ### Classes
 
-- `QuestionResolver` - Main resolver class with full configuration options
+- `BleakResolver` - Main resolver class with full configuration options
 
 ## 🛠️ Local Development & Testing
 

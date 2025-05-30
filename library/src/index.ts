@@ -1,7 +1,7 @@
 /**
- * @bleakai/core - Framework-Agnostic Question Component Resolver
+ * @bleakai/core - Framework-Agnostic Bleak Element Component Resolver
  *
- * A library that handles the logic of determining which component to use for dynamic questions.
+ * A library that handles the logic of determining which component to use for dynamic bleak elements.
  * No rendering, no framework dependencies - just pure component resolution logic.
  */
 
@@ -10,22 +10,32 @@ export const FRAMEWORK_AGNOSTIC = true;
 
 // Main exports - resolver functions and classes
 export {
-  QuestionResolver,
+  BleakResolver,
   createResolver,
   createResolverFromConfig,
+  resolveElement,
+  resolveElements,
+  // Legacy aliases for backwards compatibility
+  QuestionResolver,
   resolveQuestion,
   resolveQuestions
-} from "./core/QuestionResolver";
+} from "./core/BleakResolver";
 
 // Type exports - all the types users need
 export type {
-  Question,
-  QuestionProps,
+  BleakElement,
+  BleakElementProps,
   ComponentResolution,
   ComponentRegistry,
   ResolverOptions,
+  BleakElementConfig,
+  BleakElementTypeConfig,
+  BleakElementType,
+  ComponentType,
+  // Legacy aliases for backwards compatibility
+  Question,
+  QuestionProps,
   QuestionConfig,
   QuestionTypeConfig,
-  QuestionType,
-  ComponentType
+  QuestionType
 } from "./types/core";

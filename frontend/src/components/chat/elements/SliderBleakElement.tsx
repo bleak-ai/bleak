@@ -3,16 +3,12 @@ import {logSliderConfig, logUserAnswer} from "../../../utils/logger";
 import {useEffect, useRef} from "react";
 import type {BleakElementProps} from "@bleakai/core";
 
-export const SliderQuestion = ({
+export const SliderBleakElement = ({
   text,
-  question,
   options,
   value,
   onChange
-}: BleakElementProps & {question?: string}) => {
-  // Use text if available, otherwise fall back to question for backward compatibility
-  const displayText = text || question || "";
-
+}: BleakElementProps) => {
   const hasLoggedConfig = useRef(false);
   const lastLoggedValue = useRef<string>("");
 
@@ -51,7 +47,7 @@ export const SliderQuestion = ({
       Math.abs(parseInt(newValue) - parseInt(lastLoggedValue.current || "0")) >=
         step
     ) {
-      logUserAnswer(displayText, newValue, "slider");
+      logUserAnswer(text, newValue, "slider");
       lastLoggedValue.current = newValue;
     }
   };
@@ -63,9 +59,7 @@ export const SliderQuestion = ({
 
   return (
     <div className="space-y-4">
-      <Label className="text-base font-medium text-foreground">
-        {displayText}
-      </Label>
+      <Label className="text-base font-medium text-foreground">{text}</Label>
 
       <div className="space-y-3">
         <div className="px-3">

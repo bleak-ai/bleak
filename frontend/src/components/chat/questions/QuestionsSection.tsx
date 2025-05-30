@@ -5,10 +5,10 @@ import type {
   InteractiveQuestion,
   AnsweredQuestion
 } from "../../../api/interactiveApi";
-import {QUESTION_CONFIG} from "../../../config/questionConfig";
-import type {CustomQuestionConfig} from "../config/QuestionConfigEditor";
+import {BLEAK_ELEMENT_CONFIG} from "../../../config/bleakConfig";
+import type {CustomQuestionConfig} from "../config/BleakConfigEditor";
 
-interface QuestionsSectionProps {
+interface BleakElementsSectionProps {
   questions: InteractiveQuestion[];
   answers: Record<string, string>;
   onAnswerChange: (question: string, value: string) => void;
@@ -21,8 +21,8 @@ interface QuestionsSectionProps {
   customConfig?: CustomQuestionConfig | null;
 }
 
-// Helper component to render individual questions - much simpler now!
-function DynamicQuestion({
+// Helper component to render individual bleak elements - much simpler now!
+function DynamicBleakElement({
   question,
   value,
   onChange,
@@ -33,7 +33,7 @@ function DynamicQuestion({
   onChange: (value: string) => void;
   questionIndex: number;
 }) {
-  const {resolve} = createResolverFromConfig(QUESTION_CONFIG, {
+  const {resolve} = createResolverFromConfig(BLEAK_ELEMENT_CONFIG, {
     fallbackComponent: "radio"
   });
 
@@ -41,7 +41,7 @@ function DynamicQuestion({
   const {Component, props} = resolve(
     {
       type: question.type,
-      question: question.question,
+      text: question.question,
       options: question.options || undefined
     },
     value,
@@ -50,14 +50,14 @@ function DynamicQuestion({
   );
 
   if (!Component) {
-    console.error(`No component found for question type: ${question.type}`);
-    return <div>Error: Unknown question type</div>;
+    console.error(`No component found for element type: ${question.type}`);
+    return <div>Error: Unknown element type</div>;
   }
 
   return <Component {...props} />;
 }
 
-export const QuestionsSection = ({
+export const BleakElementsSection = ({
   questions,
   answers,
   onAnswerChange,
@@ -68,9 +68,9 @@ export const QuestionsSection = ({
   noMoreQuestionsAvailable = false,
   noMoreQuestionsMessage,
   customConfig
-}: QuestionsSectionProps) => {
-  // Get active question types for display
-  const getActiveQuestionTypes = () => {
+}: BleakElementsSectionProps) => {
+  // Get active element types for display
+  const getActiveElementTypes = () => {
     if (!customConfig) return null;
 
     const activeTypes = Object.entries(customConfig)
@@ -80,7 +80,7 @@ export const QuestionsSection = ({
     return activeTypes.length > 0 ? activeTypes : null;
   };
 
-  const activeTypes = getActiveQuestionTypes();
+  const activeTypes = getActiveElementTypes();
 
   return (
     <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
@@ -98,7 +98,7 @@ export const QuestionsSection = ({
         )}
         {activeTypes && (
           <p className="text-muted-foreground text-xs">
-            Using custom question types: {activeTypes.join(", ")}
+            Using custom element types: {activeTypes.join(", ")}
           </p>
         )}
       </div>
@@ -106,7 +106,7 @@ export const QuestionsSection = ({
       <div className="space-y-6">
         {questions.map((question, index) => (
           <div key={index}>
-            <DynamicQuestion
+            <DynamicBleakElement
               question={question}
               value={answers[question.question] || ""}
               onChange={(value: string) =>
@@ -163,3 +163,7 @@ export const QuestionsSection = ({
     </div>
   );
 };
+
+// Legacy alias for backwards compatibility
+/** @deprecated Use BleakElementsSection instead */
+export const QuestionsSection = BleakElementsSection;
