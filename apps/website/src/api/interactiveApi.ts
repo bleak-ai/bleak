@@ -70,17 +70,20 @@ export interface InteractiveResponse {
 export interface InitialRequest {
   prompt: string;
   thread_id: null;
+  apiKey?: string;
 }
 
 export interface ResumeRequest {
   thread_id: string;
   answered_questions: AnsweredQuestion[];
+  apiKey?: string;
 }
 
 export interface ChoiceRequest {
   thread_id: string;
   answered_questions: AnsweredQuestion[];
   choice: "more_questions" | "final_answer";
+  apiKey?: string;
 }
 
 /**
@@ -91,12 +94,14 @@ export interface ChoiceRequest {
  *
  * @param prompt - The user's initial question or request
  * @param customBleakElements - Optional custom configuration for bleak elements
+ * @param apiKey - Optional OpenAI API key for the request
  * @returns Promise resolving to the interactive response with questions
  * @throws Error if the request fails or response format is invalid
  */
 export const startInteractiveSession = async (
   prompt: string,
-  customBleakElements?: Array<{name: string; description: string}>
+  customBleakElements?: Array<{name: string; description: string}>,
+  apiKey?: string
 ): Promise<InteractiveResponse> => {
   const payload = {
     prompt,
@@ -107,14 +112,22 @@ export const startInteractiveSession = async (
   logSessionFlow("Starting Interactive Session", {prompt});
   logApiCall("/bleak/interactive", payload);
 
+  // Build headers
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json"
+  };
+
+  // Add API key to headers if provided
+  if (apiKey) {
+    headers["X-OpenAI-API-Key"] = apiKey;
+  }
+
   try {
     const response = await axios.post(
       `${API_BASE_URL}/bleak/interactive`,
       payload,
       {
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers,
         timeout: 30000 // 30 second timeout
       }
     );
@@ -153,13 +166,15 @@ export const startInteractiveSession = async (
  * @param threadId - The conversation thread identifier
  * @param answeredQuestions - All previously answered questions
  * @param choice - User's choice: "more_questions" or "final_answer"
+ * @param apiKey - Optional OpenAI API key for the request
  * @returns Promise resolving to either more questions or the final answer
  * @throws Error if the request fails or response format is invalid
  */
 export const makeInteractiveChoice = async (
   threadId: string,
   answeredQuestions: AnsweredQuestion[],
-  choice: "more_questions" | "final_answer"
+  choice: "more_questions" | "final_answer",
+  apiKey?: string
 ): Promise<InteractiveResponse> => {
   const payload = {
     thread_id: threadId,
@@ -182,14 +197,22 @@ export const makeInteractiveChoice = async (
 
   logApiCall("/bleak/interactive/choice", payload);
 
+  // Build headers
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json"
+  };
+
+  // Add API key to headers if provided
+  if (apiKey) {
+    headers["X-OpenAI-API-Key"] = apiKey;
+  }
+
   try {
     const response = await axios.post(
       `${API_BASE_URL}/bleak/interactive/choice`,
       payload,
       {
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers,
         timeout: choice === "final_answer" ? 60000 : 30000 // Longer timeout for final answer
       }
     );

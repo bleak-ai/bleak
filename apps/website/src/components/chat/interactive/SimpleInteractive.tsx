@@ -11,6 +11,7 @@ import {PromptForm} from "../utils/PromptForm";
 import {QuestionsSection} from "../questions/QuestionsSection";
 import {AnswerSection} from "../utils/AnswerSection";
 import {ErrorDisplay} from "../utils/ErrorDisplay";
+import {ApiKeyInput} from "../../ApiKeyInput";
 import type {CustomBleakElementConfig} from "../config/BleakConfigEditor";
 
 interface SimpleInteractiveProps {
@@ -32,6 +33,7 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
     useState(false);
   const [noMoreQuestionsMessage, setNoMoreQuestionsMessage] =
     useState<string>("");
+  const [apiKey, setApiKey] = useState<string | null>(null);
 
   // Convert custom config to API format
   const getCustomBleakElements = () => {
@@ -45,10 +47,46 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
       }));
   };
 
+  // Helper function to check if error is API key related
+  const isApiKeyError = (error: Error): boolean => {
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("api key") ||
+      message.includes("unauthorized") ||
+      message.includes("authentication") ||
+      message.includes("invalid api key") ||
+      message.includes("openai api key is required")
+    );
+  };
+
+  // Get API key error message for display
+  const getApiKeyErrorMessage = (error: Error): string | null => {
+    if (!isApiKeyError(error)) return null;
+
+    const message = error.message;
+
+    // Clean up common error patterns
+    if (message.includes("OpenAI API key is required")) {
+      return "Please enter your OpenAI API key to continue.";
+    }
+    if (message.includes("invalid api key")) {
+      return "Invalid API key format. Please check your key and try again.";
+    }
+    if (message.includes("unauthorized")) {
+      return "API key is invalid or has expired. Please check your OpenAI account.";
+    }
+
+    return "API key is required to use Bleak.";
+  };
+
   // Start session mutation
   const startMutation = useMutation<InteractiveResponse, Error, string>({
     mutationFn: (prompt: string) =>
-      startInteractiveSession(prompt, getCustomBleakElements()),
+      startInteractiveSession(
+        prompt,
+        getCustomBleakElements(),
+        apiKey || undefined
+      ),
     onSuccess: (data) => {
       setThreadId(data.thread_id);
       if (data.questions && data.questions.length > 0) {
@@ -74,7 +112,12 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
     }
   >({
     mutationFn: ({threadId, answeredQuestions, choice}) =>
-      makeInteractiveChoice(threadId, answeredQuestions, choice),
+      makeInteractiveChoice(
+        threadId,
+        answeredQuestions,
+        choice,
+        apiKey || undefined
+      ),
     onSuccess: (data) => {
       if (data.status === "completed" && data.answer) {
         // Final answer received
@@ -108,6 +151,8 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
 
   const isLoading = startMutation.isPending || choiceMutation.isPending;
   const error = startMutation.error || choiceMutation.error;
+  const apiKeyError = error ? getApiKeyErrorMessage(error) : null;
+  const nonApiKeyError = error && !isApiKeyError(error) ? error : null;
 
   const getCurrentAnsweredQuestions = (): AnsweredQuestion[] => {
     return questions
@@ -155,6 +200,13 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
+      {/* API Key Input */}
+      <ApiKeyInput
+        onApiKeyChange={setApiKey}
+        required={false}
+        error={apiKeyError}
+      />
+
       {/* Initial Prompt */}
       {!threadId && (
         <PromptForm onSubmit={handlePromptSubmit} isLoading={isLoading} />
@@ -185,11 +237,8 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
         />
       )}
 
-      {/* Loading */}
-      {/* {isLoading && <LoadingSpinner />} */}
-
-      {/* Error */}
-      {error && <ErrorDisplay error={error} />}
+      {/* Non-API Key Errors */}
+      {nonApiKeyError && <ErrorDisplay error={nonApiKeyError} />}
     </div>
   );
 };
