@@ -1,6 +1,6 @@
 {
   "name": "bleakai",
-  "version": "2.0.0",
+  "version": "0.0.2",
   "description": "Framework-agnostic dynamic bleak element component resolver",
   "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
@@ -29,8 +29,17 @@
     "resolver",
     "typescript"
   ],
-  "author": "",
+  "author": "Bernat Sampera <bsampera.job@gmail.com>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bleak-ai/bleak",
+    "directory": "packages/bleakai"
+  },
+  "homepage": "https://bleakai.com",
+  "bugs": {
+    "url": "https://github.com/bleak-ai/bleak/issues"
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
