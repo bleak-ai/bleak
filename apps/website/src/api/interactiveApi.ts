@@ -3,8 +3,8 @@ import {z} from "zod";
 import {logApiCall, logSessionFlow} from "../utils/logger";
 import {BLEAK_ELEMENT_TYPES, BLEAK_ELEMENTS} from "../config/bleakConfig";
 
-// API Base URL
-const API_BASE_URL = "http://0.0.0.0:8008";
+// API Base URL from .env
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Dynamic question schema that can handle any type
 const InteractiveQuestionSchema = z.object({
