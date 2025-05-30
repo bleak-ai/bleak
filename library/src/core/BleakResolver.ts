@@ -163,28 +163,3 @@ export function resolveElements(
     )
   );
 }
-
-// Legacy aliases for backwards compatibility
-/** @deprecated Use BleakResolver instead */
-export const QuestionResolver = BleakResolver;
-
-/** @deprecated Use resolveElement instead */
-export function resolveQuestion(
-  question: Question,
-  value: string,
-  onChange: (value: string) => void,
-  componentMap: ComponentRegistry,
-  questionIndex?: number
-): ComponentResolution {
-  return resolveElement(question, value, onChange, componentMap, questionIndex);
-}
-
-/** @deprecated Use resolveElements instead */
-export function resolveQuestions(
-  questions: Question[],
-  values: Record<string, string>,
-  onChange: (question: string, value: string) => void,
-  componentMap: ComponentRegistry
-): ComponentResolution[] {
-  return resolveElements(questions, values, onChange, componentMap);
-}

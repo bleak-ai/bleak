@@ -14,11 +14,7 @@ export {
   createResolver,
   createResolverFromConfig,
   resolveElement,
-  resolveElements,
-  // Legacy aliases for backwards compatibility
-  QuestionResolver,
-  resolveQuestion,
-  resolveQuestions
+  resolveElements
 } from "./core/BleakResolver";
 
 // Type exports - all the types users need

@@ -63,16 +63,3 @@ export type BleakElementType<T extends BleakElementConfig> = keyof T;
  */
 export type ComponentType<T extends BleakElementConfig> =
   T[keyof T]["component"];
-
-// Legacy aliases for backwards compatibility
-/** @deprecated Use BleakElement instead */
-export type Question = BleakElement;
-/** @deprecated Use BleakElementProps instead */
-export type QuestionProps = BleakElementProps;
-/** @deprecated Use BleakElementConfig instead */
-export type QuestionConfig<TComponent = any> = BleakElementConfig<TComponent>;
-/** @deprecated Use BleakElementTypeConfig instead */
-export type QuestionTypeConfig<TComponent = any> =
-  BleakElementTypeConfig<TComponent>;
-/** @deprecated Use BleakElementType instead */
-export type QuestionType<T extends BleakElementConfig> = BleakElementType<T>;
