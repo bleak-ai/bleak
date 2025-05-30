@@ -4,7 +4,7 @@ import {
   MultiSelectBleakElement,
   SliderBleakElement
 } from "../components/chat/elements";
-import type {BleakElementConfig} from "@bleakai/core";
+import type {BleakElementConfig} from "bleakai";
 
 // This enforces the library's type structure - single source of truth
 export const BLEAK_ELEMENT_CONFIG = {

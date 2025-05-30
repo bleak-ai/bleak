@@ -2,7 +2,7 @@ import {useState} from "react";
 import {Label} from "../../ui/label";
 import {RadioGroup, RadioGroupItem} from "../../ui/radio-group";
 import {Input} from "../../ui/input";
-import type {BleakElementProps} from "@bleakai/core";
+import type {BleakElementProps} from "bleakai";
 
 export const RadioBleakElement = ({
   text,

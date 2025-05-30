@@ -1,5 +1,5 @@
 {
-  "name": "@bleakai/core",
+  "name": "bleakai",
   "version": "2.0.0",
   "description": "Framework-agnostic dynamic bleak element component resolver",
   "main": "dist/index.umd.js",

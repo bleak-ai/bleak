@@ -2,7 +2,7 @@ import {useState, useEffect, useRef} from "react";
 import {Label} from "../../ui/label";
 import {Input} from "../../ui/input";
 import {logMultiSelectState, logUserAnswer} from "../../../utils/logger";
-import type {BleakElementProps} from "@bleakai/core";
+import type {BleakElementProps} from "bleakai";
 
 export const MultiSelectBleakElement = ({
   text,

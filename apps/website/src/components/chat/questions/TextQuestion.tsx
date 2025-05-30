@@ -1,6 +1,6 @@
 import {Label} from "../../ui/label";
 import {Textarea} from "../../ui/textarea";
-import type {BleakElementProps} from "@bleakai/core";
+import type {BleakElementProps} from "bleakai";
 
 export const TextQuestion = ({
   text,

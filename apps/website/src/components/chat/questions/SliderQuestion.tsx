@@ -1,7 +1,7 @@
 import {Label} from "../../ui/label";
 import {logSliderConfig, logUserAnswer} from "../../../utils/logger";
 import {useEffect, useRef} from "react";
-import type {BleakElementProps} from "@bleakai/core";
+import type {BleakElementProps} from "bleakai";
 
 export const SliderQuestion = ({
   text,

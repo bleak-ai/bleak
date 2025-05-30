@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {createResolverFromConfig} from "@bleakai/core";
+import {createResolverFromConfig} from "bleakai";
 import {Button} from "../ui/button";
 import {Card} from "../ui/card";
 import {BLEAK_ELEMENT_CONFIG} from "../../config/bleakConfig";

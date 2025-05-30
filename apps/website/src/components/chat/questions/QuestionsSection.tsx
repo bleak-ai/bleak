@@ -1,6 +1,6 @@
 import {Loader} from "lucide-react";
 import {Button} from "../../ui/button";
-import {createResolverFromConfig} from "@bleakai/core";
+import {createResolverFromConfig} from "bleakai";
 import type {
   InteractiveQuestion,
   AnsweredQuestion
