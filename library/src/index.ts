@@ -27,11 +27,5 @@ export type {
   BleakElementConfig,
   BleakElementTypeConfig,
   BleakElementType,
-  ComponentType,
-  // Legacy aliases for backwards compatibility
-  Question,
-  QuestionProps,
-  QuestionConfig,
-  QuestionTypeConfig,
-  QuestionType
+  ComponentType
 } from "./types/core";

@@ -4,11 +4,7 @@ import type {
   ComponentResolution,
   ComponentRegistry,
   ResolverOptions,
-  BleakElementConfig,
-  // Legacy aliases for backwards compatibility
-  Question,
-  QuestionProps,
-  QuestionConfig
+  BleakElementConfig
 } from "../types/core";
 
 export class BleakResolver {
