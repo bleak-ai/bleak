@@ -1,46 +1,31 @@
-// Core types
-export type {
-  BleakQuestion,
-  QuestionComponentProps,
-  BleakRendererConfig,
-  DynamicQuestionRendererProps,
-  ComponentRegistry,
-  BleakElementType
-} from "./types";
+/**
+ * @bleakai/core - Framework-Agnostic Question Component Resolver
+ *
+ * A library that handles the logic of determining which component to use for dynamic questions.
+ * No rendering, no framework dependencies - just pure component resolution logic.
+ */
 
-// Core functionality
-export {BleakRenderer} from "./core/BleakRenderer";
+export const VERSION = "2.0.0";
+export const FRAMEWORK_AGNOSTIC = true;
 
-// React components
-export {DynamicQuestionRenderer} from "./components/DynamicQuestionRenderer";
-
-// Hooks
-export {useBleakRenderer} from "./components/useBleakRenderer";
-
-// Utilities
-export {createDefaultConfig, createComponentRegistry} from "./utils";
-
-// Simple configuration (NEW - Simple approach for users)
-export type {
-  QuestionConfig,
-  QuestionTypeFromConfig,
-  ComponentRegistry as SimpleComponentRegistry,
-  ElementDefinitions
-} from "./utils/simple";
-
-// Component adaptation utilities
-export {createAdaptedRegistry, quickSetup} from "./utils/componentAdapter";
-
-// React hooks
-export {useTemporaryRenderer} from "./components/useBleakRenderer";
-
-// Utilities (legacy - for backward compatibility)
+// Main exports - resolver functions and classes
 export {
-  createQuestionTypes,
-  createTypeValidator,
-  createElementDefinitions,
-  ComponentRegistryBuilder
-} from "./utils";
+  QuestionResolver,
+  createResolver,
+  createResolverFromConfig,
+  resolveQuestion,
+  resolveQuestions
+} from "./core/QuestionResolver";
 
-// Version
-export const version = "1.0.0";
+// Type exports - all the types users need
+export type {
+  Question,
+  QuestionProps,
+  ComponentResolution,
+  ComponentRegistry,
+  ResolverOptions,
+  QuestionConfig,
+  QuestionTypeConfig,
+  QuestionType,
+  ComponentType
+} from "./types/core";

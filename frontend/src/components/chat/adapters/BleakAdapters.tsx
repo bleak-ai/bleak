@@ -1,70 +1,23 @@
 import React from "react";
-import type {QuestionComponentProps} from "bleakai";
+import type {QuestionProps} from "@bleakai/core";
 import {TextQuestion} from "../questions/TextQuestion";
 import {RadioQuestion} from "../questions/RadioQuestion";
 import {MultiSelectQuestion} from "../questions/MultiSelectQuestion";
 import {SliderQuestion} from "../questions/SliderQuestion";
 
-// Adapter for TextQuestion to match BleakAI interface
-export const BleakTextQuestion: React.FC<QuestionComponentProps> = ({
-  question,
-  value,
-  onChange
-}) => {
-  return <TextQuestion question={question} value={value} onChange={onChange} />;
-};
+// Simple adapters that just pass through props to existing components
+export const BleakTextQuestion: React.FC<QuestionProps> = (props) => (
+  <TextQuestion {...props} />
+);
 
-// Adapter for RadioQuestion to match BleakAI interface
-export const BleakRadioQuestion: React.FC<QuestionComponentProps> = ({
-  question,
-  value,
-  onChange,
-  options = [],
-  questionIndex = 0
-}) => {
-  return (
-    <RadioQuestion
-      question={question}
-      value={value}
-      onChange={onChange}
-      options={options}
-      questionIndex={questionIndex}
-    />
-  );
-};
+export const BleakRadioQuestion: React.FC<QuestionProps> = (props) => (
+  <RadioQuestion {...props} />
+);
 
-// Adapter for MultiSelectQuestion to match BleakAI interface
-export const BleakMultiSelectQuestion: React.FC<QuestionComponentProps> = ({
-  question,
-  value,
-  onChange,
-  options = [],
-  questionIndex = 0
-}) => {
-  return (
-    <MultiSelectQuestion
-      question={question}
-      value={value}
-      onChange={onChange}
-      options={options}
-      questionIndex={questionIndex}
-    />
-  );
-};
+export const BleakMultiSelectQuestion: React.FC<QuestionProps> = (props) => (
+  <MultiSelectQuestion {...props} />
+);
 
-// Adapter for SliderQuestion to match BleakAI interface
-export const BleakSliderQuestion: React.FC<QuestionComponentProps> = ({
-  question,
-  value,
-  onChange,
-  options
-}) => {
-  return (
-    <SliderQuestion
-      question={question}
-      value={value}
-      onChange={onChange}
-      options={options}
-    />
-  );
-};
+export const BleakSliderQuestion: React.FC<QuestionProps> = (props) => (
+  <SliderQuestion {...props} />
+);

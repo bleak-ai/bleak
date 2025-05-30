@@ -1,20 +1,14 @@
 import {Label} from "../../ui/label";
 import {logSliderConfig, logUserAnswer} from "../../../utils/logger";
 import {useEffect, useRef} from "react";
-
-interface SliderQuestionProps {
-  question: string;
-  options?: string[];
-  value: string;
-  onChange: (value: string) => void;
-}
+import type {QuestionProps} from "@bleakai/core";
 
 export const SliderQuestion = ({
   question,
   options,
   value,
   onChange
-}: SliderQuestionProps) => {
+}: QuestionProps) => {
   const hasLoggedConfig = useRef(false);
   const lastLoggedValue = useRef<string>("");
 

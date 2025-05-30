@@ -1,39 +1,38 @@
 import React, {useState} from "react";
-import {
-  DynamicQuestionRenderer,
-  createDefaultConfig,
-  createComponentRegistry
-} from "bleakai";
+import {createResolverFromConfig} from "@bleakai/core";
 import {Button} from "../../ui/button";
 import {Card} from "../../ui/card";
 import type {InteractiveQuestion} from "../../../api/interactiveApi";
-import {
-  BleakTextQuestion,
-  BleakRadioQuestion,
-  BleakMultiSelectQuestion,
-  BleakSliderQuestion
-} from "../adapters/BleakAdapters";
+import {QUESTION_CONFIG} from "../../../config/questionConfig";
 
-// Create component registry using BleakAI
-const components = createComponentRegistry()
-  .add("text", BleakTextQuestion as any)
-  .add("radio", BleakRadioQuestion as any)
-  .add("multi_select", BleakMultiSelectQuestion as any)
-  .add("slider", BleakSliderQuestion as any)
-  .build();
+// Helper component to render individual questions - clean and simple!
+function DemoQuestion({
+  question,
+  value,
+  onChange,
+  questionIndex
+}: {
+  question: any;
+  value: string;
+  onChange: (value: string) => void;
+  questionIndex: number;
+}) {
+  // Create resolver from config - single source of truth!
+  const {resolve} = createResolverFromConfig(QUESTION_CONFIG, {
+    fallbackComponent: "radio"
+  });
 
-// Create configuration with logging enabled
-const config = createDefaultConfig(components, {
-  enableLogging: true,
-  fallbackComponent: BleakRadioQuestion as any, // Use radio as fallback
-  customShouldHaveOptions: (type) =>
-    ["radio", "multi_select", "slider"].includes(type),
-  customDefaultOptions: (type) => {
-    if (type === "radio") return ["Yes", "No"];
-    if (type === "slider") return ["1", "10", "1"];
-    return [];
+  // Resolve and get the component directly
+  const {Component, props} = resolve(question, value, onChange, questionIndex);
+
+  if (!Component) {
+    console.error(`No component found for question type: ${question.type}`);
+    return <div>Error: Unknown question type</div>;
   }
-});
+
+  // Clean, simple rendering
+  return <Component {...props} />;
+}
 
 export const DynamicDemo: React.FC = () => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -77,17 +76,16 @@ export const DynamicDemo: React.FC = () => {
         <h1 className="text-2xl font-bold mb-4">Dynamic Questions Demo</h1>
         <p className="text-muted-foreground mb-6">
           This demo shows different question types being rendered dynamically
-          using the direct config approach.
+          using the config-based approach.
         </p>
 
         <div className="space-y-6">
           {demoQuestions.map((question, index) => (
             <div key={index} className="border rounded-lg p-4">
-              <DynamicQuestionRenderer
-                config={config}
+              <DemoQuestion
                 question={question}
                 value={answers[question.question] || ""}
-                onChange={(value) =>
+                onChange={(value: string) =>
                   handleAnswerChange(question.question, value)
                 }
                 questionIndex={index}

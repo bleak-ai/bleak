@@ -2,22 +2,15 @@ import {useState, useEffect, useRef} from "react";
 import {Label} from "../../ui/label";
 import {Input} from "../../ui/input";
 import {logMultiSelectState, logUserAnswer} from "../../../utils/logger";
-
-interface MultiSelectQuestionProps {
-  question: string;
-  options: string[];
-  value: string;
-  onChange: (value: string) => void;
-  questionIndex: number;
-}
+import type {QuestionProps} from "@bleakai/core";
 
 export const MultiSelectQuestion = ({
   question,
-  options,
+  options = [],
   value,
   onChange,
-  questionIndex
-}: MultiSelectQuestionProps) => {
+  questionIndex = 0
+}: QuestionProps) => {
   const [otherValue, setOtherValue] = useState("");
   const lastLoggedValue = useRef<string>("");
 

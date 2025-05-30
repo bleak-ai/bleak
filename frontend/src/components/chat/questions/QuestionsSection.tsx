@@ -1,12 +1,11 @@
 import {Loader} from "lucide-react";
 import {Button} from "../../ui/button";
-import {DynamicQuestionRenderer} from "bleakai";
+import {createResolverFromConfig} from "@bleakai/core";
 import type {
   InteractiveQuestion,
   AnsweredQuestion
 } from "../../../api/interactiveApi";
-// Import the simple configuration
-import {QUESTION_COMPONENTS} from "../../../config/questionConfig";
+import {QUESTION_CONFIG} from "../../../config/questionConfig";
 import type {CustomQuestionConfig} from "../config/QuestionConfigEditor";
 
 interface QuestionsSectionProps {
@@ -22,6 +21,42 @@ interface QuestionsSectionProps {
   customConfig?: CustomQuestionConfig | null;
 }
 
+// Helper component to render individual questions - much simpler now!
+function DynamicQuestion({
+  question,
+  value,
+  onChange,
+  questionIndex
+}: {
+  question: InteractiveQuestion;
+  value: string;
+  onChange: (value: string) => void;
+  questionIndex: number;
+}) {
+  const {resolve} = createResolverFromConfig(QUESTION_CONFIG, {
+    fallbackComponent: "radio"
+  });
+
+  // Resolve and get the component directly
+  const {Component, props} = resolve(
+    {
+      type: question.type,
+      question: question.question,
+      options: question.options || undefined
+    },
+    value,
+    onChange,
+    questionIndex
+  );
+
+  if (!Component) {
+    console.error(`No component found for question type: ${question.type}`);
+    return <div>Error: Unknown question type</div>;
+  }
+
+  return <Component {...props} />;
+}
+
 export const QuestionsSection = ({
   questions,
   answers,
@@ -34,12 +69,6 @@ export const QuestionsSection = ({
   noMoreQuestionsMessage,
   customConfig
 }: QuestionsSectionProps) => {
-  // Create simple renderer config using the components directly
-  const rendererConfig = {
-    components: QUESTION_COMPONENTS,
-    fallbackComponent: QUESTION_COMPONENTS.radio
-  };
-
   // Get active question types for display
   const getActiveQuestionTypes = () => {
     if (!customConfig) return null;
@@ -77,15 +106,12 @@ export const QuestionsSection = ({
       <div className="space-y-6">
         {questions.map((question, index) => (
           <div key={index}>
-            <DynamicQuestionRenderer
-              config={rendererConfig}
-              question={{
-                type: question.type,
-                question: question.question,
-                options: question.options || undefined
-              }}
+            <DynamicQuestion
+              question={question}
               value={answers[question.question] || ""}
-              onChange={(value) => onAnswerChange(question.question, value)}
+              onChange={(value: string) =>
+                onAnswerChange(question.question, value)
+              }
               questionIndex={index}
             />
           </div>

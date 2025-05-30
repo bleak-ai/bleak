@@ -1,17 +1,8 @@
 import {Label} from "../../ui/label";
 import {Textarea} from "../../ui/textarea";
+import type {QuestionProps} from "@bleakai/core";
 
-interface TextQuestionProps {
-  question: string;
-  value: string;
-  onChange: (value: string) => void;
-}
-
-export const TextQuestion = ({
-  question,
-  value,
-  onChange
-}: TextQuestionProps) => {
+export const TextQuestion = ({question, value, onChange}: QuestionProps) => {
   return (
     <div className="space-y-3">
       <Label className="text-base font-medium text-foreground">

@@ -1,17 +1,22 @@
 import {
-  BleakQuestion,
-  BleakRendererConfig,
-  QuestionComponentProps,
+  Question,
+  QuestionProps,
+  ComponentResolution,
+  ResolverConfig,
   ComponentRegistry
-} from "../types";
+} from "./types";
 
 /**
- * Core renderer class that handles the logic for dynamic question rendering
+ * Framework-agnostic question resolver
+ *
+ * This class handles the logic of determining which component should be used
+ * for a given question, but doesn't handle actual rendering. Users get back
+ * a component key and props, then render it however they want in their framework.
  */
-export class BleakRenderer {
-  private config: BleakRendererConfig;
+export class QuestionResolver {
+  private config: ResolverConfig;
 
-  constructor(config: BleakRendererConfig) {
+  constructor(config: ResolverConfig) {
     this.config = config;
     this.logRegistration();
   }
@@ -20,22 +25,21 @@ export class BleakRenderer {
    * Log the component registry on construction
    */
   private logRegistration(): void {
-    if (this.config.logger?.onRegistration) {
-      Object.entries(this.config.components).forEach(([type, component]) => {
-        this.config.logger!.onRegistration!(type, component.name || "Unknown");
+    if (this.config.logger?.onResolve) {
+      Object.entries(this.config.components).forEach(([type, componentKey]) => {
+        console.log(`📝 Registered ${type} → ${componentKey}`);
       });
     }
   }
 
   /**
-   * Register a new component type
+   * Register a new component type mapping
    */
-  registerComponent(type: string, component: any): void {
-    this.config.components[type] = component;
+  registerComponent(type: string, componentKey: string): void {
+    this.config.components[type] = componentKey;
 
-    // Log registration
-    if (this.config.logger?.onRegistration) {
-      this.config.logger.onRegistration(type, component.name || "Unknown");
+    if (this.config.logger?.onResolve) {
+      console.log(`📝 Registered ${type} → ${componentKey}`);
     }
   }
 
@@ -56,51 +60,48 @@ export class BleakRenderer {
   /**
    * Update configuration
    */
-  updateConfig(newConfig: Partial<BleakRendererConfig>): void {
+  updateConfig(newConfig: Partial<ResolverConfig>): void {
     this.config = {...this.config, ...newConfig};
   }
 
   /**
-   * Get the component for a given question type
+   * Resolve a question to component key and props
+   * This is the main method - it returns what component to use and the props for it
    */
-  getComponent(
-    question: BleakQuestion,
+  resolve(
+    question: Question,
     value: string,
     onChange: (value: string) => void,
     questionIndex?: number
-  ): {
-    Component: any;
-    props: QuestionComponentProps;
-  } {
+  ): ComponentResolution {
     const {type, options} = question;
     const normalizedType = type.toLowerCase();
 
     // Normalize null options to undefined for better compatibility
     const normalizedOptions = options === null ? undefined : options;
 
-    // Get the component for this type
-    const Component = this.config.components[normalizedType];
-    const componentName = Component?.name || "Unknown";
+    // Get the component key for this type
+    const componentKey = this.config.components[normalizedType];
 
     // Handle logging
-    if (Component && this.config.logger?.onComponentRender) {
-      this.config.logger.onComponentRender(type, componentName, questionIndex);
+    if (componentKey && this.config.logger?.onResolve) {
+      this.config.logger.onResolve(type, componentKey, questionIndex);
     } else if (
-      !Component &&
+      !componentKey &&
       this.config.logger?.onFallback &&
       this.config.fallbackComponent
     ) {
       this.config.logger.onFallback(
         type,
-        this.config.fallbackComponent.name || "Fallback",
+        this.config.fallbackComponent,
         "Type not found in registry"
       );
     }
 
     // Use fallback component if no component found
-    const FinalComponent = Component || this.config.fallbackComponent;
+    const finalComponentKey = componentKey || this.config.fallbackComponent;
 
-    if (!FinalComponent) {
+    if (!finalComponentKey) {
       throw new Error(
         `No component found for type "${type}" and no fallback component provided`
       );
@@ -116,7 +117,7 @@ export class BleakRenderer {
     }
 
     // Build component props
-    const componentProps: QuestionComponentProps = {
+    const componentProps: QuestionProps = {
       question: question.question,
       value,
       onChange,
@@ -125,7 +126,8 @@ export class BleakRenderer {
     };
 
     return {
-      Component: FinalComponent,
+      type: normalizedType,
+      componentKey: finalComponentKey,
       props: componentProps
     };
   }

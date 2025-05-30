@@ -1,12 +1,9 @@
 import {defineConfig} from "vite";
-import react from "@vitejs/plugin-react";
 import dts from "vite-plugin-dts";
 import {resolve} from "path";
-import {fileURLToPath, URL} from "node:url";
 
 export default defineConfig({
   plugins: [
-    react(),
     dts({
       insertTypesEntry: true
     })
@@ -14,17 +11,14 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, "src/index.ts"),
-      name: "BleakAI",
+      name: "BleakAICore",
       formats: ["es", "umd"],
-      fileName: (format) => `bleakai.${format}.js`
+      fileName: (format) => `index.${format}.js`
     },
     rollupOptions: {
-      external: ["react", "react-dom"],
+      external: [],
       output: {
-        globals: {
-          react: "React",
-          "react-dom": "ReactDOM"
-        }
+        globals: {}
       }
     },
     sourcemap: true

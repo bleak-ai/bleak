@@ -1,166 +1,387 @@
-# BleakAI - Dynamic Question Renderer Library
+# @bleakai/core - Framework-Agnostic Question Component Resolver
 
-A simple, straightforward React library for rendering dynamic question components. Define your question types once and use them directly in both React frontend and API backend.
+A truly framework-agnostic library that handles the **logic** of determining which component to use for dynamic questions. No rendering, no framework dependencies - just pure component resolution logic.
 
-## Features
+## 🌟 Features
 
-- 🎯 **Simple**: Just define your components and descriptions - no complex setup
-- 🔄 **Dynamic Rendering**: Automatically render the right component based on question type
-- 🌍 **Framework Agnostic**: Works with any React components
-- 🚀 **Backend Ready**: Use descriptions directly in your API/AI prompting
-- 📝 **TypeScript Support**: Full type safety and IntelliSense
-- 🪝 **React Hooks**: Easy-to-use hooks for state management
+- **Zero Framework Dependencies**: Works with React, Vue, Angular, Svelte, plain JS, anything
+- **Pure Logic**: Only handles component selection - you handle rendering
+- **Type Safe**: Full TypeScript support
+- **Tiny**: Minimal bundle size with no framework bloat
+- **Intuitive**: Simple API that's easy to understand and use
 
-## Installation
+## 📦 Installation
 
 ```bash
-npm install bleakai
+npm install @bleakai/core
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
-### 1. Define Your Question Configuration
+### The Core Concept
 
-```tsx
-import React from "react";
-import {type QuestionConfig} from "bleakai";
+1. **Define your config** following the library's type structure (single source of truth)
+2. **Use the library's helper** to create a resolver from your config
+3. **Get components and props** directly - no manual mapping needed!
 
-// Your custom components (use any React components!)
-const MyTextInput = ({question, value, onChange}) => (
-  <div>
-    <label>{question}</label>
-    <input value={value} onChange={(e) => onChange(e.target.value)} />
-  </div>
-);
+```typescript
+import {createResolverFromConfig, type QuestionConfig} from "@bleakai/core";
+import {TextInput, RadioGroup, TextArea} from "./my-components";
 
-const MyRadioGroup = ({question, options, value, onChange}) => (
-  <div>
-    <label>{question}</label>
-    {options?.map((option, index) => (
-      <label key={index}>
-        <input
-          type="radio"
-          value={option}
-          checked={value === option}
-          onChange={(e) => onChange(e.target.value)}
-        />
-        {option}
-      </label>
-    ))}
-  </div>
-);
-
-// Simple configuration - define once, use everywhere
-export const QUESTION_CONFIG = {
+// 1. Define your config - enforced by library types!
+const QUESTION_CONFIG = {
   text: {
-    component: MyTextInput,
-    description:
-      "Use for text input fields where users type free-form responses"
+    component: TextInput,
+    description: "Use for open-ended text input"
   },
   radio: {
-    component: MyRadioGroup,
-    description: "Use for single-choice questions with predefined options"
+    component: RadioGroup,
+    description: "Use for single choice from options"
+  },
+  textarea: {
+    component: TextArea,
+    description: "Use for longer text input"
   }
 } satisfies QuestionConfig;
+
+// 2. Create resolver from config (super smooth!)
+const {resolve} = createResolverFromConfig(QUESTION_CONFIG);
+
+// 3. Use it - get Component and props directly!
+function DynamicQuestion({question, value, onChange}) {
+  const {Component, props} = resolve(question, value, onChange);
+  return <Component {...props} />;
+}
 ```
 
-### 2. Use in React (Frontend)
+### Why This Approach Rocks
+
+✅ **Single source of truth** - your config defines everything  
+✅ **Type enforced** - library ensures you follow the right structure  
+✅ **No manual mapping** - library handles component resolution  
+✅ **Framework agnostic** - same pattern works everywhere
+
+## 🎯 Framework Examples
+
+### React
 
 ```tsx
-// Extract components directly from your config
-import {DynamicQuestionRenderer} from "bleakai";
+import {createResolver} from "@bleakai/core";
+import {TextInput, RadioGroup, TextArea} from "./my-components";
 
-export const QUESTION_COMPONENTS = {
-  text: QUESTION_CONFIG.text.component,
-  radio: QUESTION_CONFIG.radio.component
+// Your component registry
+const components = {
+  TextInput,
+  RadioGroup,
+  TextArea
 };
 
-function App() {
-  const [answers, setAnswers] = useState({});
+// Component map for the resolver
+const componentMap = {
+  text: "TextInput",
+  radio: "RadioGroup",
+  textarea: "TextArea"
+};
 
-  const questions = [
-    {type: "text", question: "What is your name?"},
-    {
-      type: "radio",
-      question: "What is your experience level?",
-      options: ["Beginner", "Intermediate", "Advanced"]
-    }
-  ];
+function DynamicQuestion({question, value, onChange}) {
+  const resolver = createResolver(componentMap);
+  const {componentKey, props} = resolver.resolve(question, value, onChange);
+
+  // Get the actual component from your registry
+  const Component = components[componentKey];
+
+  return <Component {...props} />;
+}
+
+// Usage
+function App() {
+  const [value, setValue] = useState("");
+  const question = {type: "text", question: "Enter your name:"};
 
   return (
-    <div>
-      {questions.map((question, index) => (
-        <div key={index}>
-          <DynamicQuestionRenderer
-            config={rendererConfig}
-            question={{
-              type: question.type,
-              question: question.question,
-              options: question.options || undefined
-            }}
-            value={answers[question.question] || ""}
-            onChange={(value) => onAnswerChange(question.question, value)}
-            questionIndex={index}
-          />
-        </div>
-      ))}
-    </div>
+    <DynamicQuestion question={question} value={value} onChange={setValue} />
   );
 }
 ```
 
-### 3. Use with Backend/API
+### Vue
 
-```tsx
-// Extract descriptions directly from your config
-export const BLEAK_ELEMENTS = [
-  {name: "text", description: QUESTION_CONFIG.text.description},
-  {name: "radio", description: QUESTION_CONFIG.radio.description}
-];
+```vue
+<template>
+  <component :is="resolvedComponent" v-bind="resolvedProps" />
+</template>
 
-// Send to your backend for AI prompting
-const startAISession = async (prompt: string) => {
-  const response = await fetch("/api/start-session", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({
-      prompt,
-      questionTypes: BLEAK_ELEMENTS // AI knows about your question types!
-    })
-  });
+<script setup>
+import {computed} from "vue";
+import {createResolver} from "@bleakai/core";
+import TextInput from "./TextInput.vue";
+import RadioGroup from "./RadioGroup.vue";
 
-  return response.json();
+const props = defineProps(["question", "value", "onChange"]);
+
+// Your component registry
+const components = {
+  TextInput,
+  RadioGroup
 };
 
-// The AI will generate questions using your exact question types:
-// { "type": "text", "question": "What's your name?" }
-// { "type": "radio", "question": "Experience?", "options": ["Beginner", "Expert"] }
+// Component map
+const componentMap = {
+  text: "TextInput",
+  radio: "RadioGroup"
+};
+
+const resolver = createResolver(componentMap);
+
+const resolved = computed(() =>
+  resolver.resolve(props.question, props.value, props.onChange)
+);
+
+const resolvedComponent = computed(
+  () => components[resolved.value.componentKey]
+);
+const resolvedProps = computed(() => resolved.value.props);
+</script>
 ```
 
-## Why This Approach?
+### Vanilla JavaScript
 
-- **No Magic**: Everything is explicit and clear
-- **No Functions**: No complex conversion functions to learn
-- **Direct Access**: Use `.component` and `.description` directly from your config
-- **Simple**: Define once, extract what you need where you need it
-- **Framework Agnostic**: No forced dependencies
+```javascript
+import {createResolver} from "@bleakai/core";
 
-## Component Props Interface
+// Your component factory functions
+const components = {
+  TextInput: (props) => {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = props.value;
+    input.placeholder = props.question;
+    input.addEventListener("input", (e) => props.onChange(e.target.value));
+    return input;
+  },
 
-All your components should accept these props:
+  RadioGroup: (props) => {
+    const container = document.createElement("div");
+    container.innerHTML = `<label>${props.question}</label>`;
 
-```tsx
-interface QuestionComponentProps {
+    props.options?.forEach((option) => {
+      const label = document.createElement("label");
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.value = option;
+      radio.checked = props.value === option;
+      radio.addEventListener("change", () => props.onChange(option));
+
+      label.appendChild(radio);
+      label.appendChild(document.createTextNode(option));
+      container.appendChild(label);
+    });
+
+    return container;
+  }
+};
+
+// Component map
+const componentMap = {
+  text: "TextInput",
+  radio: "RadioGroup"
+};
+
+// Usage
+function renderQuestion(targetElement, question, value, onChange) {
+  const resolver = createResolver(componentMap);
+  const {componentKey, props} = resolver.resolve(question, value, onChange);
+
+  // Get the factory function and create the element
+  const factory = components[componentKey];
+  const element = factory(props);
+
+  targetElement.innerHTML = "";
+  targetElement.appendChild(element);
+}
+
+// Example usage
+const targetEl = document.getElementById("question-container");
+const question = {type: "text", question: "Enter your email:"};
+renderQuestion(targetEl, question, "", (value) => console.log("Value:", value));
+```
+
+## 🎨 Advanced Usage
+
+### Batch Processing
+
+```typescript
+import {resolveQuestions} from "@bleakai/core";
+
+const questions = [
+  {type: "text", question: "Name?"},
+  {type: "radio", question: "Experience?", options: ["Beginner", "Expert"]}
+];
+
+const values = {"Name?": "John", "Experience?": "Expert"};
+
+const resolved = resolveQuestions(
+  questions,
+  values,
+  (questionText, value) => console.log(questionText, "=", value),
+  {text: "TextInput", radio: "RadioGroup"}
+);
+
+// Now render each resolved component in your framework
+resolved.forEach(({componentKey, props}, index) => {
+  // Your rendering logic here
+});
+```
+
+### Custom Resolver with Options
+
+```typescript
+import {QuestionResolver} from "@bleakai/core";
+
+const resolver = new QuestionResolver({
+  components: {
+    text: "TextInput",
+    radio: "RadioGroup",
+    slider: "SliderInput"
+  },
+  fallbackComponent: "TextInput",
+  shouldHaveOptions: (type) => ["radio", "select"].includes(type),
+  getDefaultOptions: (type) => (type === "radio" ? ["Yes", "No"] : []),
+  logger: {
+    onResolve: (type, componentKey) =>
+      console.log(`Resolved ${type} to ${componentKey}`),
+    onFallback: (type, fallback, reason) =>
+      console.warn(`Fallback for ${type}: ${reason}`)
+  }
+});
+
+const result = resolver.resolve(
+  {type: "unknown", question: "Test?"},
+  "",
+  () => {}
+);
+// Will use fallback component
+```
+
+## 🔧 API Reference
+
+### Types
+
+```typescript
+interface Question {
+  type: string;
+  question: string;
+  options?: string[] | null;
+}
+
+interface QuestionProps {
   question: string;
   value: string;
   onChange: (value: string) => void;
-  options?: string[]; // Only for components that need options
-  [key: string]: any; // Additional custom props
+  questionIndex?: number;
+  options?: string[];
 }
+
+interface ComponentResolution {
+  type: string;
+  componentKey: string;
+  props: QuestionProps;
+}
+```
+
+### Functions
+
+- `createResolver(componentMap, options?)` - Quick resolver setup
+- `resolveQuestion(question, value, onChange, componentMap)` - One-off resolution
+- `resolveQuestions(questions, values, onChange, componentMap)` - Batch resolution
+- `createStandardComponentMap(customComponents?)` - Helper for common component types
+
+### Classes
+
+- `QuestionResolver` - Main resolver class with full configuration options
+
+## 🛠️ Local Development & Testing
+
+### Building and Linking Locally
+
+If you want to test local changes to this library in your project:
+
+1. **Build the library:**
+
+   ```bash
+   cd library
+   npm run build
+   ```
+
+2. **Create a local npm link:**
+
+   ```bash
+   npm link
+   ```
+
+3. **In your project, link to the local version:**
+
+   ```bash
+   cd your-project
+   npm link @bleakai/core
+   ```
+
+4. **After making changes, rebuild and test:**
+   ```bash
+   cd library
+   npm run build
+   # Changes will be automatically available in your linked project
+   ```
+
+### Testing the Build
+
+To test that the library builds correctly and all exports work:
+
+```bash
+cd library
+npm run build
+npm run test  # If you have tests set up
+```
+
+### Unlinking
+
+When you're done with local development:
+
+```bash
+# In your project
+npm unlink @bleakai/core
+
+# In the library
+npm unlink
+
+# Then reinstall the published version
+cd your-project
+npm install @bleakai/core
 ```
 
 ### Development Workflow
 
-1. Make changes to the library
-2. Run `npm run dev` to watch and rebuild
-3. Test changes immediately in your linked project
+1. Make changes to the library code
+2. Run `npm run build` in the library directory
+3. Test in your linked project
+4. Repeat until satisfied
+5. Commit and publish when ready
+
+### Common Issues
+
+- **Changes not reflecting**: Make sure to rebuild (`npm run build`) after code changes
+- **Type errors**: Ensure TypeScript is generating declaration files correctly
+- **Import errors**: Check that the `package.json` exports are configured properly
+
+## 💡 Why This Approach?
+
+1. **True Framework Agnostic**: No framework dependencies at all
+2. **Separation of Concerns**: Logic vs. rendering are completely separate
+3. **Lightweight**: Tiny bundle size
+4. **Flexible**: Use any component library, any rendering approach
+5. **Type Safe**: Full TypeScript support
+6. **Intuitive**: Easy to understand and debug
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.

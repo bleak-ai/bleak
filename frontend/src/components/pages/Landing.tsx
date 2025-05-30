@@ -3,7 +3,7 @@ import {Button} from "../ui/button";
 import {Input} from "../ui/input";
 import {Card, CardContent} from "../ui/card";
 import {Badge} from "../ui/badge";
-import {Avatar, AvatarFallback, AvatarImage} from "../ui/avatar";
+import {Avatar, AvatarFallback} from "../ui/avatar";
 import {
   ArrowRight,
   Code,

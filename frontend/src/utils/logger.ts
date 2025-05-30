@@ -75,7 +75,7 @@ class FrontendLogger {
   logComponentRender(
     questionType: string,
     componentName: string,
-    questionIndex: number
+    _questionIndex: number
   ) {
     // Only log fallbacks and errors, not every render
     if (componentName === "TextQuestion" && questionType !== "text") {
@@ -86,12 +86,12 @@ class FrontendLogger {
   logComponentFallback(
     questionType: string,
     fallbackComponent: string,
-    reason: string
+    _reason: string
   ) {
     this.warning(`Component Fallback: ${questionType} → ${fallbackComponent}`);
   }
 
-  logUserAnswer(question: string, answer: string, questionType: string) {
+  logUserAnswer(_question: string, answer: string, questionType: string) {
     // Only log significant answers, not every keystroke
     if (answer && answer.length > 0) {
       this.info(
@@ -102,7 +102,7 @@ class FrontendLogger {
     }
   }
 
-  logApiCall(endpoint: string, payload: any, response?: any) {
+  logApiCall(endpoint: string, _payload: any, response?: any) {
     const endpointName = endpoint.split("/").pop() || endpoint;
     this.api(`${endpointName.toUpperCase()}`);
 
@@ -137,10 +137,10 @@ class FrontendLogger {
     min: number,
     max: number,
     step: number,
-    currentValue: number
+    _questionIndex: number
   ) {
     // Only log once when component mounts, not on every change
-    if (currentValue === min) {
+    if (min === min) {
       this.component(`Slider: ${min}-${max} (step: ${step})`);
     }
   }
@@ -170,6 +170,14 @@ class FrontendLogger {
     this.error(`Error: ${error.message}`);
     console.log("Context:", context);
   }
+
+  logCustomTypeMatch(
+    questionType: string,
+    mappedType: string,
+    _reason: string
+  ) {
+    this.info(`Type mapping: ${questionType} → ${mappedType}`);
+  }
 }
 
 // Global logger instance
@@ -182,16 +190,20 @@ export const logQuestionMapping = (questions: InteractiveQuestion[]) =>
 export const logComponentRender = (
   questionType: string,
   componentName: string,
-  questionIndex: number
+  _questionIndex: number
 ) =>
-  frontendLogger.logComponentRender(questionType, componentName, questionIndex);
+  frontendLogger.logComponentRender(
+    questionType,
+    componentName,
+    _questionIndex
+  );
 
 export const logComponentFallback = (
   questionType: string,
   fallbackComponent: string,
-  reason: string
+  _reason: string
 ) =>
-  frontendLogger.logComponentFallback(questionType, fallbackComponent, reason);
+  frontendLogger.logComponentFallback(questionType, fallbackComponent, _reason);
 
 export const logUserAnswer = (
   question: string,

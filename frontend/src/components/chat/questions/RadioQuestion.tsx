@@ -2,7 +2,7 @@ import {useState} from "react";
 import {Label} from "../../ui/label";
 import {RadioGroup, RadioGroupItem} from "../../ui/radio-group";
 import {Input} from "../../ui/input";
-import type {QuestionComponentProps} from "bleakai";
+import type {QuestionProps} from "@bleakai/core";
 
 export const RadioQuestion = ({
   question,
@@ -10,7 +10,7 @@ export const RadioQuestion = ({
   value,
   onChange,
   questionIndex
-}: QuestionComponentProps) => {
+}: QuestionProps) => {
   const [otherValue, setOtherValue] = useState("");
   const isOtherSelected =
     value === "other" || (!options.includes(value) && value !== "");
@@ -42,7 +42,7 @@ export const RadioQuestion = ({
         onValueChange={handleRadioChange}
         className="space-y-3"
       >
-        {options.map((option, optIndex) => (
+        {options.map((option: string, optIndex: number) => (
           <div
             key={optIndex}
             className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors"
