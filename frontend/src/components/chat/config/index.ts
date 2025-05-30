@@ -1,2 +1,2 @@
-export {QuestionConfigEditor} from "./BleakConfigEditor";
-export type {CustomQuestionConfig} from "./BleakConfigEditor";
+export {BleakElementConfigEditor} from "./BleakConfigEditor";
+export type {CustomBleakElementConfig} from "./BleakConfigEditor";

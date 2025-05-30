@@ -6,7 +6,7 @@ import type {
   AnsweredQuestion
 } from "../../../api/interactiveApi";
 import {BLEAK_ELEMENT_CONFIG} from "../../../config/bleakConfig";
-import type {CustomQuestionConfig} from "../config/BleakConfigEditor";
+import type {CustomBleakElementConfig} from "../config/BleakConfigEditor";
 
 interface BleakElementsSectionProps {
   questions: InteractiveQuestion[];
@@ -18,7 +18,7 @@ interface BleakElementsSectionProps {
   previousAnswers?: AnsweredQuestion[];
   noMoreQuestionsAvailable?: boolean;
   noMoreQuestionsMessage?: string;
-  customConfig?: CustomQuestionConfig | null;
+  customConfig?: CustomBleakElementConfig | null;
 }
 
 // Helper component to render individual bleak elements - much simpler now!
@@ -57,7 +57,7 @@ function DynamicBleakElement({
   return <Component {...props} />;
 }
 
-export const BleakElementsSection = ({
+export const QuestionsSection = ({
   questions,
   answers,
   onAnswerChange,
@@ -163,7 +163,3 @@ export const BleakElementsSection = ({
     </div>
   );
 };
-
-// Legacy alias for backwards compatibility
-/** @deprecated Use BleakElementsSection instead */
-export const QuestionsSection = BleakElementsSection;

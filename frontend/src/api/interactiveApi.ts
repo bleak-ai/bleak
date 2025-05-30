@@ -1,7 +1,7 @@
 import axios from "axios";
 import {z} from "zod";
 import {logApiCall, logSessionFlow} from "../utils/logger";
-import {QUESTION_TYPES, BLEAK_ELEMENTS} from "../config/bleakConfig";
+import {BLEAK_ELEMENT_TYPES, BLEAK_ELEMENTS} from "../config/bleakConfig";
 
 // API Base URL
 const API_BASE_URL = "http://0.0.0.0:8008";
@@ -9,7 +9,7 @@ const API_BASE_URL = "http://0.0.0.0:8008";
 // Dynamic question schema that can handle any type
 const InteractiveQuestionSchema = z.object({
   question: z.string(),
-  type: z.enum(QUESTION_TYPES as [string, ...string[]]), // Fix enum conversion
+  type: z.enum(BLEAK_ELEMENT_TYPES as [string, ...string[]]), // Fix enum conversion
   options: z.array(z.string()).nullish().optional() // Make it truly optional, not nullable
 });
 

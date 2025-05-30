@@ -1,17 +1,16 @@
 import {useState} from "react";
 import {SimpleInteractive} from "../chat/interactive/SimpleInteractive";
 import {
-  QuestionConfigEditor,
-  type CustomQuestionConfig
+  BleakElementConfigEditor,
+  type CustomBleakElementConfig
 } from "../chat/config/BleakConfigEditor";
 
 const ChatPage = () => {
-  const [customConfig, setCustomConfig] = useState<CustomQuestionConfig | null>(
-    null
-  );
+  const [customConfig, setCustomConfig] =
+    useState<CustomBleakElementConfig | null>(null);
   const [isConfigCollapsed, setIsConfigCollapsed] = useState(true);
 
-  const handleConfigChange = (config: CustomQuestionConfig) => {
+  const handleConfigChange = (config: CustomBleakElementConfig) => {
     setCustomConfig(config);
   };
 
@@ -77,7 +76,7 @@ const ChatPage = () => {
 
         {/* Question Configuration Editor */}
         <div className="mb-8">
-          <QuestionConfigEditor
+          <BleakElementConfigEditor
             onConfigChange={handleConfigChange}
             isCollapsed={isConfigCollapsed}
             onToggleCollapse={handleToggleCollapse}

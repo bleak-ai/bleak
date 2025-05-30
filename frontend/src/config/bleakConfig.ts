@@ -48,11 +48,3 @@ export const BLEAK_ELEMENT_TYPES = Object.keys(BLEAK_ELEMENT_CONFIG) as Array<
 
 // Type exports - derived from the config
 export type BleakElementType = keyof typeof BLEAK_ELEMENT_CONFIG;
-
-// Legacy aliases for backwards compatibility
-/** @deprecated Use BLEAK_ELEMENT_CONFIG instead */
-export const QUESTION_CONFIG = BLEAK_ELEMENT_CONFIG;
-/** @deprecated Use BLEAK_ELEMENT_TYPES instead */
-export const QUESTION_TYPES = BLEAK_ELEMENT_TYPES;
-/** @deprecated Use BleakElementType instead */
-export type QuestionType = BleakElementType;

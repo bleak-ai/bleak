@@ -11,10 +11,10 @@ import {PromptForm} from "../utils/PromptForm";
 import {QuestionsSection} from "../questions/QuestionsSection";
 import {AnswerSection} from "../utils/AnswerSection";
 import {ErrorDisplay} from "../utils/ErrorDisplay";
-import type {CustomQuestionConfig} from "../config/BleakConfigEditor";
+import type {CustomBleakElementConfig} from "../config/BleakConfigEditor";
 
 interface SimpleInteractiveProps {
-  customConfig?: CustomQuestionConfig | null;
+  customConfig?: CustomBleakElementConfig | null;
 }
 
 export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {

@@ -23,7 +23,7 @@ A beautiful, interactive UI component that allows users to customize how AI gene
 
 ### 1. **Configuration Interface**
 
-The `QuestionConfigEditor` component appears above the chat interface with:
+The `BleakElementConfigEditor` component appears above the chat interface with:
 
 - **Card Grid**: Four question types displayed as interactive cards
 - **Visual Status**: Enabled/disabled states clearly indicated
@@ -51,18 +51,17 @@ When a user starts a chat session:
 
 ```tsx
 import {
-  QuestionConfigEditor,
-  type CustomQuestionConfig
+  BleakElementConfigEditor,
+  type CustomBleakElementConfig
 } from "./components/chat/config";
 
 function MyApp() {
-  const [customConfig, setCustomConfig] = useState<CustomQuestionConfig | null>(
-    null
-  );
+  const [customConfig, setCustomConfig] =
+    useState<CustomBleakElementConfig | null>(null);
 
   return (
     <div>
-      <QuestionConfigEditor
+      <BleakElementConfigEditor
         onConfigChange={setCustomConfig}
         isCollapsed={false}
         onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
@@ -120,7 +119,7 @@ function MyApp() {
 ### Enable Only Text Questions
 
 ```typescript
-const textOnlyConfig: CustomQuestionConfig = {
+const textOnlyConfig: CustomBleakElementConfig = {
   text: {
     name: "Open Question",
     description:
@@ -136,7 +135,7 @@ const textOnlyConfig: CustomQuestionConfig = {
 ### Custom Survey Setup
 
 ```typescript
-const surveyConfig: CustomQuestionConfig = {
+const surveyConfig: CustomBleakElementConfig = {
   text: {
     name: "Feedback",
     description: "Use for detailed explanations and qualitative insights",
@@ -156,7 +155,7 @@ const surveyConfig: CustomQuestionConfig = {
 
 ### Components
 
-- **`QuestionConfigEditor`**: Main card-based configuration interface
+- **`BleakElementConfigEditor`**: Main card-based configuration interface
 - **`SimpleInteractive`**: Updated to accept custom config
 - **`QuestionsSection`**: Shows active question types
 - **Modal Dialog**: Shadcn dialog for editing experience
