@@ -134,7 +134,7 @@ export const BleakElementConfigEditor: React.FC<
   if (isCollapsed) {
     return (
       <Card
-        className="bg-white/5 border-white/10 cursor-pointer"
+        className="bg-white/5 border-white/10 cursor-pointer max-w-4xl w-full"
         onClick={onToggleCollapse}
       >
         <div className="p-4">
@@ -166,7 +166,7 @@ export const BleakElementConfigEditor: React.FC<
   return (
     <>
       <Card
-        className="bg-white/5 border-white/10 cursor-pointer"
+        className="bg-white/5 border-white/10 cursor-pointer max-w-4xl w-full"
         onClick={onToggleCollapse}
       >
         <div className="p-6">

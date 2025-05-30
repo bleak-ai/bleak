@@ -75,7 +75,7 @@ const ChatPage = () => {
         </div>
 
         {/* Question Configuration Editor */}
-        <div className="mb-8">
+        <div className="mb-8 flex items-center justify-center">
           <BleakElementConfigEditor
             onConfigChange={handleConfigChange}
             isCollapsed={isConfigCollapsed}
