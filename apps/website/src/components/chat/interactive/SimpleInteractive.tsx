@@ -283,17 +283,6 @@ export const SimpleInteractive = ({
     <div className="flex flex-col min-h-[calc(100vh-80px)]">
       {/* Conversation History */}
       <div className="flex-1 p-6 space-y-8 overflow-y-auto max-w-4xl mx-auto w-full">
-        {/* API Key Input - only if no API key */}
-        {!apiKey && (
-          <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
-            <ApiKeyInput
-              onApiKeyChange={setApiKey}
-              required={false}
-              error={apiKeyError}
-            />
-          </div>
-        )}
-
         {/* Questions */}
         {questions.length > 0 && (
           <div>

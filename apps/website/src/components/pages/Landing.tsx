@@ -20,7 +20,6 @@ export default function Landing() {
                 </div>
               </div>
             </div>
-            <div className="w-24 h-0.5 bg-neutral-900 mx-auto"></div>
           </div>
 
           {/* Core Message */}

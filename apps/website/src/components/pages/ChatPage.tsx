@@ -140,10 +140,10 @@ const ChatPage = () => {
 
               {/* API Key Input */}
               <div className="w-full max-w-2xl mx-auto">
+                <h3 className="text-lg font-medium text-neutral-900 mb-4 text-center">
+                  Step 1: Enter your OpenAI API Key
+                </h3>
                 <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-6">
-                  <h3 className="text-lg font-medium text-neutral-900 mb-4 text-center">
-                    Step 1: Enter your OpenAI API Key
-                  </h3>
                   <ApiKeyInput
                     onApiKeyChange={handleApiKeyChange}
                     required={true}
@@ -155,12 +155,15 @@ const ChatPage = () => {
               {/* Example Prompts */}
               <div className="space-y-6">
                 <div className="text-center">
+                  <h3 className="text-lg font-medium text-neutral-900 mb-2">
+                    Step 2: Configure Components (Optional)
+                  </h3>
                   <button
                     onClick={() => setIsConfigOpen(true)}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg transition-colors text-sm font-medium"
                   >
                     <Settings className="w-4 h-4" />
-                    Step 2: Configure Components (Optional)
+                    Configure Components
                   </button>
                 </div>
 
