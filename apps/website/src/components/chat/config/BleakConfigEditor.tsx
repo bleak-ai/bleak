@@ -11,15 +11,12 @@ import {
   DialogTitle
 } from "../../ui/dialog";
 import {
-  Settings,
   Edit3,
-  Save,
   RotateCcw,
   Type,
   CheckCircle,
   List,
   BarChart3,
-  X,
   Check,
   Minus
 } from "lucide-react";
@@ -36,7 +33,6 @@ export interface CustomBleakElementConfig {
 interface BleakElementConfigEditorProps {
   onConfigChange: (config: CustomBleakElementConfig) => void;
   isCollapsed?: boolean;
-  onToggleCollapse?: () => void;
 }
 
 const BLEAK_ELEMENT_ICONS = {
@@ -48,7 +44,7 @@ const BLEAK_ELEMENT_ICONS = {
 
 export const BleakElementConfigEditor: React.FC<
   BleakElementConfigEditorProps
-> = ({onConfigChange, isCollapsed = false, onToggleCollapse}) => {
+> = ({onConfigChange, isCollapsed = false}) => {
   // Initialize config from default BLEAK_ELEMENT_CONFIG
   const [config, setConfig] = useState<CustomBleakElementConfig>(() => {
     const initialConfig: CustomBleakElementConfig = {};

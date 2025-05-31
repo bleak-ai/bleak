@@ -4,15 +4,7 @@ import {
   BleakElementConfigEditor,
   type CustomBleakElementConfig
 } from "../chat/config/BleakConfigEditor";
-import {
-  Settings,
-  Sparkles,
-  MessageSquare,
-  X,
-  Key,
-  Cog,
-  Send
-} from "lucide-react";
+import {Settings, Sparkles, MessageSquare, X} from "lucide-react";
 import {Button} from "../ui/button";
 import {ApiKeyInput} from "../ApiKeyInput";
 
