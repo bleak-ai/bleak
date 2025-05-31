@@ -38,12 +38,16 @@ const DynamicBleakElement = ({
   const elementData = {
     type: question.type,
     text: question.question,
-    options: question.options || [],
-    elementIndex: questionIndex
+    options: question.options || []
   };
 
   try {
-    const {Component, props} = resolve(elementData, value, onChange);
+    const {Component, props} = resolve(
+      elementData,
+      value,
+      onChange,
+      questionIndex
+    );
     return <Component {...props} />;
   } catch (error) {
     console.error("Error resolving bleak element:", error);

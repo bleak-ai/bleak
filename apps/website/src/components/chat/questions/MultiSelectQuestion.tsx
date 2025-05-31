@@ -2,7 +2,18 @@ import {useState, useEffect, useRef} from "react";
 import {Label} from "../../ui/label";
 import {Input} from "../../ui/input";
 import {logMultiSelectState, logUserAnswer} from "../../../utils/logger";
-import type {BleakElementProps} from "bleakai";
+
+// Completely framework-agnostic props interface
+interface MultiSelectQuestionProps {
+  text?: string;
+  question?: string; // For backward compatibility
+  options?: string[];
+  value: string;
+  onChange: (value: string) => void;
+  uniqueId?: string; // Provided by the resolver for unique IDs
+  elementIndex?: number; // For fallback if uniqueId not available
+  questionIndex?: number; // For backward compatibility
+}
 
 export const MultiSelectQuestion = ({
   text,
@@ -10,12 +21,16 @@ export const MultiSelectQuestion = ({
   options = [],
   value,
   onChange,
+  uniqueId,
   elementIndex,
   questionIndex = 0
-}: BleakElementProps & {question?: string; questionIndex?: number}) => {
+}: MultiSelectQuestionProps) => {
   // Use text if available, otherwise fall back to question for backward compatibility
   const displayText = text || question || "";
-  const displayIndex = elementIndex ?? questionIndex ?? 0;
+
+  // Use uniqueId if available, otherwise fall back to elementIndex or questionIndex
+  const baseId =
+    uniqueId || `multiselect-${elementIndex ?? questionIndex ?? 0}`;
 
   const [otherValue, setOtherValue] = useState("");
   const lastLoggedValue = useRef<string>("");
@@ -96,13 +111,13 @@ export const MultiSelectQuestion = ({
           >
             <input
               type="checkbox"
-              id={`${displayIndex}-${optIndex}`}
+              id={`${baseId}-${optIndex}`}
               checked={selectedOptions.includes(option)}
               onChange={() => handleOptionToggle(option)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <Label
-              htmlFor={`${displayIndex}-${optIndex}`}
+              htmlFor={`${baseId}-${optIndex}`}
               className="cursor-pointer text-sm flex-1 leading-relaxed"
             >
               {option}
@@ -114,7 +129,7 @@ export const MultiSelectQuestion = ({
         <div className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
           <input
             type="checkbox"
-            id={`${displayIndex}-other`}
+            id={`${baseId}-other`}
             checked={otherValue.trim() !== ""}
             onChange={() => {}} // Controlled by text input
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"

@@ -294,23 +294,6 @@ export const SimpleInteractive = ({
           </div>
         )}
 
-        {/* Debug info - remove this in production */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-xs">
-            <strong>Debug Info:</strong>
-            <br />
-            Questions: {questions.length}
-            <br />
-            Thread ID: {threadId || "None"}
-            <br />
-            Loading: {isLoading ? "Yes" : "No"}
-            <br />
-            Final Answer: {finalAnswer ? "Yes" : "No"}
-            <br />
-            Error: {error?.message || "None"}
-          </div>
-        )}
-
         {/* Questions */}
         {questions.length > 0 && (
           <div>

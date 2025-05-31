@@ -1,11 +1,21 @@
 import type {
   BleakElement,
-  BleakElementProps,
   ComponentResolution,
   ComponentRegistry,
   ResolverOptions,
   BleakElementConfig
 } from "../types/core";
+
+// Internal counter for generating unique IDs
+let globalElementCounter = 0;
+
+// Generate a unique ID for an element
+function generateUniqueId(type: string, elementIndex?: number): string {
+  const timestamp = Date.now();
+  const counter = ++globalElementCounter;
+  const index = elementIndex ?? counter;
+  return `bleak-${type}-${index}-${timestamp}-${counter}`;
+}
 
 export class BleakResolver {
   private components: ComponentRegistry;
@@ -55,11 +65,15 @@ export class BleakResolver {
       options = this.options.getDefaultOptions!(element.type);
     }
 
-    // Build the props
-    const props: BleakElementProps = {
+    // Generate unique ID for this element
+    const uniqueId = generateUniqueId(element.type, elementIndex);
+
+    // Build the props - completely framework agnostic
+    const props: Record<string, any> = {
       text: element.text,
       value,
       onChange,
+      uniqueId,
       elementIndex,
       ...(options.length > 0 && {options})
     };
@@ -87,7 +101,7 @@ export function createResolverFromConfig<T extends BleakElementConfig>(
     value: string,
     onChange: (value: string) => void,
     elementIndex?: number
-  ) => ComponentResolution & {Component: T[keyof T]["component"]};
+  ) => ComponentResolution & {Component: any};
 } {
   // Extract component mapping from config
   const componentRegistry: ComponentRegistry = {};

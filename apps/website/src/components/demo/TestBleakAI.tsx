@@ -21,15 +21,24 @@ function TestQuestion({
     fallbackComponent: "radio"
   });
 
+  // Convert question format to proper BleakElement format
+  const element = {
+    type: question.type,
+    text: question.text || question.question, // Support both formats
+    options: question.options
+  };
+
   // Resolve and get the component directly
-  const {Component, props} = resolve(question, value, onChange, questionIndex);
+  const {Component, props} = resolve(element, value, onChange, questionIndex);
 
   if (!Component) {
     console.error(`No component found for question type: ${question.type}`);
     return <div>Error: Unknown question type</div>;
   }
 
-  // Clean, simple rendering
+  // Clean, simple rendering - Debug info for IDs
+  console.log(`Question ${questionIndex}: Props:`, props);
+
   return <Component {...props} />;
 }
 
@@ -39,21 +48,31 @@ export const TestBleakAI: React.FC = () => {
   const testQuestions = [
     {
       type: "text",
-      question: "What's your company name?"
+      text: "What's your company name?"
     },
     {
       type: "radio",
-      question: "What's your business size?",
+      text: "What's your business size?",
       options: ["Small (1-10)", "Medium (11-50)", "Large (50+)"]
     },
     {
+      type: "radio",
+      text: "What's your industry?",
+      options: ["Technology", "Healthcare", "Finance", "Retail"]
+    },
+    {
+      type: "radio",
+      text: "What's your priority?",
+      options: ["Cost", "Quality", "Speed", "Features"]
+    },
+    {
       type: "multi_select",
-      question: "Which features do you need?",
+      text: "Which features do you need?",
       options: ["Analytics", "Reporting", "Integration", "Support"]
     },
     {
       type: "slider",
-      question: "What's your budget range? (in thousands)",
+      text: "What's your budget range? (in thousands)",
       options: ["1", "100"]
     }
   ];
@@ -79,7 +98,8 @@ export const TestBleakAI: React.FC = () => {
       <Card className="p-6">
         <h1 className="text-2xl font-bold mb-4">BleakAI Test Form</h1>
         <p className="text-muted-foreground mb-6">
-          Test the question rendering system with various question types.
+          Test the question rendering system with multiple radio questions to
+          verify unique ID generation.
         </p>
 
         <div className="space-y-6">
@@ -87,9 +107,9 @@ export const TestBleakAI: React.FC = () => {
             <div key={index}>
               <TestQuestion
                 question={question}
-                value={answers[question.question] || ""}
+                value={answers[question.text] || ""}
                 onChange={(value: string) =>
-                  handleAnswerChange(question.question, value)
+                  handleAnswerChange(question.text, value)
                 }
                 questionIndex={index}
               />

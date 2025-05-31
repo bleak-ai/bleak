@@ -1,6 +1,6 @@
-import React from "react";
 import {Button} from "../ui/button";
 import {ArrowRight, Palette, Layers, Zap, Github} from "lucide-react";
+import {CodeBlock} from "../ui/code-block";
 
 export default function Landing() {
   return (
@@ -191,10 +191,10 @@ export default function Landing() {
               <h3 className="text-2xl font-medium mb-6">
                 Simple Configuration
               </h3>
-              <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-1">
+              <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-6">
                 <div className="overflow-x-auto">
-                  <pre className="text-sm text-neutral-700 whitespace-pre-wrap break-words brush:python">
-                    <code>{`// Map to your existing components
+                  <CodeBlock language="typescript">
+                    {`// Map to your existing components
 const config = {
   text: {
     component: YourTextInput, 
@@ -214,8 +214,8 @@ const config = {
 const {resolve} = createResolverFromConfig(config);
 
 // Use it
-const {Component, props} = resolve(element, value, onChange);`}</code>
-                  </pre>
+const {Component, props} = resolve(element, value, onChange);`}
+                  </CodeBlock>
                 </div>
               </div>
             </div>

@@ -20,7 +20,6 @@ export {
 // Type exports - all the types users need
 export type {
   BleakElement,
-  BleakElementProps,
   ComponentResolution,
   ComponentRegistry,
   ResolverOptions,
@@ -29,3 +28,6 @@ export type {
   BleakElementType,
   ComponentType
 } from "./types/core";
+
+// Legacy export for backward compatibility - marked as deprecated
+export type {BleakElementProps} from "./types/core";

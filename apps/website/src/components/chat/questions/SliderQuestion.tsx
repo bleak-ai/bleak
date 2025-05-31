@@ -1,7 +1,15 @@
 import {Label} from "../../ui/label";
 import {logSliderConfig, logUserAnswer} from "../../../utils/logger";
 import {useEffect, useRef} from "react";
-import type {BleakElementProps} from "bleakai";
+
+// Completely framework-agnostic props interface
+interface SliderQuestionProps {
+  text?: string;
+  question?: string; // For backward compatibility
+  options?: string[];
+  value: string;
+  onChange: (value: string) => void;
+}
 
 export const SliderQuestion = ({
   text,
@@ -9,7 +17,7 @@ export const SliderQuestion = ({
   options,
   value,
   onChange
-}: BleakElementProps & {question?: string}) => {
+}: SliderQuestionProps) => {
   // Use text if available, otherwise fall back to question for backward compatibility
   const displayText = text || question || "";
 

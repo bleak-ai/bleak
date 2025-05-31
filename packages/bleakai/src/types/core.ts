@@ -8,6 +8,10 @@ export interface BleakElement {
   options?: string[] | null;
 }
 
+// Keep BleakElementProps for backward compatibility but mark as deprecated
+/**
+ * @deprecated Use generic props instead. UI components should be framework-agnostic.
+ */
 export interface BleakElementProps {
   text: string;
   value: string;
@@ -19,7 +23,7 @@ export interface BleakElementProps {
 export interface ComponentResolution {
   type: string;
   componentKey: string;
-  props: BleakElementProps;
+  props: Record<string, any>;
 }
 
 export interface ComponentRegistry {

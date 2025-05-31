@@ -1,6 +1,6 @@
 {
   "name": "bleakai",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Framework-agnostic dynamic bleak element component resolver",
   "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
