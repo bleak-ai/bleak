@@ -69,7 +69,7 @@ const ChatPage = () => {
               <div className="mb-6">
                 <p className="text-sm text-neutral-600 leading-relaxed">
                   Configure which UI component types the AI can generate during
-                  conversations.
+                  conversations
                 </p>
               </div>
 
@@ -84,7 +84,7 @@ const ChatPage = () => {
 
       <div className="w-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-neutral-200">
+        <div className="flex items-center justify-between p-6 border-b border-neutral-200 bg-neutral-200">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-neutral-900 rounded-full flex items-center justify-center">
               <Sparkles className="w-4 h-4 text-white" />

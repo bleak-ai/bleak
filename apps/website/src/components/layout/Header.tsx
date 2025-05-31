@@ -35,7 +35,8 @@ const Header = () => {
             className="flex items-center cursor-pointer"
             onClick={() => navigateTo("")}
           >
-            <span className="text-2xl font-light tracking-tight text-neutral-900">
+            <img src="/bleaktree.png" alt="Bleak" className="w-10 h-10" />
+            <span className="text-2xl font-light tracking-tight text-neutral-900 ml-2">
               Bleak
             </span>
           </div>
