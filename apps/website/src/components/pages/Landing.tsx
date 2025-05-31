@@ -1,332 +1,277 @@
-import React, {useState, useEffect} from "react";
+import React from "react";
 import {Button} from "../ui/button";
-import {Input} from "../ui/input";
-import {Card, CardContent} from "../ui/card";
-import {Badge} from "../ui/badge";
-import {Avatar, AvatarFallback} from "../ui/avatar";
-import {
-  ArrowRight,
-  Code,
-  Zap,
-  Users,
-  Star,
-  GitBranch,
-  MessageSquare,
-  Sparkles,
-  CheckCircle,
-  Mail
-} from "lucide-react";
-import {storeEmailLocally} from "../../api/emailService";
-import Bleak from "../features/bleak";
+import {ArrowRight, Palette, Layers, Zap, Github} from "lucide-react";
 
 export default function Landing() {
-  const [showContent, setShowContent] = useState(false);
-  const [email, setEmail] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false);
-
-  useEffect(() => {
-    const contentTimer = setTimeout(() => {
-      setShowContent(true);
-    }, 800);
-
-    return () => {
-      clearTimeout(contentTimer);
-    };
-  }, []);
-
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-
-    try {
-      // For now, using localStorage. Replace with actual email service integration
-      const success = storeEmailLocally(email);
-
-      if (success) {
-        setIsSubmitted(true);
-        setEmail("");
-
-        // Reset after 3 seconds
-        setTimeout(() => setIsSubmitted(false), 3000);
-      }
-    } catch (error) {
-      console.error("Failed to submit email:", error);
-    }
-  };
-
-  const companies = [
-    {name: "Pack den Sack", initial: "P"},
-    {name: "Bjj Gym", initial: "B"},
-    {name: "Kronologs", initial: "K"}
-  ];
-
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
+    <div className="bg-white text-neutral-900">
       {/* Hero Section */}
-
-      <div className="flex items-center justify-center min-h-screen px-4 relative">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-900/5 to-rose-800/5" />
-        <div className="absolute top-20 left-10 w-72 h-72 bg-rose-900/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-rose-800/10 rounded-full blur-3xl" />
-
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          {/* Main Content */}
-          <Bleak />
-
-          <div
-            className={`transition-all duration-1000 ${
-              showContent
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-8"
-            }`}
-            id="main"
-          >
-            {/* Tagline */}
-            <div className="mb-8">
-              <Badge
-                variant="outline"
-                className="mb-6 border-white/20 text-white/80"
-              >
-                <Sparkles className="w-3 h-3 mr-1" />
-                AI responses as UI components
-              </Badge>
-
-              <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-                The{" "}
-                <span className="bg-gradient-to-r from-rose-600 to-rose-800 bg-clip-text text-transparent">
-                  Chatbot API
-                </span>
-                <br />
-                Built for Developers
-              </h2>
-
-              <p className="text-xl sm:text-2xl text-white/70 mb-8 max-w-3xl mx-auto leading-relaxed">
-                Skip the plain text. Get AI responses as ready-to-use UI
-                components that plug directly into your frontend apps.
-              </p>
-            </div>
-
-            {/* Email Capture */}
-            <div className="mb-12">
-              <form
-                onSubmit={handleEmailSubmit}
-                className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto"
-              >
-                <Input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-white/5 border-white/20 text-white placeholder:text-white/50 focus:border-rose-600"
-                  required
-                />
-                <Button
-                  type="submit"
-                  className="bg-white text-black hover:bg-white/90 font-medium px-8"
-                  disabled={isSubmitted}
-                >
-                  {isSubmitted ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Subscribed!
-                    </>
-                  ) : (
-                    <>
-                      Get Early Access
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </>
-                  )}
-                </Button>
-              </form>
-              <p className="text-sm text-white/50 mt-3">
-                Join {Math.floor(Math.random() * 500) + 1200}+ developers
-                building with Bleak
-              </p>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-              <Button
-                size="lg"
-                className="bg-rose-700 hover:bg-rose-800 text-white font-medium px-8"
-                onClick={() =>
-                  document
-                    .getElementById("demo")
-                    ?.scrollIntoView({behavior: "smooth"})
-                }
-              >
-                <Code className="w-5 h-5 mr-2" />
-                View Demo
-              </Button>
-              <Button
-                size="lg"
-                className="bg-rose-600 hover:bg-rose-700 text-white font-medium px-8"
-                onClick={() => (window.location.hash = "chat")}
-              >
-                <MessageSquare className="w-5 h-5 mr-2" />
-                Try Chat
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/20 text-white hover:bg-white/5 font-medium px-8"
-                onClick={() =>
-                  window.open("https://github.com/your-repo/bleak", "_blank")
-                }
-              >
-                <GitBranch className="w-5 h-5 mr-2" />
-                Star on GitHub
-              </Button>
-            </div>
-
-            {/* Social Proof */}
-            <div className="text-center">
-              <p className="text-sm text-white/50 mb-6">
-                Trusted by developers at
-              </p>
-              <div className="flex justify-center items-center gap-6 flex-wrap">
-                {companies.map((company, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 text-white/40 hover:text-white/60 transition-colors"
-                  >
-                    <Avatar className="w-6 h-6">
-                      <AvatarFallback className="bg-white/10 text-xs font-medium">
-                        {company.initial}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm font-medium">{company.name}</span>
-                  </div>
-                ))}
+      <section className="min-h-screen flex items-center justify-center px-6">
+        <div className="max-w-5xl mx-auto text-center">
+          {/* Brand */}
+          <div className="mb-12">
+            <div className="flex items-center justify-center">
+              <h1 className="text-7xl sm:text-8xl md:text-9xl font-light tracking-tight mb-4">
+                Bleak
+              </h1>
+              <div className={`ml-4 duration-700 ease-out `}>
+                <div className="w-16 h-16 sm:w-32 sm:h-32">
+                  <img src="/bleaktree.png" alt="" className="w-full h-full" />
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Features Section */}
-      <div
-        className={`py-24 px-4 transition-all duration-1000 delay-500 ${
-          showContent ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h3 className="text-3xl sm:text-4xl font-bold mb-4">
-              Why Choose <span className="text-rose-600">Bleak</span>?
-            </h3>
-            <p className="text-xl text-white/70 max-w-2xl mx-auto">
-              Traditional chatbots return plain text. Bleak returns interactive
-              UI components ready for production.
-            </p>
+            <div className="w-24 h-0.5 bg-neutral-900 mx-auto"></div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-rose-700/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Zap className="w-8 h-8 text-rose-600" />
-                </div>
-                <h4 className="text-xl font-bold mb-4 text-white">
-                  Instant Integration
-                </h4>
-                <p className="text-white/70">
-                  Get UI components instead of text. Copy, paste, and ship—no
-                  conversion needed.
-                </p>
-              </CardContent>
-            </Card>
+          {/* Core Message */}
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light leading-relaxed mb-8 text-neutral-700 max-w-4xl mx-auto">
+            Transform conversational AI by generating{" "}
+            <span className="text-neutral-900 font-medium">
+              structured UI components
+            </span>{" "}
+            instead of plain text responses
+          </h2>
 
-            <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-rose-700/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <MessageSquare className="w-8 h-8 text-rose-600" />
-                </div>
-                <h4 className="text-xl font-bold mb-4 text-white">
-                  Smart Responses
-                </h4>
-                <p className="text-white/70">
-                  Context-aware AI that understands your app structure and
-                  returns appropriate components.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/5 border-white/10 hover:bg-white/10 transition-all duration-300 hover:scale-105">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-rose-700/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Users className="w-8 h-8 text-rose-600" />
-                </div>
-                <h4 className="text-xl font-bold mb-4 text-white">
-                  Developer First
-                </h4>
-                <p className="text-white/70">
-                  Built by developers, for developers. Simple API, great docs,
-                  and active community.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-
-      {/* Demo Section */}
-      <div
-        id="demo"
-        className={`py-24 px-4 bg-white/5 transition-all duration-1000 delay-700 ${
-          showContent ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <div className="max-w-4xl mx-auto text-center">
-          <h3 className="text-3xl sm:text-4xl font-bold mb-8">
-            See Bleak in <span className="text-rose-600">Action</span>
-          </h3>
-
-          <Button
-            size="lg"
-            className="bg-rose-600 hover:bg-rose-700 text-white font-medium px-8"
-            onClick={() => (window.location.hash = "chat")}
-          >
-            <MessageSquare className="w-5 h-5 mr-2" />
-            Try Chat
-          </Button>
-        </div>
-      </div>
-
-      {/* Final CTA */}
-      <div
-        className={`py-24 px-4 transition-all duration-1000 delay-1000 ${
-          showContent ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        <div className="max-w-2xl mx-auto text-center">
-          <h3 className="text-3xl sm:text-4xl font-bold mb-6">
-            Ready to Build Faster?
-          </h3>
-          <p className="text-xl text-white/70 mb-8">
-            Join hundreds of developers already building with Bleak.
+          <p className="text-lg text-neutral-600 mb-16 max-w-2xl mx-auto leading-relaxed">
+            Bridge the gap between natural language processing and structured
+            data collection using your existing design systems and component
+            libraries.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Primary Actions */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-20">
             <Button
               size="lg"
-              className="bg-white text-black hover:bg-white/90 font-medium px-8"
+              className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-4 text-base font-medium"
+              onClick={() => (window.location.hash = "chat")}
             >
-              <Mail className="w-5 h-5 mr-2" />
-              Get Early Access
+              Try the Demo
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="border-white/20 text-white hover:bg-white/5 font-medium px-8"
+              className="border-neutral-300 text-neutral-900 hover:bg-neutral-50 px-8 py-4 text-base font-medium"
+              onClick={() =>
+                window.open("https://github.com/bleak-ai/bleak", "_blank")
+              }
             >
-              <Star className="w-5 h-5 mr-2" />
-              Star on GitHub
+              <Github className="w-4 h-4 mr-2" />
+              View on GitHub
+            </Button>
+          </div>
+
+          {/* Concept Preview */}
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-8">
+              <div className="grid md:grid-cols-2 gap-8 text-left">
+                <div>
+                  <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">
+                    Traditional Chatbots
+                  </h3>
+                  <div className="bg-white rounded border p-4">
+                    <p className="text-sm text-neutral-600">
+                      "What's your experience level with programming? Please
+                      choose from: Beginner, Intermediate, Advanced, Expert"
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">
+                    BleakAI Response
+                  </h3>
+
+                  <div className="bg-white rounded border p-4">
+                    <label className="text-sm font-medium text-neutral-700 mb-2 block">
+                      What's your experience level?
+                    </label>
+                    <div className="space-y-2">
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          name="experience"
+                          className="mr-2"
+                        />
+                        <span className="text-sm">Beginner</span>
+                      </div>
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          name="experience"
+                          className="mr-2"
+                          defaultChecked
+                        />
+                        <span className="text-sm">Intermediate</span>
+                      </div>
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          name="experience"
+                          className="mr-2"
+                        />
+                        <span className="text-sm">Advanced</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-neutral-600 mt-4">
+                    Here the AI model though the predefined radio component was
+                    the more suited to formulate the question.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Core Philosophy */}
+      <section className="py-32 px-6 bg-neutral-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl sm:text-5xl font-light mb-8 tracking-tight">
+            Bring Your Own Components
+          </h2>
+          <p className="text-xl text-neutral-600 mb-16 leading-relaxed">
+            BleakAI doesn't impose a specific UI framework or component library.
+            We provide the intelligence layer while you maintain complete
+            control over how components look and behave in your applications.
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-12 mb-16">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-neutral-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Palette className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-medium mb-4">Your Design System</h3>
+              <p className="text-neutral-600 leading-relaxed">
+                Use your existing custom components, design tokens, and styling
+                approach. BleakAI adapts to your established design language and
+                patterns.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-neutral-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Layers className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-medium mb-4">Framework Agnostic</h3>
+              <p className="text-neutral-600 leading-relaxed">
+                Works seamlessly with React, Vue, Angular, or any custom
+                implementation. Pure logic, no framework dependencies.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-neutral-900 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Zap className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-medium mb-4">Simple Integration</h3>
+              <p className="text-neutral-600 leading-relaxed">
+                Map BleakAI element types to your components with a simple
+                configuration object. No refactoring required.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Component Mapping Examples */}
+      <section className="py-32 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl sm:text-5xl font-light mb-8 tracking-tight">
+              Use Your Existing Components
+            </h2>
+            <p className="text-xl text-neutral-600 leading-relaxed">
+              BleakAI provides the intelligence, you provide the presentation.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
+            <div className="text-left">
+              <h3 className="text-2xl font-medium mb-6">
+                Simple Configuration
+              </h3>
+              <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-1">
+                <div className="overflow-x-auto">
+                  <pre className="text-sm text-neutral-700 whitespace-pre-wrap break-words brush:python">
+                    <code>{`// Map to your existing components
+const config = {
+  text: {
+    component: YourTextInput, 
+    description: "Use Text Input this for free-form text input"
+  },
+  radio: {
+    component: YourRadioGroup, 
+    description: "Use Radio Group this for single-choice elements with 2-5 predefined options"
+  },
+  slider: {
+    component: YourSlider, 
+    description: "Use Slider this for numeric input, ratings, scales, or range selections"
+  }
+};
+
+// Create resolver
+const {resolve} = createResolverFromConfig(config);
+
+// Use it
+const {Component, props} = resolve(element, value, onChange);`}</code>
+                  </pre>
+                </div>
+              </div>
+            </div>
+
+            <div className="text-left">
+              <h3 className="text-2xl font-medium mb-6">Your Components</h3>
+              <div className="space-y-6">
+                <div className="border border-neutral-200 rounded-lg p-6">
+                  <h4 className="font-medium mb-2">Custom Design System</h4>
+                  <p className="text-neutral-600 text-sm">
+                    Your own TextInput, RadioGroup, Slider, Select components
+                    with your styling
+                  </p>
+                </div>
+                <div className="border border-neutral-200 rounded-lg p-6">
+                  <h4 className="font-medium mb-2">Existing UI Library</h4>
+                  <p className="text-neutral-600 text-sm">
+                    Material-UI, Ant Design, Chakra UI, or any component library
+                    you already use
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Call to Action */}
+      <section className="py-32 px-6 bg-neutral-50">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl sm:text-5xl font-light mb-8 tracking-tight">
+            Ready to Transform Your Conversations?
+          </h2>
+          <p className="text-xl text-neutral-600 mb-12 leading-relaxed">
+            Start building intelligent interfaces with your existing components.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Button
+              size="lg"
+              className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-4 text-base font-medium"
+              onClick={() => (window.location.hash = "chat")}
+            >
+              Experience It Live
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-neutral-300 text-neutral-900 hover:bg-neutral-50 px-8 py-4 text-base font-medium"
+            >
+              Read Documentation
             </Button>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }

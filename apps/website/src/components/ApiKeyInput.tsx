@@ -46,13 +46,30 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
   const isApiKeyError = error && error.toLowerCase().includes("api key");
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-2 mb-2 text-foreground">
-        <Key className="w-4 h-4 " />
-        <label htmlFor="api-key" className="text-sm font-medium">
-          OpenAI API Key
-          {required && <span className="text-rose-500 ml-1">*</span>}
-        </label>
+    <div className="space-y-4">
+      <div className="flex items-center gap-3">
+        <Key className="w-5 h-5 text-neutral-600" />
+        <div className="flex-1">
+          <label
+            htmlFor="api-key"
+            className="text-sm font-medium text-neutral-900"
+          >
+            OpenAI API Key
+            {required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+          {!apiKey && !isApiKeyError && (
+            <p className="text-xs text-neutral-500 mt-1">
+              <a
+                href="https://platform.openai.com/api-keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-neutral-700 hover:text-neutral-900 transition-colors underline"
+              >
+                Get your API key from OpenAI
+              </a>
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="relative">
@@ -62,18 +79,18 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
           value={apiKey}
           onChange={(e) => handleApiKeyChange(e.target.value)}
           placeholder="sk-..."
-          className={`w-full px-3 py-2 pr-16 text-sm border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
+          className={`w-full px-4 py-3 pr-20 bg-white border rounded-lg text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-0 transition-colors ${
             isApiKeyError
-              ? "border-rose-300 focus:border-rose-500 focus:ring-rose-200"
-              : "border-gray-300 focus:border-gray-500 focus:ring-gray-200"
+              ? "border-red-300 focus:border-red-500"
+              : "border-neutral-300 focus:border-neutral-900"
           }`}
         />
 
-        <div className="absolute inset-y-0 right-0 flex items-center">
+        <div className="absolute inset-y-0 right-0 flex items-center pr-1">
           <button
             type="button"
             onClick={() => setIsVisible(!isVisible)}
-            className="px-2 py-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-2 text-neutral-400 hover:text-neutral-600 transition-colors rounded"
           >
             {isVisible ? (
               <EyeOff className="w-4 h-4" />
@@ -86,7 +103,7 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
             <button
               type="button"
               onClick={clearApiKey}
-              className="px-2 py-1 text-gray-400 hover:text-rose-500 transition-colors"
+              className="p-2 text-neutral-400 hover:text-red-500 transition-colors rounded text-lg leading-none"
             >
               ×
             </button>
@@ -96,52 +113,18 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
 
       {/* Error message */}
       {isApiKeyError && (
-        <div className="mt-2 flex items-start gap-2 p-3 bg-rose-50 border border-rose-200 rounded-lg">
-          <AlertCircle className="w-4 h-4 text-rose-500 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-rose-700">
-            <p className="font-medium">API Key Error</p>
-            <p className="mt-1">{error}</p>
-            <p className="mt-2 text-xs">
-              Get your API key from{" "}
-              <a
-                href="https://platform.openai.com/api-keys"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:no-underline"
-              >
-                OpenAI's platform
-              </a>
-            </p>
+        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+          <div className="text-sm">
+            <p className="font-medium text-red-900">API Key Required</p>
+            <p className="text-red-700 mt-1">{error}</p>
           </div>
         </div>
       )}
 
       {/* Success message */}
       {apiKey && !isApiKeyError && (
-        <p className="mt-2 text-xs text-gray-600">✓ API key saved locally</p>
-      )}
-
-      {/* Required field message */}
-      {required && !apiKey && !isApiKeyError && (
-        <p className="mt-2 text-xs text-gray-500">
-          Required to use Bleak. Keys are stored locally and never sent to our
-          servers.
-        </p>
-      )}
-
-      {/* Help text for new users */}
-      {!apiKey && !isApiKeyError && (
-        <p className="mt-2 text-xs text-gray-500">
-          Need an API key?{" "}
-          <a
-            href="https://platform.openai.com/api-keys"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-700 underline hover:no-underline"
-          >
-            Get one from OpenAI
-          </a>{" "}
-        </p>
+        <p className="text-xs text-neutral-600">✓ API key saved locally</p>
       )}
     </div>
   );

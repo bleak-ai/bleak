@@ -1,4 +1,4 @@
-# @bleakai/core - Framework-Agnostic Bleak Element Component Resolver
+# bleakai - Framework-Agnostic Bleak Element Component Resolver
 
 A truly framework-agnostic library that handles the **logic** of determining which component to use for dynamic bleak elements. No rendering, no framework dependencies - just pure component resolution logic.
 
@@ -13,7 +13,7 @@ A truly framework-agnostic library that handles the **logic** of determining whi
 ## 📦 Installation
 
 ```bash
-npm install @bleakai/core
+npm install bleakai
 ```
 
 ## 🚀 Quick Start
@@ -25,7 +25,7 @@ npm install @bleakai/core
 3. **Get components and props** directly - no manual mapping needed!
 
 ```typescript
-import {createResolverFromConfig, type BleakElementConfig} from "@bleakai/core";
+import {createResolverFromConfig, type BleakElementConfig} from "bleakai";
 import {TextInput, RadioGroup, TextArea} from "./my-components";
 
 // 1. Define your config - enforced by library types!
@@ -66,7 +66,7 @@ function DynamicBleakElement({element, value, onChange}) {
 ### React
 
 ```tsx
-import {createResolver} from "@bleakai/core";
+import {createResolver} from "bleakai";
 import {TextInput, RadioGroup, TextArea} from "./my-components";
 
 // Your component registry
@@ -113,7 +113,7 @@ function App() {
 
 <script setup>
 import {computed} from "vue";
-import {createResolver} from "@bleakai/core";
+import {createResolver} from "bleakai";
 import TextInput from "./TextInput.vue";
 import RadioGroup from "./RadioGroup.vue";
 
@@ -147,7 +147,7 @@ const resolvedProps = computed(() => resolved.value.props);
 ### Vanilla JavaScript
 
 ```javascript
-import {createResolver} from "@bleakai/core";
+import {createResolver} from "bleakai";
 
 // Your component factory functions
 const components = {
@@ -213,7 +213,7 @@ renderBleakElement(targetEl, element, "", (value) =>
 ### Batch Processing
 
 ```typescript
-import {resolveElements} from "@bleakai/core";
+import {resolveElements} from "bleakai";
 
 const elements = [
   {type: "text", text: "Name?"},
@@ -238,7 +238,7 @@ resolved.forEach(({componentKey, props}, index) => {
 ### Custom Resolver with Options
 
 ```typescript
-import {BleakResolver} from "@bleakai/core";
+import {BleakResolver} from "bleakai";
 
 const resolver = new BleakResolver({
   components: {
@@ -321,7 +321,7 @@ If you want to test local changes to this library in your project:
 
    ```bash
    cd your-project
-   npm link @bleakai/core
+   npm link bleakai
    ```
 
 4. **After making changes, rebuild and test:**
@@ -347,14 +347,14 @@ When you're done with local development:
 
 ```bash
 # In your project
-npm unlink @bleakai/core
+npm unlink bleakai
 
 # In the library
 npm unlink
 
 # Then reinstall the published version
 cd your-project
-npm install @bleakai/core
+npm install bleakai
 ```
 
 ### Development Workflow

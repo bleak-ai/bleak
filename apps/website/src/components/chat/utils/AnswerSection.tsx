@@ -14,28 +14,38 @@ export const AnswerSection = ({
   onReset
 }: AnswerSectionProps) => {
   return (
-    <div className="space-y-6">
-      <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-foreground">Answer</h2>
+    <div className="space-y-8">
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <h2 className="text-2xl font-light text-neutral-900">Answer</h2>
         </div>
-        <div className="bg-muted/50 border border-border rounded-md p-4">
-          <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
-            <MarkdownPreview source={answer} style={{padding: 16}} />
+
+        <div className="bg-white border border-neutral-200 rounded-lg p-6">
+          <div className="prose prose-neutral max-w-none">
+            <MarkdownPreview
+              source={answer}
+              style={{
+                backgroundColor: "transparent",
+                padding: 0,
+                color: "#525252",
+                fontFamily: "inherit"
+              }}
+            />
           </div>
         </div>
 
         {answeredQuestions && answeredQuestions.length > 0 && (
-          <div className="border-t border-border pt-4">
-            <h3 className="text-sm font-medium text-foreground mb-2">
-              Based on your answers:
+          <div className="space-y-4">
+            <h3 className="text-sm font-medium text-neutral-700 uppercase tracking-wide">
+              Based on your answers
             </h3>
-            <div className="space-y-2">
+            <div className="space-y-3">
               {answeredQuestions.map((qa, index) => (
-                <div key={index} className="text-xs text-muted-foreground">
-                  <span className="font-medium">Q:</span> {qa.question}
-                  <br />
-                  <span className="font-medium">A:</span> {qa.answer}
+                <div key={index} className="border-l-2 border-neutral-200 pl-4">
+                  <div className="text-sm">
+                    <p className="text-neutral-600 mb-1">{qa.question}</p>
+                    <p className="text-neutral-900 font-medium">{qa.answer}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -45,8 +55,8 @@ export const AnswerSection = ({
 
       <Button
         onClick={onReset}
-        variant="secondary"
-        className="w-full"
+        variant="outline"
+        className="border-neutral-300 text-neutral-900 hover:bg-neutral-50 px-8 py-3 text-base font-medium"
         size="lg"
       >
         Ask Another Question

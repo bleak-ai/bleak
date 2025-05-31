@@ -54,7 +54,7 @@ A modern AI chatbot application built with FastAPI backend and React frontend, f
 
 ## Bleak Element System
 
-The application includes a sophisticated element resolution system powered by the `@bleakai/core` library:
+The application includes a sophisticated element resolution system powered by the `bleakai` library:
 
 ### Supported Element Types
 

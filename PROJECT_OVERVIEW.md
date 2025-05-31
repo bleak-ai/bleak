@@ -1,12 +1,16 @@
 # BleakAI Project Overview
 
-**BleakAI transforms conversational AI by dynamically generating structured UI components based on user interactions.** Instead of static chat responses, BleakAI returns sophisticated form elements—text inputs, radio buttons, sliders, multi-selects—that capture user intent with precision. This framework bridges the gap between natural language processing and structured data collection, enabling developers to build intelligent interfaces that adapt to user needs in real-time.
+**BleakAI transforms conversational AI by dynamically generating structured UI components based on user interactions.** Instead of static chat responses, BleakAI returns sophisticated form elements that developers can map to their own custom components. This framework bridges the gap between natural language processing and structured data collection, enabling developers to build intelligent interfaces using their existing design systems and component libraries.
+
+## Core Philosophy
+
+**Bring Your Own Components.** BleakAI doesn't impose a specific UI framework or component library. Instead, it provides the intelligence layer that determines what type of input is needed, while developers maintain complete control over how those components look and behave in their applications.
 
 ## Architecture
 
 ### Frontend (Demo Interface)
 
-The frontend serves as both a demonstration platform and reference implementation. Built with React and TypeScript, it showcases how developers can integrate BleakAI into their applications. The `QuestionsSection` component dynamically renders UI elements returned by the backend, while the `BleakResolver` from the core library handles component resolution and state management. The frontend communicates with the backend through a clean REST API that manages conversation threads and processes user responses.
+The frontend serves as both a demonstration platform and reference implementation. Built with React and TypeScript, it showcases how developers can integrate BleakAI into their applications using any component library. The `QuestionsSection` component dynamically renders UI elements returned by the backend, while the `BleakResolver` from the core library handles component resolution and state management. The frontend communicates with the backend through a clean REST API that manages conversation threads and processes user responses.
 
 ### Backend (LangGraph-Powered Intelligence)
 
@@ -19,38 +23,44 @@ The backend leverages **LangGraph** to orchestrate sophisticated conversational 
 
 LangGraph's state management and checkpoint system enables persistent conversations across multiple interactions, allowing users to progressively refine their queries through structured input collection.
 
-### Library (@bleakai/core)
+### Library (bleakai)
 
-The `@bleakai/core` library provides a framework-agnostic component resolution system that maps abstract element types to concrete UI components. The `BleakResolver` class serves as the core engine, accepting element specifications (type, text, options) and returning resolved components with proper props. This design enables developers to:
+The `bleakai` library provides a framework-agnostic component resolution system that maps abstract element types to your own UI components. The `BleakResolver` class serves as the core engine, accepting element specifications (type, text, options) and returning resolved components with proper props. This design enables developers to:
 
-- **Plug into any React application** with minimal configuration
-- **Define custom component mappings** for different UI frameworks
-- **Extend element types** beyond the built-in text, radio, multi-select, and slider components
-- **Maintain type safety** throughout the resolution process
+- **Use any UI framework or component library** - React, Vue, Angular, or custom implementations
+- **Map BleakAI element types to existing components** in your design system
+- **Maintain complete design control** - BleakAI provides the logic, you provide the presentation
+- **Extend with custom element types** beyond the built-in text, radio, multi-select, and slider components
+- **Preserve type safety** throughout the resolution process
 
 ## Structure
 
 bleak
---frontend
---backend
---library
+--frontend (demo)
+--backend (intelligence)
+--library (framework-agnostic core)
 
-## Component Interaction Flow
+## Developer Integration
 
-1. **User submits a query** through the frontend interface
-2. **Backend processes the query** using LangGraph, generating contextual clarifying questions
-3. **Questions are structured** into specific UI element types (radio, text, slider, etc.)
-4. **Frontend receives element specifications** and uses the BleakResolver to render appropriate components
-5. **User interactions** are collected and sent back to the backend for further processing
-6. **Conversation continues** until sufficient information is gathered for a final response
+The true power of BleakAI lies in its flexibility. Developers can integrate BleakAI by:
 
-## External Integration
-
-The library's framework-agnostic design makes it highly reusable. Developers can integrate BleakAI by:
-
-- Installing `@bleakai/core` via npm
-- Defining their component mappings in a configuration object
-- Using the `createResolverFromConfig()` function to instantiate a resolver
+- Installing `bleakai` via npm
+- **Mapping BleakAI element types to their existing components** - use Material-UI, Ant Design, Chakra UI, or custom components
+- Using the `createResolverFromConfig()` function with their component configuration
 - Implementing the REST API endpoints that communicate with the BleakAI backend
 
-The separation of concerns ensures that the core resolution logic remains independent of specific UI frameworks, making it adaptable to React, Vue, Angular, or custom implementations.
+**Example Integration:**
+
+```typescript
+// Use your existing components
+const config = {
+  text: {component: YourTextInput, description: "Text input"},
+  radio: {component: YourRadioGroup, description: "Single choice"},
+  slider: {component: YourSlider, description: "Numeric range"}
+};
+
+// BleakAI handles the logic, your components handle the presentation
+const {resolve} = createResolverFromConfig(config);
+```
+
+The separation of concerns ensures that BleakAI provides the conversational intelligence while developers maintain complete control over their user interface, making it adaptable to any design system or component library.

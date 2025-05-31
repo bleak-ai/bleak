@@ -21,8 +21,8 @@ interface BleakElementsSectionProps {
   customConfig?: CustomBleakElementConfig | null;
 }
 
-// Helper component to render individual bleak elements - much simpler now!
-function DynamicBleakElement({
+// Dynamic component that creates proper bleak elements based on config
+const DynamicBleakElement = ({
   question,
   value,
   onChange,
@@ -32,30 +32,28 @@ function DynamicBleakElement({
   value: string;
   onChange: (value: string) => void;
   questionIndex: number;
-}) {
-  const {resolve} = createResolverFromConfig(BLEAK_ELEMENT_CONFIG, {
-    fallbackComponent: "radio"
-  });
+}) => {
+  const {resolve} = createResolverFromConfig(BLEAK_ELEMENT_CONFIG);
 
-  // Resolve and get the component directly
-  const {Component, props} = resolve(
-    {
-      type: question.type,
-      text: question.question,
-      options: question.options || undefined
-    },
-    value,
-    onChange,
-    questionIndex
-  );
+  const elementData = {
+    type: question.type,
+    text: question.question,
+    options: question.options || [],
+    elementIndex: questionIndex
+  };
 
-  if (!Component) {
-    console.error(`No component found for element type: ${question.type}`);
-    return <div>Error: Unknown element type</div>;
+  try {
+    const {Component, props} = resolve(elementData, value, onChange);
+    return <Component {...props} />;
+  } catch (error) {
+    console.error("Error resolving bleak element:", error);
+    return (
+      <div className="text-red-600 text-sm">
+        Error rendering question: {question.question}
+      </div>
+    );
   }
-
-  return <Component {...props} />;
-}
+};
 
 export const QuestionsSection = ({
   questions,
@@ -83,49 +81,56 @@ export const QuestionsSection = ({
   const activeTypes = getActiveElementTypes();
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-6">
-      <div className="space-y-1">
-        <h2 className="text-xl font-semibold text-foreground">
-          Help me understand better
-        </h2>
-        <p className="text-muted-foreground text-sm">
-          Please answer these questions to get a more personalized response
-        </p>
-        {previousAnswers && previousAnswers.length > 0 && (
-          <p className="text-muted-foreground text-xs">
-            Building on your previous {previousAnswers.length} answer(s)
-          </p>
-        )}
-        {activeTypes && (
-          <p className="text-muted-foreground text-xs">
-            Using custom element types: {activeTypes.join(", ")}
-          </p>
-        )}
-      </div>
-
+    <div className="space-y-8">
       <div className="space-y-6">
-        {questions.map((question, index) => (
-          <div key={index}>
-            <DynamicBleakElement
-              question={question}
-              value={answers[question.question] || ""}
-              onChange={(value: string) =>
-                onAnswerChange(question.question, value)
-              }
-              questionIndex={index}
-            />
+        <div className="space-y-3">
+          <h2 className="text-2xl font-light text-neutral-900">
+            Help me understand better
+          </h2>
+          <div className="space-y-2">
+            <p className="text-neutral-600">
+              Please answer these questions to get a more personalized response
+            </p>
+            {previousAnswers && previousAnswers.length > 0 && (
+              <p className="text-xs text-neutral-500">
+                Building on your previous {previousAnswers.length} answer(s)
+              </p>
+            )}
+            {activeTypes && (
+              <p className="text-xs text-neutral-500">
+                Using custom element types: {activeTypes.join(", ")}
+              </p>
+            )}
           </div>
-        ))}
+        </div>
+
+        <div className="space-y-8">
+          {questions.map((question, index) => (
+            <div key={index} className="space-y-3">
+              <DynamicBleakElement
+                question={question}
+                value={answers[question.question] || ""}
+                onChange={(value: string) =>
+                  onAnswerChange(question.question, value)
+                }
+                questionIndex={index}
+              />
+              {index < questions.length - 1 && (
+                <div className="w-full h-px bg-neutral-200"></div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Choice buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-border">
+      <div className="flex flex-col sm:flex-row gap-4">
         {!noMoreQuestionsAvailable && (
           <Button
             onClick={() => onChoice("more_questions")}
             variant="outline"
             disabled={!allQuestionsAnswered || isLoading}
-            className="flex-1"
+            className="flex-1 border-neutral-300 text-neutral-900 hover:bg-neutral-50 py-3 text-base font-medium"
           >
             {isLoading ? (
               <>
@@ -141,7 +146,7 @@ export const QuestionsSection = ({
         <Button
           onClick={() => onChoice("final_answer")}
           disabled={!allQuestionsAnswered || isLoading}
-          className="flex-1"
+          className="flex-1 bg-neutral-900 hover:bg-neutral-800 text-white py-3 text-base font-medium"
         >
           {isLoading ? (
             <>
@@ -156,7 +161,7 @@ export const QuestionsSection = ({
 
       {/* No more questions message */}
       {noMoreQuestionsAvailable && noMoreQuestionsMessage && (
-        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800">{noMoreQuestionsMessage}</p>
         </div>
       )}

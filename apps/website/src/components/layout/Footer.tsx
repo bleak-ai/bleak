@@ -2,45 +2,48 @@ import {Separator} from "../ui/separator";
 
 const Footer = () => {
   return (
-    <footer className="border-t border-white/10 py-12 px-4 bg-black">
+    <footer className="border-t border-neutral-200 py-16 px-6 bg-white">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center">
-          <div className="flex items-center gap-3 mb-4 md:mb-0">
-            <div className="w-8 h-8">
-              <img
-                src="/bleaktreewhite.png"
-                alt="Bleak"
-                className="w-full h-full object-contain"
-              />
-            </div>
-            <span
-              className="font-bold text-xl text-white"
-              style={{fontFamily: "'Orbitron', monospace"}}
-            >
-              bleak
+          <div className="flex items-center mb-8 md:mb-0">
+            <span className="text-xl font-light tracking-tight text-neutral-900">
+              Bleak
             </span>
           </div>
 
-          <div className="flex items-center gap-6 text-white/50 text-sm">
-            <a href="#" className="hover:text-white transition-colors">
+          <div className="flex items-center justify-center flex-wrap gap-8 text-neutral-600 text-sm">
+            <a
+              href="#"
+              className="hover:text-neutral-900 transition-colors font-medium"
+            >
               Documentation
             </a>
-            <a href="#" className="hover:text-white transition-colors">
+            <a
+              href="#"
+              className="hover:text-neutral-900 transition-colors font-medium"
+            >
               GitHub
             </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Discord
+            <a
+              href="#"
+              className="hover:text-neutral-900 transition-colors font-medium"
+            >
+              Examples
             </a>
-            <a href="#" className="hover:text-white transition-colors">
-              Twitter
+            <a
+              href="#"
+              className="hover:text-neutral-900 transition-colors font-medium"
+            >
+              Community
             </a>
           </div>
         </div>
 
-        <Separator className="my-8 bg-white/10" />
+        <Separator className="my-12 bg-neutral-200" />
 
-        <div className="text-center text-white/50 text-sm">
-          © 2025 Bleak. Built with ❤️ for developers.
+        <div className="text-center text-neutral-500 text-sm">
+          © 2025 BleakAI. Open source project for intelligent conversational
+          interfaces.
         </div>
       </div>
     </footer>

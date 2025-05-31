@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {useMutation} from "@tanstack/react-query";
 import {
   startInteractiveSession,
@@ -16,9 +16,19 @@ import type {CustomBleakElementConfig} from "../config/BleakConfigEditor";
 
 interface SimpleInteractiveProps {
   customConfig?: CustomBleakElementConfig | null;
+  onConversationStart?: () => void;
+  isWelcomeMode?: boolean;
+  initialApiKey?: string | null;
+  prefilledPrompt?: string;
 }
 
-export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
+export const SimpleInteractive = ({
+  customConfig,
+  onConversationStart,
+  isWelcomeMode = false,
+  initialApiKey = null,
+  prefilledPrompt = ""
+}: SimpleInteractiveProps) => {
   const [threadId, setThreadId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<InteractiveQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -33,7 +43,14 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
     useState(false);
   const [noMoreQuestionsMessage, setNoMoreQuestionsMessage] =
     useState<string>("");
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState<string | null>(initialApiKey);
+
+  // Update API key when initialApiKey changes
+  useEffect(() => {
+    if (initialApiKey && initialApiKey !== apiKey) {
+      setApiKey(initialApiKey);
+    }
+  }, [initialApiKey, apiKey]);
 
   // Convert custom config to API format
   const getCustomBleakElements = () => {
@@ -81,23 +98,42 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
 
   // Start session mutation
   const startMutation = useMutation<InteractiveResponse, Error, string>({
-    mutationFn: (prompt: string) =>
-      startInteractiveSession(
+    mutationFn: (prompt: string) => {
+      console.log("🚀 Starting session with prompt:", prompt);
+      console.log("🔧 Custom elements:", getCustomBleakElements());
+      console.log("🔑 API key present:", !!apiKey);
+
+      return startInteractiveSession(
         prompt,
         getCustomBleakElements(),
         apiKey || undefined
-      ),
+      );
+    },
     onSuccess: (data) => {
+      console.log("✅ Session started successfully:", data);
       setThreadId(data.thread_id);
+
       if (data.questions && data.questions.length > 0) {
         setQuestions(data.questions);
         setAnswers({});
         setPreviousAnswers([]);
         setNoMoreQuestionsAvailable(false);
         setNoMoreQuestionsMessage("");
+        setFinalAnswer(null); // Clear any previous final answer
       } else if (data.answer) {
         setFinalAnswer(data.answer);
+        setQuestions([]); // Clear questions when we have final answer
+      } else {
+        console.warn("⚠️ No questions or answer in response:", data);
       }
+
+      // Notify parent that conversation has started
+      if (onConversationStart) {
+        onConversationStart();
+      }
+    },
+    onError: (error) => {
+      console.error("❌ Session start error:", error);
     }
   });
 
@@ -119,6 +155,8 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
         apiKey || undefined
       ),
     onSuccess: (data) => {
+      console.log("✅ Choice response:", data);
+
       if (data.status === "completed" && data.answer) {
         // Final answer received
         setFinalAnswer(data.answer);
@@ -146,6 +184,9 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
         setNoMoreQuestionsAvailable(false);
         setNoMoreQuestionsMessage("");
       }
+    },
+    onError: (error) => {
+      console.error("❌ Choice error:", error);
     }
   });
 
@@ -167,6 +208,16 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
   };
 
   const handlePromptSubmit = (prompt: string) => {
+    // Clear previous state before starting new session
+    setQuestions([]);
+    setAnswers({});
+    setFinalAnswer(null);
+    setThreadId(null);
+    setAllAnsweredQuestions([]);
+    setPreviousAnswers([]);
+    setNoMoreQuestionsAvailable(false);
+    setNoMoreQuestionsMessage("");
+
     startMutation.mutate(prompt);
   };
 
@@ -174,6 +225,7 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
     if (!threadId || isLoading) return;
 
     const answeredQuestions = getCurrentAnsweredQuestions();
+
     if (answeredQuestions.length > 0) {
       choiceMutation.mutate({threadId, answeredQuestions, choice});
     }
@@ -198,47 +250,110 @@ export const SimpleInteractive = ({customConfig}: SimpleInteractiveProps) => {
     answers[q.question]?.trim()
   );
 
-  return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
-      {/* API Key Input */}
-      <ApiKeyInput
-        onApiKeyChange={setApiKey}
-        required={false}
-        error={apiKeyError}
-      />
+  // Different layouts for welcome mode vs conversation mode
+  if (isWelcomeMode) {
+    return (
+      <div className="space-y-6">
+        {/* API Key Input - only shown if there's an error and no API key from parent */}
+        {apiKeyError && !apiKey && (
+          <div className="p-4 border border-neutral-200 rounded-lg bg-neutral-50">
+            <ApiKeyInput
+              onApiKeyChange={setApiKey}
+              required={false}
+              error={apiKeyError}
+            />
+          </div>
+        )}
 
-      {/* Initial Prompt */}
-      {!threadId && (
-        <PromptForm onSubmit={handlePromptSubmit} isLoading={isLoading} />
-      )}
-
-      {/* Questions */}
-      {questions.length > 0 && (
-        <QuestionsSection
-          questions={questions}
-          answers={answers}
-          onAnswerChange={handleAnswerChange}
-          onChoice={handleChoice}
+        {/* Prompt Form for welcome screen */}
+        <PromptForm
+          onSubmit={handlePromptSubmit}
           isLoading={isLoading}
-          allQuestionsAnswered={allQuestionsAnswered}
-          previousAnswers={previousAnswers}
-          noMoreQuestionsAvailable={noMoreQuestionsAvailable}
-          noMoreQuestionsMessage={noMoreQuestionsMessage}
-          customConfig={customConfig}
+          prefilledPrompt={prefilledPrompt}
         />
-      )}
 
-      {/* Final Answer */}
-      {finalAnswer && (
-        <AnswerSection
-          answer={finalAnswer}
-          answeredQuestions={allAnsweredQuestions}
-          onReset={reset}
-        />
-      )}
+        {/* Non-API Key Errors */}
+        {nonApiKeyError && <ErrorDisplay error={nonApiKeyError} />}
+      </div>
+    );
+  }
 
-      {/* Non-API Key Errors */}
-      {nonApiKeyError && <ErrorDisplay error={nonApiKeyError} />}
+  // Conversation mode - ChatGPT style
+  return (
+    <div className="flex flex-col min-h-[calc(100vh-80px)]">
+      {/* Conversation History */}
+      <div className="flex-1 p-6 space-y-8 overflow-y-auto max-w-4xl mx-auto w-full">
+        {/* API Key Input - only if no API key */}
+        {!apiKey && (
+          <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-4">
+            <ApiKeyInput
+              onApiKeyChange={setApiKey}
+              required={false}
+              error={apiKeyError}
+            />
+          </div>
+        )}
+
+        {/* Debug info - remove this in production */}
+        {process.env.NODE_ENV === "development" && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded p-4 text-xs">
+            <strong>Debug Info:</strong>
+            <br />
+            Questions: {questions.length}
+            <br />
+            Thread ID: {threadId || "None"}
+            <br />
+            Loading: {isLoading ? "Yes" : "No"}
+            <br />
+            Final Answer: {finalAnswer ? "Yes" : "No"}
+            <br />
+            Error: {error?.message || "None"}
+          </div>
+        )}
+
+        {/* Questions */}
+        {questions.length > 0 && (
+          <div>
+            <h3 className="text-lg font-medium mb-4">
+              Questions ({questions.length})
+            </h3>
+            <QuestionsSection
+              questions={questions}
+              answers={answers}
+              onAnswerChange={handleAnswerChange}
+              onChoice={handleChoice}
+              isLoading={isLoading}
+              allQuestionsAnswered={allQuestionsAnswered}
+              previousAnswers={previousAnswers}
+              noMoreQuestionsAvailable={noMoreQuestionsAvailable}
+              noMoreQuestionsMessage={noMoreQuestionsMessage}
+              customConfig={customConfig}
+            />
+          </div>
+        )}
+
+        {/* Final Answer */}
+        {finalAnswer && (
+          <AnswerSection
+            answer={finalAnswer}
+            answeredQuestions={allAnsweredQuestions}
+            onReset={reset}
+          />
+        )}
+
+        {/* Non-API Key Errors */}
+        {nonApiKeyError && <ErrorDisplay error={nonApiKeyError} />}
+
+        {/* Loading state */}
+        {isLoading && (
+          <div className="text-center py-8">
+            <div className="inline-flex items-center gap-2 text-neutral-600">
+              <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin"></div>
+              Processing your request...
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 /**
- * @bleakai/core - Framework-Agnostic Bleak Element Component Resolver
+ * bleakai - Framework-Agnostic Bleak Element Component Resolver
  *
  * A library that handles the logic of determining which component to use for dynamic bleak elements.
  * No rendering, no framework dependencies - just pure component resolution logic.
