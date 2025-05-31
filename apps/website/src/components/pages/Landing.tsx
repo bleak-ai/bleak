@@ -198,15 +198,15 @@ export default function Landing() {
 const config = {
   text: {
     component: YourTextInput, 
-    description: "Use Text Input this for free-form text input"
+    description: "Use this Text Input  for free-form text input"
   },
   radio: {
     component: YourRadioGroup, 
-    description: "Use Radio Group this for single-choice elements with 2-5 predefined options"
+    description: "Use this Radio Group  for single-choice elements with 2-5 predefined options"
   },
   slider: {
     component: YourSlider, 
-    description: "Use Slider this for numeric input, ratings, scales, or range selections"
+    description: "Use this Slider  for numeric input, ratings, scales, or range selections"
   }
 };
 
