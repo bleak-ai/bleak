@@ -6,11 +6,11 @@ interface ErrorDisplayProps {
 
 export const ErrorDisplay = ({error}: ErrorDisplayProps) => {
   return (
-    <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-      <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+    <div className="flex items-start gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+      <AlertCircle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
       <div className="text-sm">
-        <p className="font-medium text-red-900">Something went wrong</p>
-        <p className="text-red-700 mt-1">{error.message}</p>
+        <p className="font-medium text-foreground">Something went wrong</p>
+        <p className="text-muted-foreground mt-1">{error.message}</p>
       </div>
     </div>
   );

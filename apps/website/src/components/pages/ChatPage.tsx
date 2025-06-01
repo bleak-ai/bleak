@@ -38,7 +38,7 @@ const ChatPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-neutral-900 relative">
+    <div className="min-h-screen bg-background text-foreground relative">
       {/* Settings Panel */}
       {isConfigOpen && (
         <div className="fixed inset-0 z-50 flex">
@@ -49,25 +49,25 @@ const ChatPage = () => {
           />
 
           {/* Panel */}
-          <div className="relative ml-auto w-full max-w-md bg-white border-l border-neutral-200 shadow-lg overflow-y-auto">
+          <div className="relative ml-auto w-full max-w-md bg-background border-l border-border shadow-lg overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <Settings className="w-5 h-5 text-neutral-600" />
-                  <h2 className="text-lg font-medium text-neutral-900">
+                  <Settings className="w-5 h-5 text-muted-foreground" />
+                  <h2 className="text-lg font-medium text-foreground">
                     Component Settings
                   </h2>
                 </div>
                 <button
                   onClick={() => setIsConfigOpen(false)}
-                  className="p-1 hover:bg-neutral-100 rounded transition-colors"
+                  className="p-1 hover:bg-accent rounded transition-colors"
                 >
-                  <X className="w-5 h-5 text-neutral-500" />
+                  <X className="w-5 h-5 text-muted-foreground" />
                 </button>
               </div>
 
               <div className="mb-6">
-                <p className="text-sm text-neutral-600 leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   Configure which UI component types the AI can generate during
                   conversations
                 </p>
@@ -84,12 +84,14 @@ const ChatPage = () => {
 
       <div className="w-full">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-neutral-200 bg-neutral-200">
+        <div className="flex items-center justify-between p-6 border-b border-border bg-muted/30">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-neutral-900 rounded-full flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-primary-foreground" />
             </div>
-            <h1 className="text-xl font-medium">Bleak Assistant</h1>
+            <h1 className="text-xl font-medium text-foreground">
+              Bleak Assistant
+            </h1>
           </div>
 
           <div className="flex items-center gap-3">
@@ -98,17 +100,16 @@ const ChatPage = () => {
                 onClick={handleNewConversation}
                 variant="outline"
                 size="sm"
-                className="border-neutral-300 text-neutral-600 hover:text-neutral-900"
               >
                 New Chat
               </Button>
             )}
             <button
               onClick={() => setIsConfigOpen(true)}
-              className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-accent rounded-lg transition-colors"
               title="Configure components"
             >
-              <Settings className="w-5 h-5 text-neutral-600" />
+              <Settings className="w-5 h-5 text-muted-foreground" />
             </button>
           </div>
         </div>
@@ -126,13 +127,13 @@ const ChatPage = () => {
             <div className="text-center max-w-4xl mx-auto space-y-12">
               {/* Welcome Message */}
               <div className="space-y-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-neutral-900 to-neutral-700 rounded-full flex items-center justify-center mx-auto">
-                  <MessageSquare className="w-8 h-8 text-white" />
+                <div className="w-16 h-16 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center mx-auto">
+                  <MessageSquare className="w-8 h-8 text-primary-foreground" />
                 </div>
-                <h2 className="text-3xl font-light text-neutral-900">
+                <h2 className="text-3xl font-light text-foreground">
                   Try Bleak Assistant
                 </h2>
-                <p className="text-lg text-neutral-600 leading-relaxed max-w-2xl mx-auto">
+                <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto">
                   Experience how Bleak generates interactive UI components based
                   on your questions. Follow these steps to get started:
                 </p>
@@ -140,10 +141,10 @@ const ChatPage = () => {
 
               {/* API Key Input */}
               <div className="w-full max-w-2xl mx-auto">
-                <h3 className="text-lg font-medium text-neutral-900 mb-4 text-center">
+                <h3 className="text-lg font-medium text-foreground mb-4 text-center">
                   Step 1: Enter your OpenAI API Key
                 </h3>
-                <div className="bg-neutral-50 border border-neutral-200 rounded-lg p-6">
+                <div className="bg-card border border-border rounded-lg p-6">
                   <ApiKeyInput
                     onApiKeyChange={handleApiKeyChange}
                     required={true}
@@ -155,12 +156,12 @@ const ChatPage = () => {
               {/* Example Prompts */}
               <div className="space-y-6">
                 <div className="text-center">
-                  <h3 className="text-lg font-medium text-neutral-900 mb-2">
+                  <h3 className="text-lg font-medium text-foreground mb-2">
                     Step 2: Configure Components (Optional)
                   </h3>
                   <button
                     onClick={() => setIsConfigOpen(true)}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-lg transition-colors text-sm font-medium"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-lg transition-colors text-sm font-medium"
                   >
                     <Settings className="w-4 h-4" />
                     Configure Components
@@ -169,10 +170,10 @@ const ChatPage = () => {
 
                 <div className="space-y-4">
                   <div className="text-center">
-                    <h3 className="text-lg font-medium text-neutral-900 mb-2">
+                    <h3 className="text-lg font-medium text-foreground mb-2">
                       Step 3: Try these example questions
                     </h3>
-                    <p className="text-sm text-neutral-600">
+                    <p className="text-sm text-muted-foreground">
                       Click any question below to pre-fill it, then press "Ask
                       Question" to start
                     </p>
@@ -186,7 +187,7 @@ const ChatPage = () => {
                     ].map((prompt) => (
                       <button
                         key={prompt}
-                        className="px-4 py-2 text-sm bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-full transition-colors border border-neutral-200"
+                        className="px-4 py-2 text-sm bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-full transition-colors border border-border"
                         onClick={() => handleExamplePromptClick(prompt)}
                       >
                         {prompt}

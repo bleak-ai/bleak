@@ -1,56 +1,60 @@
 import {Button} from "../ui/button";
 import {ArrowRight, Palette, Layers, Zap, Github} from "lucide-react";
 import {CodeBlock} from "../ui/code-block";
+import {BleakShowcase} from "../demo/BleakShowcase";
 
 export default function Landing() {
   return (
-    <div className="bg-white text-neutral-900">
+    <div className="bg-background text-foreground">
       {/* Hero Section */}
       <section className="min-h-screen flex items-center justify-center px-6">
         <div className="max-w-5xl mx-auto text-center">
           {/* Brand */}
           <div className="mb-12">
             <div className="flex items-center justify-center">
-              <h1 className="text-7xl sm:text-8xl md:text-9xl font-light tracking-tight mb-4">
+              <h1 className="text-7xl sm:text-8xl md:text-9xl font-light tracking-tight mb-4 text-foreground">
                 Bleak
               </h1>
               <div className={`ml-4 duration-700 ease-out `}>
                 <div className="w-16 h-16 sm:w-32 sm:h-32">
-                  <img src="/bleaktree.png" alt="" className="w-full h-full" />
+                  <img
+                    src="/bleaktreewhite.png"
+                    alt=""
+                    className="w-full h-full"
+                  />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Core Message */}
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light leading-relaxed mb-8 text-neutral-700 max-w-4xl mx-auto">
-            Transform conversational AI by generating{" "}
-            <span className="text-neutral-900 font-medium">
-              structured UI components
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-light leading-relaxed mb-8 text-muted-foreground max-w-4xl mx-auto">
+            Stop making users type everything.{" "}
+            <span className="text-foreground font-medium">
+              Generate smart forms
             </span>{" "}
-            instead of plain text responses
+            when AI needs more information.
           </h2>
 
-          <p className="text-lg text-neutral-600 mb-16 max-w-2xl mx-auto leading-relaxed">
-            Bridge the gap between natural language processing and structured
-            data collection using your existing design systems and component
-            libraries.
+          <p className="text-lg text-muted-foreground mb-16 max-w-2xl mx-auto leading-relaxed">
+            Turn "please tell me about..." into date pickers, sliders, and
+            dropdowns. Get structured data instead of messy text.
           </p>
 
           {/* Primary Actions */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-20">
             <Button
               size="lg"
-              className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-4 text-base font-medium"
+              className="px-8 py-4 text-base font-medium"
               onClick={() => (window.location.hash = "chat")}
             >
-              Try the Demo
+              See It Work
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="border-neutral-300 text-neutral-900 hover:bg-neutral-50 px-8 py-4 text-base font-medium"
+              className="px-8 py-4 text-base font-medium"
               onClick={() =>
                 window.open("https://github.com/bleak-ai/bleak", "_blank")
               }
@@ -62,26 +66,31 @@ export default function Landing() {
 
           {/* Concept Preview */}
           <div className="max-w-3xl mx-auto">
-            <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-8">
+            <div className="bg-card rounded-lg border border-border p-8">
               <div className="grid md:grid-cols-2 gap-8 text-left">
                 <div>
-                  <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">
-                    Traditional Chatbots
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                    Normal AI
                   </h3>
-                  <div className="bg-white rounded border p-4">
-                    <p className="text-sm text-neutral-600">
-                      "What's your experience level with programming? Please
-                      choose from: Beginner, Intermediate, Advanced, Expert"
+                  <div className="bg-background rounded border border-border p-4">
+                    <p className="text-sm text-muted-foreground">
+                      "What's your experience level? Type: beginner,
+                      intermediate, or advanced"
                     </p>
+                    <input
+                      type="text"
+                      className="w-full mt-2 px-2 py-1 text-xs border rounded bg-muted/30"
+                      placeholder="User types: intermediate i guess"
+                    />
                   </div>
                 </div>
                 <div>
-                  <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wide mb-3">
-                    BleakAI Response
+                  <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-3">
+                    BleakAI
                   </h3>
 
-                  <div className="bg-white rounded border p-4">
-                    <label className="text-sm font-medium text-neutral-700 mb-2 block">
+                  <div className="bg-background rounded border border-border p-4">
+                    <label className="text-sm font-medium text-foreground mb-2 block">
                       What's your experience level?
                     </label>
                     <div className="space-y-2">
@@ -89,32 +98,37 @@ export default function Landing() {
                         <input
                           type="radio"
                           name="experience"
-                          className="mr-2"
+                          className="mr-2 accent-primary"
                         />
-                        <span className="text-sm">Beginner</span>
+                        <span className="text-sm text-foreground">
+                          Beginner
+                        </span>
                       </div>
                       <div className="flex items-center">
                         <input
                           type="radio"
                           name="experience"
-                          className="mr-2"
+                          className="mr-2 accent-primary"
                           defaultChecked
                         />
-                        <span className="text-sm">Intermediate</span>
+                        <span className="text-sm text-foreground">
+                          Intermediate
+                        </span>
                       </div>
                       <div className="flex items-center">
                         <input
                           type="radio"
                           name="experience"
-                          className="mr-2"
+                          className="mr-2 accent-primary"
                         />
-                        <span className="text-sm">Advanced</span>
+                        <span className="text-sm text-foreground">
+                          Advanced
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <p className="text-sm text-neutral-600 mt-4">
-                    Here the AI model though the predefined radio component was
-                    the more suited to formulate the question.
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Perfect data, no parsing needed.
                   </p>
                 </div>
               </div>
@@ -123,50 +137,59 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Interactive Showcase Section */}
+      <section className="py-32 px-6">
+        <BleakShowcase />
+      </section>
+
       {/* Core Philosophy */}
-      <section className="py-32 px-6 bg-neutral-50">
+      <section className="py-32 px-6 bg-muted/30">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-light mb-8 tracking-tight">
-            Bring Your Own Components
+          <h2 className="text-4xl sm:text-5xl font-light mb-8 tracking-tight text-foreground">
+            Works With Your Components
           </h2>
-          <p className="text-xl text-neutral-600 mb-16 leading-relaxed">
-            BleakAI doesn't impose a specific UI framework or component library.
-            We provide the intelligence layer while you maintain complete
-            control over how components look and behave in your applications.
+          <p className="text-xl text-muted-foreground mb-16 leading-relaxed">
+            BleakAI doesn't come with UI components. It generates the logic to
+            use yours. Keep your design system, add smart form generation.
           </p>
 
           <div className="grid md:grid-cols-3 gap-12 mb-16">
             <div className="text-center">
-              <div className="w-16 h-16 bg-neutral-900 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Palette className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                <Palette className="w-8 h-8 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-medium mb-4">Your Design System</h3>
-              <p className="text-neutral-600 leading-relaxed">
-                Use your existing custom components, design tokens, and styling
-                approach. BleakAI adapts to your established design language and
-                patterns.
+              <h3 className="text-xl font-medium mb-4 text-foreground">
+                Your Style
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Use your existing buttons, inputs, and dropdowns. BleakAI
+                decides which ones to use when.
               </p>
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-neutral-900 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Layers className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                <Layers className="w-8 h-8 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-medium mb-4">Framework Agnostic</h3>
-              <p className="text-neutral-600 leading-relaxed">
-                Works seamlessly with React, Vue, Angular, or any custom
-                implementation. Pure logic, no framework dependencies.
+              <h3 className="text-xl font-medium mb-4 text-foreground">
+                Any Stack
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                React, Vue, Svelte, vanilla JS. BleakAI generates component
+                trees, you render them however you want.
               </p>
             </div>
 
             <div className="text-center">
-              <div className="w-16 h-16 bg-neutral-900 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Zap className="w-8 h-8 text-white" />
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto mb-6">
+                <Zap className="w-8 h-8 text-primary-foreground" />
               </div>
-              <h3 className="text-xl font-medium mb-4">Simple Integration</h3>
-              <p className="text-neutral-600 leading-relaxed">
-                Map BleakAI element types to your components with a simple
-                configuration object. No refactoring required.
+              <h3 className="text-xl font-medium mb-4 text-foreground">
+                5-Minute Setup
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                Map your components to form types. Start generating forms
+                immediately.
               </p>
             </div>
           </div>
@@ -177,64 +200,74 @@ export default function Landing() {
       <section className="py-32 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-light mb-8 tracking-tight">
-              Use Your Existing Components
+            <h2 className="text-4xl sm:text-5xl font-light mb-8 tracking-tight text-foreground">
+              How It Works
             </h2>
-            <p className="text-xl text-neutral-600 leading-relaxed">
-              BleakAI provides the intelligence, you provide the presentation.
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Tell BleakAI about your components. It picks the right ones for
+              each situation.
             </p>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-12 items-start">
             <div className="text-left">
-              <h3 className="text-2xl font-medium mb-6">
-                Simple Configuration
+              <h3 className="text-2xl font-medium mb-6 text-foreground">
+                Component Mapping
               </h3>
-              <div className="bg-neutral-50 rounded-lg border border-neutral-200 p-6">
+              <div className="bg-card rounded-lg border border-border p-6">
                 <div className="overflow-x-auto">
                   <CodeBlock language="typescript">
-                    {`// Map to your existing components
+                    {`// Tell BleakAI about your components
 const config = {
   text: {
-    component: YourTextInput, 
-    description: "Use this Text Input  for free-form text input"
+    component: YourTextInput,
+    description: "For text input and messages"
   },
-  radio: {
-    component: YourRadioGroup, 
-    description: "Use this Radio Group  for single-choice elements with 2-5 predefined options"
+  select: {
+    component: YourDropdown,
+    description: "For choosing from 2-10 options"
+  },
+  date: {
+    component: YourDatePicker,
+    description: "For dates and times"
   },
   slider: {
-    component: YourSlider, 
-    description: "Use this Slider  for numeric input, ratings, scales, or range selections"
+    component: YourSlider,
+    description: "For numbers and ranges"
   }
 };
 
-// Create resolver
-const {resolve} = createResolverFromConfig(config);
-
-// Use it
-const {Component, props} = resolve(element, value, onChange);`}
+// AI picks the right component for each question
+const form = generateForm(userMessage, config);`}
                   </CodeBlock>
                 </div>
               </div>
             </div>
 
             <div className="text-left">
-              <h3 className="text-2xl font-medium mb-6">Your Components</h3>
+              <h3 className="text-2xl font-medium mb-6 text-foreground">
+                Real Examples
+              </h3>
               <div className="space-y-6">
-                <div className="border border-neutral-200 rounded-lg p-6">
-                  <h4 className="font-medium mb-2">Custom Design System</h4>
-                  <p className="text-neutral-600 text-sm">
-                    Your own TextInput, RadioGroup, Slider, Select components
-                    with your styling
+                <div className="border border-border rounded-lg p-6 bg-card">
+                  <h4 className="font-medium mb-2 text-foreground">
+                    "When do you want to meet?"
+                  </h4>
+                  <p className="text-muted-foreground text-sm">→ Date picker</p>
+                </div>
+                <div className="border border-border rounded-lg p-6 bg-card">
+                  <h4 className="font-medium mb-2 text-foreground">
+                    "How important is this to you?"
+                  </h4>
+                  <p className="text-muted-foreground text-sm">
+                    → Slider from 1-10
                   </p>
                 </div>
-                <div className="border border-neutral-200 rounded-lg p-6">
-                  <h4 className="font-medium mb-2">Existing UI Library</h4>
-                  <p className="text-neutral-600 text-sm">
-                    Material-UI, Ant Design, Chakra UI, or any component library
-                    you already use
-                  </p>
+                <div className="border border-border rounded-lg p-6 bg-card">
+                  <h4 className="font-medium mb-2 text-foreground">
+                    "Which features do you need?"
+                  </h4>
+                  <p className="text-muted-foreground text-sm">→ Checkboxes</p>
                 </div>
               </div>
             </div>
@@ -243,30 +276,31 @@ const {Component, props} = resolve(element, value, onChange);`}
       </section>
 
       {/* Call to Action */}
-      <section className="py-32 px-6 bg-neutral-50">
+      <section className="py-32 px-6 bg-muted/30">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-light mb-8 tracking-tight">
-            Ready to Transform Your Conversations?
+          <h2 className="text-4xl sm:text-5xl font-light mb-8 tracking-tight text-foreground">
+            Stop Parsing Messy Text
           </h2>
-          <p className="text-xl text-neutral-600 mb-12 leading-relaxed">
-            Start building intelligent interfaces with your existing components.
+          <p className="text-xl text-muted-foreground mb-12 leading-relaxed">
+            Get clean, structured data from the start. Build better AI
+            experiences.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Button
               size="lg"
-              className="bg-neutral-900 hover:bg-neutral-800 text-white px-8 py-4 text-base font-medium"
+              className="px-8 py-4 text-base font-medium"
               onClick={() => (window.location.hash = "chat")}
             >
-              Experience It Live
+              Try BleakAI Now
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="border-neutral-300 text-neutral-900 hover:bg-neutral-50 px-8 py-4 text-base font-medium"
+              className="px-8 py-4 text-base font-medium"
             >
-              Read Documentation
+              Read the Guide
             </Button>
           </div>
         </div>

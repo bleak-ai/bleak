@@ -40,7 +40,7 @@ function App() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen">
       <Header />
       <main className="min-h-screen">{renderPage()}</main>
       <Footer />

@@ -48,22 +48,22 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <Key className="w-5 h-5 text-neutral-600" />
+        <Key className="w-5 h-5 text-muted-foreground" />
         <div className="flex-1">
           <label
             htmlFor="api-key"
-            className="text-sm font-medium text-neutral-900"
+            className="text-sm font-medium text-foreground"
           >
             OpenAI API Key
-            {required && <span className="text-red-500 ml-1">*</span>}
+            {required && <span className="text-destructive ml-1">*</span>}
           </label>
           {!apiKey && !isApiKeyError && (
-            <p className="text-xs text-neutral-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               <a
                 href="https://platform.openai.com/api-keys"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-neutral-700 hover:text-neutral-900 transition-colors underline"
+                className="text-foreground hover:text-primary transition-colors underline underline-offset-2"
               >
                 Get your API key from OpenAI
               </a>
@@ -79,10 +79,10 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
           value={apiKey}
           onChange={(e) => handleApiKeyChange(e.target.value)}
           placeholder="sk-..."
-          className={`w-full px-4 py-3 pr-20 bg-white border rounded-lg text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:ring-0 transition-colors ${
+          className={`w-full px-4 py-3 pr-20 bg-input border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors ${
             isApiKeyError
-              ? "border-red-300 focus:border-red-500"
-              : "border-neutral-300 focus:border-neutral-900"
+              ? "border-destructive focus:border-destructive focus:ring-destructive/20"
+              : "border-border focus:border-ring"
           }`}
         />
 
@@ -90,7 +90,7 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
           <button
             type="button"
             onClick={() => setIsVisible(!isVisible)}
-            className="p-2 text-neutral-400 hover:text-neutral-600 transition-colors rounded"
+            className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded"
           >
             {isVisible ? (
               <EyeOff className="w-4 h-4" />
@@ -103,7 +103,7 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
             <button
               type="button"
               onClick={clearApiKey}
-              className="p-2 text-neutral-400 hover:text-red-500 transition-colors rounded text-lg leading-none"
+              className="p-2 text-muted-foreground hover:text-destructive transition-colors rounded text-lg leading-none"
             >
               ×
             </button>
@@ -113,18 +113,18 @@ export const ApiKeyInput: React.FC<ApiKeyInputProps> = ({
 
       {/* Error message */}
       {isApiKeyError && (
-        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+        <div className="flex items-start gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+          <AlertCircle className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
           <div className="text-sm">
-            <p className="font-medium text-red-900">API Key Required</p>
-            <p className="text-red-700 mt-1">{error}</p>
+            <p className="font-medium text-foreground">API Key Required</p>
+            <p className="text-muted-foreground mt-1">{error}</p>
           </div>
         </div>
       )}
 
       {/* Success message */}
       {apiKey && !isApiKeyError && (
-        <p className="text-xs text-neutral-600">✓ API key saved locally</p>
+        <p className="text-xs text-muted-foreground">✓ API key saved locally</p>
       )}
     </div>
   );

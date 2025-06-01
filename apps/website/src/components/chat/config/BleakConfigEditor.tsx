@@ -136,19 +136,14 @@ export const BleakElementConfigEditor: React.FC<
         {/* Header Actions */}
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-medium text-neutral-900 mb-1">
+            <h3 className="text-lg font-medium text-foreground mb-1">
               Component Types
             </h3>
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-muted-foreground">
               {enabledCount} of {Object.keys(config).length} types enabled
             </p>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleReset}
-            className="text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
-          >
+          <Button variant="ghost" size="sm" onClick={handleReset}>
             <RotateCcw className="h-4 w-4 mr-2" />
             Reset All
           </Button>
@@ -164,19 +159,19 @@ export const BleakElementConfigEditor: React.FC<
             return (
               <div
                 key={type}
-                className="border border-neutral-200 rounded-lg p-4 space-y-4"
+                className="border border-border rounded-lg p-4 space-y-4 bg-card"
               >
                 {/* Header with Icon, Name, and Toggle */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-neutral-100 rounded-lg flex items-center justify-center">
-                      <IconComponent className="h-5 w-5 text-neutral-600" />
+                    <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                      <IconComponent className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-medium text-neutral-900">
+                      <h4 className="font-medium text-foreground">
                         {typeConfig.name}
                       </h4>
-                      <p className="text-xs text-neutral-500">
+                      <p className="text-xs text-muted-foreground">
                         {type} component
                       </p>
                     </div>
@@ -186,7 +181,7 @@ export const BleakElementConfigEditor: React.FC<
                     {/* Edit Button */}
                     <button
                       onClick={() => handleStartEdit(type)}
-                      className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-colors"
+                      className="p-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-lg transition-colors"
                       title="Edit component settings"
                     >
                       <Edit3 className="h-4 w-4" />
@@ -197,8 +192,8 @@ export const BleakElementConfigEditor: React.FC<
                       onClick={() => handleToggleEnabled(type)}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                         typeConfig.enabled
-                          ? "bg-green-100 text-green-700 hover:bg-green-200"
-                          : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200"
+                          ? "bg-primary/10 text-primary hover:bg-primary/20"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                       title={
                         typeConfig.enabled
@@ -226,8 +221,8 @@ export const BleakElementConfigEditor: React.FC<
                   <p
                     className={`text-sm leading-relaxed ${
                       typeConfig.enabled
-                        ? "text-neutral-600"
-                        : "text-neutral-400"
+                        ? "text-muted-foreground"
+                        : "text-muted-foreground/60"
                     }`}
                   >
                     {typeConfig.description.length > 150
@@ -242,7 +237,7 @@ export const BleakElementConfigEditor: React.FC<
 
         {/* Summary */}
         {enabledCount === 0 && (
-          <div className="text-center py-8 text-neutral-500">
+          <div className="text-center py-8 text-muted-foreground">
             <p className="text-sm">No component types are enabled.</p>
             <p className="text-xs mt-1">
               Enable at least one type to use the chat.
@@ -253,9 +248,9 @@ export const BleakElementConfigEditor: React.FC<
 
       {/* Edit Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[500px] bg-white border-neutral-200">
+        <DialogContent className="sm:max-w-[500px] bg-background border-border">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 text-neutral-900">
+            <DialogTitle className="flex items-center gap-3 text-foreground">
               {editingType && (
                 <>
                   {React.createElement(
@@ -263,21 +258,21 @@ export const BleakElementConfigEditor: React.FC<
                       editingType as keyof typeof BLEAK_ELEMENT_ICONS
                     ] || Type,
                     {
-                      className: "h-5 w-5 text-neutral-600"
+                      className: "h-5 w-5 text-muted-foreground"
                     }
                   )}
                   Edit {config[editingType]?.name}
                 </>
               )}
             </DialogTitle>
-            <DialogDescription className="text-neutral-600">
+            <DialogDescription className="text-muted-foreground">
               Customize how the AI uses this component type in conversations.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-900">
+              <label className="text-sm font-medium text-foreground">
                 Display Name
               </label>
               <Input
@@ -286,12 +281,11 @@ export const BleakElementConfigEditor: React.FC<
                   setTempConfig((prev) => ({...prev, name: e.target.value}))
                 }
                 placeholder="Component type name"
-                className="bg-white border-neutral-300 text-neutral-900 placeholder:text-neutral-500 focus:border-neutral-900 focus:ring-0"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-900">
+              <label className="text-sm font-medium text-foreground">
                 AI Instructions
               </label>
               <Textarea
@@ -303,25 +297,16 @@ export const BleakElementConfigEditor: React.FC<
                   }))
                 }
                 placeholder="Describe when and how this component type should be used..."
-                className="min-h-[100px] bg-white border-neutral-300 text-neutral-900 placeholder:text-neutral-500 focus:border-neutral-900 focus:ring-0 resize-none"
+                className="min-h-[100px] resize-none"
               />
             </div>
           </div>
 
           <DialogFooter className="gap-3">
-            <Button
-              variant="ghost"
-              onClick={handleCloseModal}
-              className="text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
-            >
+            <Button variant="ghost" onClick={handleCloseModal}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSaveEdit}
-              className="bg-neutral-900 hover:bg-neutral-800 text-white"
-            >
-              Save Changes
-            </Button>
+            <Button onClick={handleSaveEdit}>Save Changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

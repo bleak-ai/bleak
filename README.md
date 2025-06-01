@@ -1,207 +1,275 @@
-# Bleak - AI Chatbot with Time Travel
+# BleakAI - Stop Making Users Type Everything
 
-A modern AI chatbot application built with FastAPI backend and React frontend, featuring LangGraph-powered conversation management, time travel capabilities, and dynamic bleak element rendering.
+BleakAI transforms text-based AI conversations into smart form interactions. Instead of asking users to type responses, AI generates the right form components - date pickers, sliders, dropdowns - to get structured data from the start.
 
-## Features
+## The Problem
 
-### 🚀 Core Features
+Traditional AI conversations look like this:
 
-- **AI-Powered Conversations**: Intelligent chatbot using LangGraph for conversation flow
-- **Real-time Chat Interface**: Modern, responsive chat UI with message history
-- **Persistent Conversations**: Conversation state is maintained across sessions
-- **Dynamic Bleak Elements**: Framework-agnostic component resolution for interactive elements
+```
+🤖 AI: "Please tell me: what date, what time, how many people, any dietary requirements, and your contact information?"
 
-### ⏰ Time Travel Features
-
-- **Conversation History**: View complete conversation history with all checkpoints
-- **Message Editing**: Edit any previous user message and see how the conversation would have evolved differently
-- **Checkpoint Resume**: Jump back to any point in the conversation and continue from there
-- **Visual Timeline**: See all conversation states with timestamps and navigation controls
-
-### 🎯 Bleak Element System
-
-- **Framework-Agnostic**: Component resolution logic works with any UI framework
-- **Type-Safe**: Full TypeScript support for element configuration
-- **Extensible**: Easy to add new element types and components
-- **Intelligent Fallbacks**: Graceful handling of unsupported element types
-
-## Time Travel Usage
-
-### Viewing History
-
-1. Start a conversation with the AI
-2. Click the "Show History" button in the chat header
-3. Browse through all conversation checkpoints with timestamps
-
-### Editing Messages
-
-1. In the history view, hover over any user message
-2. Click the "Edit" button that appears
-3. Modify the message and press Enter or click "Save"
-4. The conversation will continue from that point with the new message
-
-### Resuming from Checkpoints
-
-1. In the history view, find the checkpoint you want to resume from
-2. Click the "Resume Here" button
-3. The conversation will continue from that exact state
-
-### Keyboard Shortcuts
-
-- **Enter**: Save edited message
-- **Escape**: Cancel editing
-- **Shift+Enter**: New line in edit mode
-
-## Bleak Element System
-
-The application includes a sophisticated element resolution system powered by the `bleakai` library:
-
-### Supported Element Types
-
-- **Text Elements**: Open-ended text input fields
-- **Radio Elements**: Single-choice selection with predefined options
-- **Multi-select Elements**: Multiple choice selections with checkboxes
-- **Slider Elements**: Numeric ratings and range selections
-
-### Configuration
-
-Elements are configured through a type-safe configuration system:
-
-```typescript
-const BLEAK_ELEMENT_CONFIG = {
-  text: {
-    component: TextBleakElement,
-    description: "Use for open-ended text input"
-  },
-  radio: {
-    component: RadioBleakElement,
-    description: "Use for single-choice questions"
-  }
-  // ... more configurations
-} satisfies BleakElementConfig;
+👤 User: "Um, let me think... next Friday, around 7pm, for 4 people. My friend is vegetarian. My number is 555-0123"
 ```
 
-### Dynamic Resolution
+**Problems:**
 
-The system automatically resolves element types to appropriate UI components:
+- User must remember all details
+- Easy to forget information
+- AI must parse messy text
+- Prone to errors and misunderstanding
+
+## The BleakAI Solution
+
+With BleakAI, the same conversation becomes:
+
+```
+🤖 AI: "I need some details for your reservation. Let me create a form:"
+
+✨ Generates:
+- Date picker (auto-set to next Friday)
+- Time dropdown (7:00 PM, 7:30 PM, 8:00 PM options)
+- Number input (party size)
+- Checkboxes (Vegetarian ✓, Vegan, Gluten-free)
+- Phone input (with validation)
+```
+
+**Result: Perfect structured data, no parsing needed.**
+
+## When to Use BleakAI
+
+BleakAI is ideal when:
+
+🤖 **The AI doesn't know yet what it needs to know**  
+📋 **Forms must be generated on the fly, tailored to the conversation**  
+🧩 **The form itself isn't the product, but rather input for another intelligent process**  
+🔁 **User input refines a multi-step, dynamic decision or generation process**
+
+## Core Features
+
+### 🎯 Smart Form Generation
+
+- AI analyzes what information it needs
+- Automatically generates appropriate form components
+- Gets structured data instead of parsing text
+
+### 🧩 Your Components, AI's Logic
+
+- Works with any UI library (React, Vue, Angular, vanilla JS)
+- Use your existing design system
+- BleakAI provides the intelligence, you provide the presentation
+
+### ⚡ Dynamic & Context-Aware
+
+- Forms generated based on conversation context
+- Can't be predicted beforehand
+- Adapts to user needs in real-time
+
+## How It Works
+
+### 1. Map Your Components
+
+Tell BleakAI about your existing UI components:
 
 ```typescript
+const config = {
+  text: {
+    component: YourTextInput,
+    description: "For text input and messages"
+  },
+  select: {
+    component: YourDropdown,
+    description: "For choosing from 2-10 options"
+  },
+  date: {
+    component: YourDatePicker,
+    description: "For dates and times"
+  },
+  slider: {
+    component: YourSlider,
+    description: "For numbers and ranges"
+  }
+};
+```
+
+### 2. AI Picks the Right Components
+
+When AI needs information, it generates the optimal form:
+
+```typescript
+// User: "I need help booking a restaurant"
+// AI analyzes and generates appropriate form elements
+
+const form = generateForm(userMessage, config);
+// Returns: date picker, time selector, party size, dietary checkboxes
+```
+
+### 3. Get Perfect Data
+
+Instead of parsing "next Friday around 7pm for 4 people", you get:
+
+```json
+{
+  "date": "2024-03-15",
+  "time": "19:00",
+  "partySize": 4,
+  "dietary": ["vegetarian"]
+}
+```
+
+## Real-World Examples
+
+### Restaurant Reservation
+
+- **Traditional**: "Please tell me date, time, party size, dietary requirements..."
+- **BleakAI**: Date picker + time dropdown + number input + dietary checkboxes
+
+### Product Configuration
+
+- **Traditional**: "Tell me your specs, budget, and requirements..."
+- **BleakAI**: RAM buttons + storage options + budget slider + feature checkboxes
+
+### Technical Support
+
+- **Traditional**: "Describe your device, when it crashes, and what you were doing..."
+- **BleakAI**: Device dropdown + frequency slider + structured reproduction steps
+
+## Framework Agnostic
+
+BleakAI doesn't ship with UI components. It generates component trees that you render with your existing setup:
+
+**React:**
+
+```tsx
 const {Component, props} = resolve(element, value, onChange);
 return <Component {...props} />;
 ```
 
-## Technical Implementation
+**Vue:**
 
-### Backend (FastAPI + LangGraph)
+```vue
+<component :is="resolvedComponent" v-bind="props" />
+```
 
-- **Checkpoint System**: Uses LangGraph's MemorySaver for state persistence
-- **Time Travel API**: RESTful endpoints for history management
-- **State Management**: Conversation states are stored with unique checkpoint IDs
-- **Element Generation**: AI-powered generation of appropriate bleak elements
+**Vanilla JS:**
 
-### Frontend (React + TypeScript)
+```javascript
+const element = resolve(elementConfig, value, onChange);
+document.body.appendChild(element);
+```
 
-- **Real-time Updates**: React Query for efficient data fetching and caching
-- **Responsive Design**: Modern UI with Tailwind CSS
-- **Interactive History**: Intuitive interface for browsing and editing conversation history
-- **Component Resolution**: Framework-agnostic element rendering system
+## Quick Start
 
-### Bleak Core Library
-
-- **Framework Agnostic**: Pure TypeScript logic without UI dependencies
-- **Type Safety**: Comprehensive TypeScript definitions and validation
-- **Extensible**: Easy to add new element types and behaviors
-- **Lightweight**: Minimal bundle size with zero framework dependencies
-
-## API Endpoints
-
-### Chat Endpoints
-
-- `POST /chat` - Send a message to the chatbot
-- `GET /chat/{conversation_id}/history` - Get conversation history with checkpoints
-- `POST /chat/resume-from-checkpoint` - Resume conversation from a specific checkpoint
-- `POST /chat/edit-message` - Edit a message at a specific checkpoint
-
-### Health & Debug
-
-- `GET /health` - Health check endpoint
-- `GET /debug` - Debug information and available endpoints
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.8+
-- Node.js 16+
-- npm or yarn
-
-### Backend Setup
+### 1. Install
 
 ```bash
-cd backend
-pip install -r requirements.txt
-python -m uvicorn src.main:app --host 0.0.0.0 --port 8008 --reload
+npm install @bleakai/core
 ```
 
-### Frontend Setup
+### 2. Configure Your Components
 
-```bash
-cd frontend
-npm install
-npm run dev
+```typescript
+import {createResolverFromConfig} from "@bleakai/core";
+
+const config = {
+  text: {component: MyTextInput, description: "For text input"},
+  select: {component: MyDropdown, description: "For selections"}
+  // ... map your components
+};
+
+const {resolve} = createResolverFromConfig(config);
 ```
 
-### Library Development
+### 3. Generate Forms
 
-```bash
-cd library
-npm install
-npm run build
-npm link  # For local development
-```
+```typescript
+// When AI needs information
+const formElements = generateForm(conversation, config);
 
-### Environment Variables
-
-Create a `.env` file in the backend directory:
-
-```
-OPENAI_API_KEY=your_openai_api_key_here
-# or other LLM provider keys as needed
+// Render each element
+formElements.map((element) => {
+  const {Component, props} = resolve(element, value, onChange);
+  return <Component {...props} />;
+});
 ```
 
 ## Architecture
 
-The application follows modern patterns with separation of concerns:
+### Core Components
 
-### LangGraph Time Travel
+- **Form Generator**: AI logic that determines what information is needed
+- **Component Resolver**: Maps form requirements to your UI components
+- **Type System**: Ensures type safety across the entire pipeline
+- **Framework Adapters**: Render generated forms in any frontend framework
 
-- **State Persistence**: Every conversation step is checkpointed
-- **Immutable History**: Previous states are preserved when editing
-- **Branching Conversations**: Edits create new conversation branches
-- **Efficient Storage**: Only state differences are stored between checkpoints
+### Backend Integration
 
-### Bleak Element System
+```python
+# Python backend example
+from bleakai import FormGenerator
 
-- **Component Resolution**: Framework-agnostic logic determines UI components
-- **Type Safety**: Strict TypeScript validation prevents runtime errors
-- **Extensibility**: Plugin-like architecture for adding new element types
-- **Fallback Handling**: Graceful degradation for unsupported elements
+generator = FormGenerator()
+form_spec = generator.analyze_conversation(messages)
+# Returns structured form specification for frontend
+```
+
+### Frontend Integration
+
+```typescript
+// Frontend renders the form
+const formElements = await fetchFormSpec(conversationId);
+const renderedForm = renderForm(formElements, componentConfig);
+```
+
+## The Difference
+
+| Traditional AI                            | BleakAI                               |
+| ----------------------------------------- | ------------------------------------- |
+| ❌ Overwhelming text questions            | ✅ Smart, focused form components     |
+| ❌ Users type unstructured answers        | ✅ Users click, select, and slide     |
+| ❌ AI must parse messy text               | ✅ Perfect structured data every time |
+| ❌ Information gets lost or misunderstood | ✅ Nothing gets lost in translation   |
 
 ## Contributing
 
+BleakAI is open source. We welcome contributions:
+
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+3. Add tests for new functionality
+4. Submit a pull request
 
-### Adding New Element Types
+### Adding New Component Types
 
-1. Define the element configuration in the library
-2. Create the UI component in the frontend
-3. Register the component in the element registry
-4. Update type definitions and documentation
+```typescript
+// Define new component type
+export interface SliderElement {
+  type: "slider";
+  min: number;
+  max: number;
+  step?: number;
+  label: string;
+}
+
+// Add to configuration
+const config = {
+  slider: {
+    component: YourSliderComponent,
+    description: "For numeric ranges and ratings"
+  }
+};
+```
 
 ## License
 
 MIT License - see LICENSE file for details
+
+## Get Started
+
+Ready to stop parsing messy text and start getting perfect data?
+
+```bash
+npm install @bleakai/core
+```
+
+Visit our [documentation](https://bleakai.dev) for detailed guides and examples.

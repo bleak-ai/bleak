@@ -27,7 +27,7 @@ const Header = () => {
   };
 
   return (
-    <header className="border-b border-neutral-200 bg-white backdrop-blur-sm sticky top-0 z-50">
+    <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 py-6">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -35,8 +35,8 @@ const Header = () => {
             className="flex items-center cursor-pointer"
             onClick={() => navigateTo("")}
           >
-            <img src="/bleaktree.png" alt="Bleak" className="w-10 h-10" />
-            <span className="text-2xl font-light tracking-tight text-neutral-900 ml-2">
+            <img src="/bleaktreewhite.png" alt="Bleak" className="w-10 h-10" />
+            <span className="text-2xl font-light tracking-tight text-foreground ml-2">
               Bleak
             </span>
           </div>
@@ -45,9 +45,9 @@ const Header = () => {
           <nav className="flex items-center gap-2">
             <Button
               variant="ghost"
-              className={`text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 font-medium ${
+              className={`text-muted-foreground hover:text-foreground hover:bg-accent font-medium ${
                 currentHash === "" || currentHash === "#"
-                  ? "text-neutral-900 bg-neutral-50"
+                  ? "text-foreground bg-accent"
                   : ""
               }`}
               onClick={() => navigateTo("")}
@@ -56,8 +56,8 @@ const Header = () => {
             </Button>
             <Button
               variant="ghost"
-              className={`text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 font-medium ${
-                currentHash === "#chat" ? "text-neutral-900 bg-neutral-50" : ""
+              className={`text-muted-foreground hover:text-foreground hover:bg-accent font-medium ${
+                currentHash === "#chat" ? "text-foreground bg-accent" : ""
               }`}
               onClick={() => navigateTo("chat")}
             >

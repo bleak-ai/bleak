@@ -33,10 +33,10 @@ export const PromptForm = ({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-light mb-2 text-neutral-900">
+        <h2 className="text-2xl font-light mb-2 text-foreground">
           What would you like to know?
         </h2>
-        <p className="text-neutral-600">
+        <p className="text-muted-foreground">
           Ask a question and I'll generate interactive components to gather more
           details.
         </p>
@@ -48,12 +48,12 @@ export const PromptForm = ({
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Type your question here..."
           rows={4}
-          className="resize-none bg-white border-neutral-300 text-neutral-900 placeholder:text-neutral-500 focus:border-neutral-900 focus:ring-0"
+          className="resize-none"
         />
         <Button
           type="submit"
           disabled={!prompt.trim() || isLoading}
-          className="w-full bg-neutral-900 hover:bg-neutral-800 text-white py-3 text-base font-medium"
+          className="w-full py-3 text-base font-medium"
           size="lg"
         >
           {isLoading ? (
