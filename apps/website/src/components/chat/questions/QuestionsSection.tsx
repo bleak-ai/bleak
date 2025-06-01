@@ -52,7 +52,7 @@ const DynamicBleakElement = ({
   } catch (error) {
     console.error("Error resolving bleak element:", error);
     return (
-      <div className="text-red-600 text-sm">
+      <div className="text-destructive text-sm">
         Error rendering question: {question.question}
       </div>
     );
@@ -88,20 +88,20 @@ export const QuestionsSection = ({
     <div className="space-y-8">
       <div className="space-y-6">
         <div className="space-y-3">
-          <h2 className="text-2xl font-light text-neutral-900">
+          <h2 className="text-2xl font-light text-foreground">
             Help me understand better
           </h2>
           <div className="space-y-2">
-            <p className="text-neutral-600">
+            <p className="text-muted-foreground">
               Please answer these questions to get a more personalized response
             </p>
             {previousAnswers && previousAnswers.length > 0 && (
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-muted-foreground">
                 Building on your previous {previousAnswers.length} answer(s)
               </p>
             )}
             {activeTypes && (
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-muted-foreground">
                 Using custom element types: {activeTypes.join(", ")}
               </p>
             )}
@@ -120,7 +120,7 @@ export const QuestionsSection = ({
                 questionIndex={index}
               />
               {index < questions.length - 1 && (
-                <div className="w-full h-px bg-neutral-200"></div>
+                <div className="w-full h-px bg-border"></div>
               )}
             </div>
           ))}
@@ -134,7 +134,7 @@ export const QuestionsSection = ({
             onClick={() => onChoice("more_questions")}
             variant="outline"
             disabled={!allQuestionsAnswered || isLoading}
-            className="flex-1 border-neutral-300 text-neutral-900 hover:bg-neutral-50 py-3 text-base font-medium"
+            className="flex-1 py-3 text-base font-medium"
           >
             {isLoading ? (
               <>
@@ -150,7 +150,7 @@ export const QuestionsSection = ({
         <Button
           onClick={() => onChoice("final_answer")}
           disabled={!allQuestionsAnswered || isLoading}
-          className="flex-1 bg-neutral-900 hover:bg-neutral-800 text-white py-3 text-base font-medium"
+          className="flex-1 py-3 text-base font-medium"
         >
           {isLoading ? (
             <>
@@ -165,8 +165,10 @@ export const QuestionsSection = ({
 
       {/* No more questions message */}
       {noMoreQuestionsAvailable && noMoreQuestionsMessage && (
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-800">{noMoreQuestionsMessage}</p>
+        <div className="p-4 bg-secondary border border-border rounded-lg">
+          <p className="text-sm text-secondary-foreground">
+            {noMoreQuestionsMessage}
+          </p>
         </div>
       )}
     </div>

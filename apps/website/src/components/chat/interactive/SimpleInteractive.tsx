@@ -256,7 +256,7 @@ export const SimpleInteractive = ({
       <div className="space-y-6">
         {/* API Key Input - only shown if there's an error and no API key from parent */}
         {apiKeyError && !apiKey && (
-          <div className="p-4 border border-neutral-200 rounded-lg bg-neutral-50">
+          <div className="p-4 border border-border rounded-lg bg-muted">
             <ApiKeyInput
               onApiKeyChange={setApiKey}
               required={false}
@@ -286,7 +286,7 @@ export const SimpleInteractive = ({
         {/* Questions */}
         {questions.length > 0 && (
           <div>
-            <h3 className="text-lg font-medium mb-4">
+            <h3 className="text-lg font-medium mb-4 text-foreground">
               Questions ({questions.length})
             </h3>
             <QuestionsSection
@@ -319,8 +319,8 @@ export const SimpleInteractive = ({
         {/* Loading state */}
         {isLoading && (
           <div className="text-center py-8">
-            <div className="inline-flex items-center gap-2 text-neutral-600">
-              <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin"></div>
+            <div className="inline-flex items-center gap-2 text-muted-foreground">
+              <div className="w-4 h-4 border-2 border-border border-t-foreground rounded-full animate-spin"></div>
               Processing your request...
             </div>
           </div>

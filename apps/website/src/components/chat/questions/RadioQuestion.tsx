@@ -60,17 +60,17 @@ export const RadioQuestion = ({
       <RadioGroup
         value={isOtherSelected ? "other" : value}
         onValueChange={handleRadioChange}
-        className="space-y-3"
+        className="space-y-2"
       >
         {options.map((option: string, optIndex: number) => (
           <div
             key={optIndex}
-            className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors"
+            className="flex items-center space-x-3 p-3 rounded-lg border border-border bg-card hover:bg-accent hover:border-ring/50 transition-all duration-200 cursor-pointer"
           >
             <RadioGroupItem value={option} id={`${baseId}-${optIndex}`} />
             <Label
               htmlFor={`${baseId}-${optIndex}`}
-              className="cursor-pointer text-sm flex-1 leading-relaxed"
+              className="cursor-pointer text-sm flex-1 leading-relaxed text-foreground"
             >
               {option}
             </Label>
@@ -79,7 +79,7 @@ export const RadioQuestion = ({
 
         {/* Other option */}
         <div className="space-y-3">
-          <div className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors">
+          <div className="flex items-center space-x-3 p-3 rounded-lg border border-border bg-card hover:bg-accent hover:border-ring/50 transition-all duration-200">
             <RadioGroupItem value="other" id={`${baseId}-other`} />
             <Input
               value={otherValue}

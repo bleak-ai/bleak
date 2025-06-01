@@ -43,63 +43,64 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Silent Edge Dark Theme - Default */
+/* High Contrast Dark Theme - Much More Visible */
 :root {
   --radius: 0.625rem;
 
-  /* Dark Silent Edge - Deep blacks with high contrast whites */
-  /* --background: oklch(0.1 0 0); Deep black background */
-  --background: oklch(0.21 0.006 285.885);
-  --foreground: oklch(0.98 0 0); /* Pure white text */
+  /* Deep black backgrounds with stark white text */
+  --background: oklch(
+    0.21 0.006 285.885
+  ); /* Even darker background for maximum contrast */
+  --foreground: oklch(1 0 0); /* Pure bright white text */
 
-  /* Cards with subtle distinction from background */
-  --card: oklch(0.15 0 0); /* Slightly lighter than background */
-  --card-foreground: oklch(0.98 0 0); /* High contrast white text */
+  /* Cards with clear distinction from background */
+  --card: oklch(0.25 0 0); /* More distinct card background */
+  --card-foreground: oklch(1 0 0); /* Bright white text on cards */
 
   /* Popovers */
-  --popover: oklch(0.12 0 0);
-  --popover-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.1 0 0);
+  --popover-foreground: oklch(1 0 0);
 
-  /* Primary - Clean white for key actions */
-  --primary: oklch(0.98 0 0); /* Clean white for primary elements */
-  --primary-foreground: oklch(0.1 0 0); /* Dark text on white */
+  /* Primary - Bright white for maximum visibility */
+  --primary: oklch(1 0 0); /* Pure white for primary elements */
+  --primary-foreground: oklch(0.05 0 0); /* Deep black text on white */
 
-  /* Secondary - Subtle grays */
-  --secondary: oklch(0.2 0 0); /* Subtle dark gray */
-  --secondary-foreground: oklch(0.9 0 0); /* Light gray text */
+  /* Secondary - Much more visible gray */
+  --secondary: oklch(0.25 0 0); /* More visible secondary background */
+  --secondary-foreground: oklch(0.95 0 0); /* Bright text on secondary */
 
-  /* Muted elements */
-  --muted: oklch(0.18 0 0); /* Muted dark background */
-  --muted-foreground: oklch(0.65 0 0); /* Muted gray text with good contrast */
+  /* Muted elements - increased visibility */
+  --muted: oklch(0.15 0 0); /* Lighter muted background for better visibility */
+  --muted-foreground: oklch(0.75 0 0); /* Much brighter muted text */
 
-  /* Accent */
-  --accent: oklch(0.2 0 0);
-  --accent-foreground: oklch(0.98 0 0);
+  /* Accent - more prominent */
+  --accent: oklch(0.22 0 0); /* More visible accent background */
+  --accent-foreground: oklch(1 0 0); /* Bright white on accent */
 
   /* Destructive actions */
-  --destructive: oklch(0.6 0.2 25); /* Red with good contrast */
+  --destructive: oklch(0.65 0.25 25); /* Brighter, more visible red */
 
-  /* Borders - Subtle but visible */
-  --border: oklch(0.25 0 0); /* Subtle border that's visible on dark */
-  --input: oklch(0.2 0 0); /* Input background */
-  --ring: oklch(0.6 0 0); /* Focus ring */
+  /* Borders and inputs - much more visible */
+  --border: oklch(0.35 0 0); /* Much brighter borders for clear definition */
+  --input: oklch(0.12 0 0); /* Slightly lighter input background */
+  --ring: oklch(0.7 0 0); /* Very bright focus ring */
 
   /* Charts */
-  --chart-1: oklch(0.65 0.2 260);
-  --chart-2: oklch(0.7 0.15 160);
-  --chart-3: oklch(0.75 0.18 60);
-  --chart-4: oklch(0.6 0.25 300);
-  --chart-5: oklch(0.68 0.22 20);
+  --chart-1: oklch(0.7 0.25 260);
+  --chart-2: oklch(0.75 0.2 160);
+  --chart-3: oklch(0.8 0.22 60);
+  --chart-4: oklch(0.65 0.3 300);
+  --chart-5: oklch(0.73 0.27 20);
 
   /* Sidebar */
-  --sidebar: oklch(0.12 0 0);
-  --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.98 0 0);
-  --sidebar-primary-foreground: oklch(0.1 0 0);
-  --sidebar-accent: oklch(0.2 0 0);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.25 0 0);
-  --sidebar-ring: oklch(0.6 0 0);
+  --sidebar: oklch(0.1 0 0);
+  --sidebar-foreground: oklch(1 0 0);
+  --sidebar-primary: oklch(1 0 0);
+  --sidebar-primary-foreground: oklch(0.05 0 0);
+  --sidebar-accent: oklch(0.22 0 0);
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --sidebar-border: oklch(0.35 0 0);
+  --sidebar-ring: oklch(0.7 0 0);
 }
 
 /* Light theme (when explicitly needed) */

@@ -57,11 +57,15 @@ export const SliderBleakElement = ({
     onChange(actualMin.toString());
   }
 
+  // Calculate progress percentage for the slider
+  const progressPercentage =
+    ((numericValue - actualMin) / (actualMax - actualMin)) * 100;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4 rounded-lg border border-border bg-card">
       <Label className="text-base font-medium text-foreground">{text}</Label>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="px-3">
           <input
             type="range"
@@ -70,29 +74,28 @@ export const SliderBleakElement = ({
             step={step}
             value={numericValue}
             onChange={handleSliderChange}
-            className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer 
-                       slider::-webkit-slider-thumb:appearance-none 
-                       slider::-webkit-slider-thumb:h-5 
-                       slider::-webkit-slider-thumb:w-5 
-                       slider::-webkit-slider-thumb:rounded-full 
-                       slider::-webkit-slider-thumb:bg-blue-500
-                       focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full h-2 bg-border rounded-lg appearance-none cursor-pointer 
+                       [&::-webkit-slider-thumb]:appearance-none 
+                       [&::-webkit-slider-thumb]:h-6 
+                       [&::-webkit-slider-thumb]:w-6 
+                       [&::-webkit-slider-thumb]:rounded-full 
+                       [&::-webkit-slider-thumb]:bg-primary
+                       [&::-webkit-slider-thumb]:shadow-lg
+                       [&::-webkit-slider-thumb]:hover:scale-110
+                       [&::-webkit-slider-thumb]:transition-transform
+                       focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-card"
             style={{
-              background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${
-                ((numericValue - actualMin) / (actualMax - actualMin)) * 100
-              }%, #e5e7eb ${
-                ((numericValue - actualMin) / (actualMax - actualMin)) * 100
-              }%, #e5e7eb 100%)`
+              background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${progressPercentage}%, hsl(var(--border)) ${progressPercentage}%, hsl(var(--border)) 100%)`
             }}
           />
         </div>
 
         <div className="flex justify-between text-sm text-muted-foreground px-3">
-          <span>{actualMin}</span>
-          <span className="font-medium text-foreground px-2 py-1 rounded">
+          <span className="font-medium">{actualMin}</span>
+          <span className="font-bold text-lg text-foreground bg-primary text-primary-foreground px-3 py-1 rounded-md shadow-sm">
             {numericValue}
           </span>
-          <span>{actualMax}</span>
+          <span className="font-medium">{actualMax}</span>
         </div>
 
         {/* Show step info if it's not 1 */}

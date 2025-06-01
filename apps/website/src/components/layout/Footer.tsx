@@ -2,7 +2,7 @@ import {Separator} from "../ui/separator";
 
 const Footer = () => {
   return (
-    <footer className="border-t border-border py-16 px-6 bg-background">
+    <footer className="border-t border-border py-16 px-6 bg-muted">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="flex items-center mb-8 md:mb-0">
