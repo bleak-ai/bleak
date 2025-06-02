@@ -7,7 +7,7 @@ interface AuthPageWrapperProps {
   children?: React.ReactNode;
 }
 
-export const AuthPageWrapper: React.FC<AuthPageWrapperProps> = ({children}) => {
+export const AuthPageWrapper: React.FC<AuthPageWrapperProps> = () => {
   // Get the SuperTokens routing component
   const authComponent = getRoutingComponent([PasswordlessPreBuiltUI]);
 

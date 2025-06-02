@@ -8,7 +8,7 @@ import {TestBleakAI} from "./components/demo";
 import {AuthWrapper} from "./components/auth/AuthWrapper";
 import {AuthPageWrapper} from "./components/auth/AuthPageWrapper";
 import DashboardPage from "./components/dashboard/UserDashboard";
-import {canHandleRoute, getRoutingComponent} from "supertokens-auth-react/ui";
+import {canHandleRoute} from "supertokens-auth-react/ui";
 import {PasswordlessPreBuiltUI} from "supertokens-auth-react/recipe/passwordless/prebuiltui";
 
 function App() {
