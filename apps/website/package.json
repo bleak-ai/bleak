@@ -28,6 +28,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-syntax-highlighter": "^15.6.1",
+    "supertokens-auth-react": "^0.49.1",
+    "supertokens-web-js": "^0.15.0",
     "tailwind-merge": "^3.3.0",
     "tailwindcss": "^4.1.7",
     "zod": "^3.25.20"

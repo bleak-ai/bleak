@@ -5,28 +5,42 @@ import {Landing, ChatPage} from "./components/pages";
 import {Header, Footer} from "./components/layout";
 // import {DynamicDemo} from "./components/chat/interactive";
 import {TestBleakAI} from "./components/demo";
+import {AuthWrapper} from "./components/auth/AuthWrapper";
+import {AuthPageWrapper} from "./components/auth/AuthPageWrapper";
+import DashboardPage from "./components/dashboard/UserDashboard";
+import {canHandleRoute, getRoutingComponent} from "supertokens-auth-react/ui";
+import {PasswordlessPreBuiltUI} from "supertokens-auth-react/recipe/passwordless/prebuiltui";
 
 function App() {
   const [currentRoute, setCurrentRoute] = useState("");
 
   useEffect(() => {
-    // Function to handle hash changes
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace("#", "");
-      setCurrentRoute(hash);
+    // Function to handle path changes
+    const handlePathChange = () => {
+      const path = window.location.pathname.replace("/", "");
+      setCurrentRoute(path);
     };
 
     // Set initial route
-    handleHashChange();
+    handlePathChange();
 
-    // Listen for hash changes
-    window.addEventListener("hashchange", handleHashChange);
+    // Listen for popstate events (browser back/forward)
+    window.addEventListener("popstate", handlePathChange);
 
     // Cleanup
     return () => {
-      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("popstate", handlePathChange);
     };
   }, []);
+
+  // Check if SuperTokens can handle the current route
+  if (canHandleRoute([PasswordlessPreBuiltUI])) {
+    return (
+      <AuthWrapper>
+        <AuthPageWrapper />
+      </AuthWrapper>
+    );
+  }
 
   const renderPage = () => {
     switch (currentRoute) {
@@ -34,17 +48,21 @@ function App() {
         return <ChatPage />;
       case "demo":
         return <TestBleakAI />;
+      case "profile":
+        return <DashboardPage />;
       default:
         return <Landing />;
     }
   };
 
   return (
-    <div className="min-h-screen">
-      <Header />
-      <main className="min-h-screen">{renderPage()}</main>
-      <Footer />
-    </div>
+    <AuthWrapper>
+      <div className="min-h-screen">
+        <Header />
+        <main className="min-h-screen">{renderPage()}</main>
+        <Footer />
+      </div>
+    </AuthWrapper>
   );
 }
 

@@ -1,73 +1,82 @@
 import {useState, useEffect} from "react";
 import {Button} from "../ui/button";
+import {AuthButton} from "../auth/AuthWrapper";
 
 const Header = () => {
-  const [currentHash, setCurrentHash] = useState("");
+  const [currentPath, setCurrentPath] = useState("");
 
   useEffect(() => {
-    // Function to handle hash changes
-    const handleHashChange = () => {
-      setCurrentHash(window.location.hash);
+    // Function to handle path changes
+    const handlePathChange = () => {
+      setCurrentPath(window.location.pathname);
     };
 
-    // Set initial hash
-    handleHashChange();
+    // Set initial path
+    handlePathChange();
 
-    // Listen for hash changes
-    window.addEventListener("hashchange", handleHashChange);
+    // Listen for popstate events (browser back/forward)
+    window.addEventListener("popstate", handlePathChange);
 
     // Cleanup
     return () => {
-      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("popstate", handlePathChange);
     };
   }, []);
 
-  const navigateTo = (hash: string) => {
-    window.location.hash = hash;
+  const navigateTo = (path: string) => {
+    window.location.href = path;
+  };
+
+  const handleProfileClick = () => {
+    navigateTo("/profile");
   };
 
   return (
     <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 py-6">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <div
-            className="flex items-center cursor-pointer"
-            onClick={() => navigateTo("")}
-          >
-            <img src="/bleaktreewhite.png" alt="Bleak" className="w-10 h-10" />
-            <span className="text-2xl font-light tracking-tight text-foreground ml-2">
+          <div className="flex items-center space-x-8">
+            <div
+              onClick={() => navigateTo("/")}
+              className="text-2xl font-bold cursor-pointer hover:opacity-80 transition-opacity"
+            >
               Bleak
-            </span>
+            </div>
+
+            <nav className="hidden md:flex items-center space-x-6">
+              <Button
+                variant={currentPath === "/" ? "default" : "ghost"}
+                onClick={() => navigateTo("/")}
+                className="text-sm"
+              >
+                Home
+              </Button>
+              <Button
+                variant={currentPath === "/chat" ? "default" : "ghost"}
+                onClick={() => navigateTo("/chat")}
+                className="text-sm"
+              >
+                Chat
+              </Button>
+              <Button
+                variant={currentPath === "/demo" ? "default" : "ghost"}
+                onClick={() => navigateTo("/demo")}
+                className="text-sm"
+              >
+                Demo
+              </Button>
+            </nav>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              className={`text-muted-foreground hover:text-foreground hover:bg-accent font-medium ${
-                currentHash === "" || currentHash === "#"
-                  ? "text-foreground bg-accent"
-                  : ""
-              }`}
-              onClick={() => navigateTo("")}
-            >
-              Home
-            </Button>
-            <Button
-              variant="ghost"
-              className={`text-muted-foreground hover:text-foreground hover:bg-accent font-medium ${
-                currentHash === "#chat" ? "text-foreground bg-accent" : ""
-              }`}
-              onClick={() => navigateTo("chat")}
-            >
-              Chat
-            </Button>
-          </nav>
+          {/* Authentication Button - Always visible */}
+          <div className="flex items-center">
+            <AuthButton onProfileClick={handleProfileClick} />
+          </div>
         </div>
       </div>
     </header>
   );
 };
 
+export {Header};
 export default Header;

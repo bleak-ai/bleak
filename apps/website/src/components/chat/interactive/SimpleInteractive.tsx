@@ -68,11 +68,23 @@ export const SimpleInteractive = ({
   const isApiKeyError = (error: Error): boolean => {
     const message = error.message.toLowerCase();
     return (
-      message.includes("api key") ||
-      message.includes("unauthorized") ||
-      message.includes("authentication") ||
+      message.includes("api key required") ||
       message.includes("invalid api key") ||
-      message.includes("openai api key is required")
+      message.includes("authentication") ||
+      (message.includes("unauthorized") && !message.includes("ollama")) // Don't treat Ollama connection issues as API key errors
+    );
+  };
+
+  // Helper function to check if error is related to missing Ollama/development setup
+  const isOllamaConnectionError = (error: Error): boolean => {
+    const message = error.message.toLowerCase();
+    return (
+      message.includes("ollama") ||
+      message.includes("connection") ||
+      message.includes("refused") ||
+      message.includes("timeout") ||
+      (message.includes("error processing request") &&
+        !message.includes("api key"))
     );
   };
 
@@ -83,8 +95,8 @@ export const SimpleInteractive = ({
     const message = error.message;
 
     // Clean up common error patterns
-    if (message.includes("OpenAI API key is required")) {
-      return "Please enter your OpenAI API key to continue.";
+    if (message.includes("API key required")) {
+      return "API key required for production use. In development, ensure Ollama is running, or provide an OpenAI API key.";
     }
     if (message.includes("invalid api key")) {
       return "Invalid API key format. Please check your key and try again.";
@@ -93,7 +105,14 @@ export const SimpleInteractive = ({
       return "API key is invalid or has expired. Please check your OpenAI account.";
     }
 
-    return "API key is required to use Bleak.";
+    return "API key is required for production use. For development, you can use Ollama instead.";
+  };
+
+  // Get Ollama connection error message
+  const getOllamaConnectionErrorMessage = (error: Error): string | null => {
+    if (!isOllamaConnectionError(error)) return null;
+
+    return "Unable to connect to Ollama. Make sure Ollama is running locally, or provide an OpenAI API key to use OpenAI models instead.";
   };
 
   // Start session mutation
@@ -106,7 +125,7 @@ export const SimpleInteractive = ({
       return startInteractiveSession(
         prompt,
         getCustomBleakElements(),
-        apiKey || undefined
+        apiKey || undefined // API key is optional - will use Ollama if not provided in development
       );
     },
     onSuccess: (data) => {
@@ -152,7 +171,7 @@ export const SimpleInteractive = ({
         threadId,
         answeredQuestions,
         choice,
-        apiKey || undefined
+        apiKey || undefined // API key is optional - will use Ollama if not provided in development
       ),
     onSuccess: (data) => {
       console.log("✅ Choice response:", data);
@@ -193,7 +212,13 @@ export const SimpleInteractive = ({
   const isLoading = startMutation.isPending || choiceMutation.isPending;
   const error = startMutation.error || choiceMutation.error;
   const apiKeyError = error ? getApiKeyErrorMessage(error) : null;
-  const nonApiKeyError = error && !isApiKeyError(error) ? error : null;
+  const ollamaConnectionError = error
+    ? getOllamaConnectionErrorMessage(error)
+    : null;
+  const nonApiKeyError =
+    error && !isApiKeyError(error) && !isOllamaConnectionError(error)
+      ? error
+      : null;
 
   const getCurrentAnsweredQuestions = (): AnsweredQuestion[] => {
     return questions
@@ -254,7 +279,7 @@ export const SimpleInteractive = ({
   if (isWelcomeMode) {
     return (
       <div className="space-y-6">
-        {/* API Key Input - only shown if there's an error and no API key from parent */}
+        {/* API Key Input - only shown if there's an API key error and no API key from parent */}
         {apiKeyError && !apiKey && (
           <div className="p-4 border border-border rounded-lg bg-muted">
             <ApiKeyInput
@@ -262,6 +287,24 @@ export const SimpleInteractive = ({
               required={false}
               error={apiKeyError}
             />
+          </div>
+        )}
+
+        {/* Ollama Connection Error */}
+        {ollamaConnectionError && (
+          <div className="p-4 border border-destructive/50 rounded-lg bg-destructive/10">
+            <div className="text-sm text-destructive">
+              <strong>Connection Error:</strong> {ollamaConnectionError}
+            </div>
+            {!apiKey && (
+              <div className="mt-3">
+                <ApiKeyInput
+                  onApiKeyChange={setApiKey}
+                  required={false}
+                  error={null}
+                />
+              </div>
+            )}
           </div>
         )}
 

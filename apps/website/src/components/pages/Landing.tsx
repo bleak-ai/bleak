@@ -46,7 +46,7 @@ export default function Landing() {
             <Button
               size="lg"
               className="px-8 py-4 text-base font-medium"
-              onClick={() => (window.location.hash = "chat")}
+              onClick={() => (window.location.href = "/chat")}
             >
               See It Work
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -290,7 +290,7 @@ const form = generateForm(userMessage, config);`}
             <Button
               size="lg"
               className="px-8 py-4 text-base font-medium"
-              onClick={() => (window.location.hash = "chat")}
+              onClick={() => (window.location.href = "/chat")}
             >
               Try BleakAI Now
               <ArrowRight className="w-4 h-4 ml-2" />
