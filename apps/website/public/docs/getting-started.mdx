@@ -30,20 +30,9 @@ You'll also need an OpenAI API key for the AI functionality:
 2. Go to the API section and generate your API key
 3. Keep this key secure as you'll need it for configuration
 
-### Environment Configuration
+## Configuration
 
-Create a `.env.local` file in your project root:
-
-```bash
-# .env.local
-VITE_API_BASE_URL=http://localhost:8000
-BLEAK_AI_API_KEY=your-bleakai-api-key-here
-OPENAI_API_KEY=your-openai-api-key-here
-```
-
-### Alternative: Direct Configuration
-
-You can also pass the API keys directly to the client:
+Pass the API keys directly to the client when initializing:
 
 ```typescript
 import {createSimpleChatClient} from "bleakai";
@@ -53,25 +42,6 @@ const client = createSimpleChatClient({
   apiKey: "your-bleakai-api-key-here",
   openaiKey: "your-openai-api-key-here"
 });
-```
-
-## Quick Start
-
-Here's your first BleakAI conversation:
-
-```typescript
-import {createSimpleChatClient} from "bleakai";
-
-// Initialize the client
-const client = createSimpleChatClient({
-  baseUrl: "http://localhost:8000",
-  apiKey: "your-bleakai-api-key",
-  openaiKey: "your-openai-api-key"
-});
-
-// Start a conversation
-const response = await client.ask("Help me plan a vacation");
-console.log(response);
 ```
 
 ## Next Steps

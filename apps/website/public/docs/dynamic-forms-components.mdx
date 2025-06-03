@@ -1,0 +1,86 @@
+# Create Custom Components
+
+The power of BleakAI lies in mapping element types to your existing components. This "Bring Your Own Components" approach gives you complete control over presentation while BleakAI handles the intelligence.
+
+## Radio Component Example
+
+Here's an example of a Radio Component that you might have in your project:
+
+```typescript
+import React from "react";
+
+interface RadioComponentProps {
+  text: string;
+  options: string[];
+  value?: string;
+  onChange: (value: string) => void;
+}
+
+const RadioComponent: React.FC<RadioComponentProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => {
+  return (
+    <div className="space-y-3">
+      <label className="text-sm font-medium text-gray-700">{text}</label>
+      <div className="space-y-2">
+        {options.map((option, index) => (
+          <label key={index} className="flex items-center space-x-2">
+            <input
+              type="radio"
+              name={text}
+              value={option}
+              checked={value === option}
+              onChange={(e) => onChange(e.target.value)}
+              className="text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-900">{option}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+## Why This Matters for BleakAI
+
+- **Design System Integration**: Use your existing design system components
+- **Complete Control**: BleakAI provides the logic (what component to show), you provide the presentation (how it looks)
+- **Framework Agnostic**: Works with any UI framework or component library
+- **Type Safety**: Maintain TypeScript safety throughout the resolution process
+- **Extensible**: Add any custom element types your application needs
+
+## Component Configuration
+
+Configure your component mapping using the resolver:
+
+```typescript
+import {createResolverFromConfig} from "bleakai";
+
+const config = {
+  text: {component: YourTextInput, description: "Text input"},
+  radio: {component: RadioComponent, description: "Single choice"},
+  multiSelect: {component: YourMultiSelect, description: "Multiple choice"},
+  slider: {component: YourSlider, description: "Numeric range"},
+  // Add any custom element types your application needs
+  dateRange: {component: YourDateRangePicker, description: "Date selection"},
+  fileUpload: {component: YourFileUploader, description: "File upload"}
+};
+
+const {resolve} = createResolverFromConfig(config);
+```
+
+## Popular UI Libraries
+
+BleakAI works seamlessly with any component library:
+
+- **Material-UI**: Use `<Select>`, `<TextField>`, `<RadioGroup>` components
+- **Ant Design**: Map to `<Radio.Group>`, `<Input>`, `<Select>` components
+- **Chakra UI**: Use `<RadioGroup>`, `<Input>`, `<Select>` components
+- **Custom Components**: Your own design system components
+- **Headless UI**: Build completely custom styled components
+
+The separation of concerns ensures BleakAI provides the conversational intelligence while you maintain complete control over your user interface.

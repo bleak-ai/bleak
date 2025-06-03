@@ -1,0 +1,140 @@
+# Ask Questions
+
+Use the `ask` method to start a conversation. BleakAI will analyze your prompt and determine what additional information is needed to provide a complete response.
+
+## Making a Request
+
+```typescript
+// Ask a question that might require clarification
+const response = await client.ask("Help me plan a vacation to Europe");
+```
+
+## Understanding the Response
+
+The backend response will contain structured component specifications that you have **complete freedom** to render however you want:
+
+```typescript
+// Example response structure
+{
+  type: "questions",
+  questions: [
+    {
+      question_id: "q1",
+      type: "radio",
+      text: "What's your budget range?",
+      options: ["$1000-2000", "$2000-5000", "$5000+"]
+    },
+    {
+      question_id: "q2",
+      type: "text",
+      text: "How many days do you plan to travel?",
+      options: null
+    },
+    {
+      question_id: "q3",
+      type: "multiSelect",
+      text: "Which activities interest you?",
+      options: ["Museums", "Beaches", "Hiking", "Nightlife", "Food Tours"]
+    }
+  ]
+}
+```
+
+## Response Types
+
+BleakAI can return different response types:
+
+- **`questions`**: When more information is needed
+- **`answer`**: When enough information is available to provide a response
+- **`complete`**: When the conversation is finished
+
+## Rendering with Complete Freedom
+
+You decide how to render these components using your own styling, layout, validation, and UX patterns:
+
+```typescript
+// You decide how to render these components
+if (response.type === "questions") {
+  response.questions.forEach((question) => {
+    const Component = resolve(question.type);
+
+    // Render using your own styling, layout, validation, etc.
+    return (
+      <Component
+        text={question.text}
+        options={question.options}
+        onChange={(value) => handleAnswer(question.question_id, value)}
+        // Add any additional props your components need
+        className="your-custom-styles"
+        validation={yourValidationLogic}
+        required={true}
+        helperText="Please select an option"
+      />
+    );
+  });
+}
+```
+
+## Advanced Rendering Examples
+
+### With Form Validation
+
+```typescript
+const [errors, setErrors] = useState({});
+
+const renderQuestion = (question) => {
+  const Component = resolve(question.type);
+
+  return (
+    <div key={question.question_id} className="form-field">
+      <Component
+        text={question.text}
+        options={question.options}
+        onChange={(value) => {
+          handleAnswer(question.question_id, value);
+          // Clear error when user provides input
+          if (errors[question.question_id]) {
+            setErrors((prev) => ({...prev, [question.question_id]: null}));
+          }
+        }}
+        error={errors[question.question_id]}
+        required={true}
+      />
+      {errors[question.question_id] && (
+        <span className="error-message">{errors[question.question_id]}</span>
+      )}
+    </div>
+  );
+};
+```
+
+### With Custom Layouts
+
+```typescript
+const renderQuestionsGrid = (questions) => {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {questions.map((question, index) => {
+        const Component = resolve(question.type);
+
+        return (
+          <div
+            key={question.question_id}
+            className={`p-4 border rounded-lg ${
+              question.type === "text" ? "md:col-span-2" : ""
+            }`}
+          >
+            <Component
+              text={question.text}
+              options={question.options}
+              onChange={(value) => handleAnswer(question.question_id, value)}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+```
+
+The key principle is that **BleakAI provides the intelligence** about what questions to ask, while **you control everything about the presentation**.

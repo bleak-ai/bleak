@@ -83,6 +83,10 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
             "<strong class='font-semibold text-white'>$1</strong>"
           )
           .replace(
+            /\[([^\]]+)\]\(([^)]+)\)/g,
+            '<a href="$2" class="text-orange-400 hover:text-orange-300 underline" target="_blank" rel="noopener noreferrer">$1</a>'
+          )
+          .replace(
             /`(.*?)`/g,
             '<code class="px-2 py-1 bg-zinc-800 text-orange-300 rounded-md font-mono text-sm border border-zinc-700">$1</code>'
           );
@@ -111,6 +115,10 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
                         .replace(
                           /\*\*(.*?)\*\*/g,
                           "<strong class='font-semibold text-white'>$1</strong>"
+                        )
+                        .replace(
+                          /\[([^\]]+)\]\(([^)]+)\)/g,
+                          '<a href="$2" class="text-orange-400 hover:text-orange-300 underline" target="_blank" rel="noopener noreferrer">$1</a>'
                         )
                         .replace(
                           /`(.*?)`/g,

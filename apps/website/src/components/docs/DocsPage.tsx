@@ -8,7 +8,8 @@ import {
   FileText,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from "lucide-react";
 
 interface DocSection {
@@ -16,12 +17,16 @@ interface DocSection {
   title: string;
   icon: React.ComponentType<any>;
   content: string;
+  subpages?: DocSection[];
 }
 
 const DocsPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState("getting-started");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [docContents, setDocContents] = useState<Record<string, string>>({});
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(
+    new Set(["dynamic-forms", "api-reference"])
+  );
 
   const sections: DocSection[] = [
     {
@@ -34,13 +39,53 @@ const DocsPage: React.FC = () => {
       id: "dynamic-forms",
       title: "Dynamic Forms",
       icon: Code,
-      content: ""
+      content: "",
+      subpages: [
+        {
+          id: "dynamic-forms-initialize",
+          title: "Initialize Chat Client",
+          icon: Rocket,
+          content: ""
+        },
+        {
+          id: "dynamic-forms-components",
+          title: "Create Custom Components",
+          icon: Code,
+          content: ""
+        },
+        {
+          id: "dynamic-forms-questions",
+          title: "Ask Questions",
+          icon: FileText,
+          content: ""
+        },
+        {
+          id: "dynamic-forms-answers",
+          title: "Send Answers",
+          icon: ChevronRight,
+          content: ""
+        }
+      ]
     },
     {
       id: "api-reference",
       title: "API Reference",
       icon: BookOpen,
-      content: ""
+      content: "",
+      subpages: [
+        {
+          id: "api-reference-sdk",
+          title: "SDK Methods",
+          icon: Code,
+          content: ""
+        },
+        {
+          id: "api-reference-core",
+          title: "Core Methods",
+          icon: BookOpen,
+          content: ""
+        }
+      ]
     }
   ];
 
@@ -50,20 +95,38 @@ const DocsPage: React.FC = () => {
       const contents: Record<string, string> = {};
 
       try {
-        // Load each MDX file
+        // Load main sections
         const gettingStartedResponse = await fetch("/docs/getting-started.mdx");
         if (gettingStartedResponse.ok) {
           contents["getting-started"] = await gettingStartedResponse.text();
         }
 
-        const dynamicFormsResponse = await fetch("/docs/dynamic-forms.mdx");
-        if (dynamicFormsResponse.ok) {
-          contents["dynamic-forms"] = await dynamicFormsResponse.text();
+        // Load Dynamic Forms subpages
+        const dynamicFormsSubpages = [
+          "dynamic-forms-initialize",
+          "dynamic-forms-components",
+          "dynamic-forms-questions",
+          "dynamic-forms-answers"
+        ];
+
+        for (const subpage of dynamicFormsSubpages) {
+          const response = await fetch(`/docs/${subpage}.mdx`);
+          if (response.ok) {
+            contents[subpage] = await response.text();
+          }
         }
 
-        const apiReferenceResponse = await fetch("/docs/api-reference.mdx");
-        if (apiReferenceResponse.ok) {
-          contents["api-reference"] = await apiReferenceResponse.text();
+        // Load API Reference subpages
+        const apiReferenceSubpages = [
+          "api-reference-sdk",
+          "api-reference-core"
+        ];
+
+        for (const subpage of apiReferenceSubpages) {
+          const response = await fetch(`/docs/${subpage}.mdx`);
+          if (response.ok) {
+            contents[subpage] = await response.text();
+          }
         }
       } catch (error) {
         console.error("Failed to load MDX files:", error);
@@ -80,36 +143,91 @@ const DocsPage: React.FC = () => {
 
   const currentContent = docContents[activeSection] || "";
 
-  const renderSidebarSection = (section: DocSection) => {
+  const toggleSection = (sectionId: string) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionId)) {
+      newExpanded.delete(sectionId);
+    } else {
+      newExpanded.add(sectionId);
+    }
+    setExpandedSections(newExpanded);
+  };
+
+  const renderSidebarSection = (section: DocSection, level = 0) => {
     const Icon = section.icon;
     const isActive = activeSection === section.id;
+    const hasSubpages = section.subpages && section.subpages.length > 0;
+    const isExpanded = expandedSections.has(section.id);
 
     return (
-      <button
-        key={section.id}
-        onClick={() => {
-          setActiveSection(section.id);
-          setSidebarOpen(false);
-        }}
-        className={`w-full flex items-center gap-3 px-4 py-3 text-left text-sm transition-all duration-200 rounded-lg group ${
-          isActive
-            ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
-            : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-        }`}
-      >
-        <Icon
-          className={`h-4 w-4 shrink-0 ${
-            isActive
-              ? "text-orange-400"
-              : "text-zinc-500 group-hover:text-zinc-300"
-          }`}
-        />
-        <span className="font-medium">{section.title}</span>
-        {isActive && (
-          <ChevronRight className="h-4 w-4 ml-auto text-orange-400" />
+      <div key={section.id}>
+        <div className={`flex items-center ${level > 0 ? "ml-4" : ""}`}>
+          {hasSubpages && (
+            <button
+              onClick={() => toggleSection(section.id)}
+              className="p-1 hover:bg-zinc-800 rounded mr-1"
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-3 w-3 text-zinc-400" />
+              ) : (
+                <ChevronRight className="h-3 w-3 text-zinc-400" />
+              )}
+            </button>
+          )}
+
+          <button
+            onClick={() => {
+              setActiveSection(section.id);
+              setSidebarOpen(false);
+              if (hasSubpages && !isExpanded) {
+                toggleSection(section.id);
+              }
+            }}
+            className={`flex-1 flex items-center gap-3 px-3 py-2 text-left text-sm transition-all duration-200 rounded-lg group ${
+              isActive
+                ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
+            } ${!hasSubpages && level > 0 ? "ml-2" : ""}`}
+          >
+            <Icon
+              className={`h-4 w-4 shrink-0 ${
+                isActive
+                  ? "text-orange-400"
+                  : "text-zinc-500 group-hover:text-zinc-300"
+              }`}
+            />
+            <span className="font-medium">{section.title}</span>
+            {isActive && (
+              <ChevronRight className="h-4 w-4 ml-auto text-orange-400" />
+            )}
+          </button>
+        </div>
+
+        {hasSubpages && isExpanded && (
+          <div className="mt-1 space-y-1">
+            {section.subpages!.map((subpage) =>
+              renderSidebarSection(subpage, level + 1)
+            )}
+          </div>
         )}
-      </button>
+      </div>
     );
+  };
+
+  const findSectionTitle = (sectionId: string): string => {
+    for (const section of sections) {
+      if (section.id === sectionId) {
+        return section.title;
+      }
+      if (section.subpages) {
+        for (const subpage of section.subpages) {
+          if (subpage.id === sectionId) {
+            return subpage.title;
+          }
+        }
+      }
+    }
+    return "Documentation";
   };
 
   return (
@@ -124,7 +242,7 @@ const DocsPage: React.FC = () => {
 
       {/* Sidebar */}
       <div
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-72 bg-zinc-900 border-r border-zinc-800 transform ${
+        className={`fixed lg:static inset-y-0 left-0 z-40 w-72 bg-zinc-900 border-r border-zinc-800 transform ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 transition-transform duration-300 ease-in-out`}
       >
@@ -143,7 +261,7 @@ const DocsPage: React.FC = () => {
             <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3 px-4">
               Documentation
             </div>
-            {sections.map(renderSidebarSection)}
+            {sections.map((section) => renderSidebarSection(section))}
           </div>
         </nav>
       </div>
@@ -167,7 +285,7 @@ const DocsPage: React.FC = () => {
                 <span>Docs</span>
                 <ChevronRight className="h-4 w-4" />
                 <span className="text-white font-medium">
-                  {sections.find((s) => s.id === activeSection)?.title}
+                  {findSectionTitle(activeSection)}
                 </span>
               </div>
             </div>
