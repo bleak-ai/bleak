@@ -5,7 +5,6 @@
  * No rendering, no framework dependencies - just pure component resolution logic.
  */
 
-export const VERSION = "2.1.0";
 export const FRAMEWORK_AGNOSTIC = true;
 
 // Main exports - resolver functions and classes
