@@ -21,17 +21,15 @@ import {
   Minus
 } from "lucide-react";
 import {BLEAK_ELEMENT_CONFIG} from "../../../config/bleakConfig";
+import type {BleakElementConfig} from "bleakai";
 
-export interface CustomBleakElementConfig {
-  [key: string]: {
-    name: string;
-    description: string;
-    enabled: boolean;
-  };
+// Internal type for managing enabled state
+interface ElementEnabledState {
+  [key: string]: boolean;
 }
 
 interface BleakElementConfigEditorProps {
-  onConfigChange: (config: CustomBleakElementConfig) => void;
+  onConfigChange: (config: BleakElementConfig) => void;
   isCollapsed?: boolean;
 }
 
@@ -42,28 +40,31 @@ const BLEAK_ELEMENT_ICONS = {
   slider: BarChart3
 } as const;
 
+const BLEAK_ELEMENT_DISPLAY_NAMES = {
+  text: "Text Input",
+  radio: "Radio Button",
+  multi_select: "Multi Select",
+  slider: "Slider"
+} as const;
+
 export const BleakElementConfigEditor: React.FC<
   BleakElementConfigEditorProps
 > = ({onConfigChange, isCollapsed = false}) => {
   // Initialize config from default BLEAK_ELEMENT_CONFIG
-  const [config, setConfig] = useState<CustomBleakElementConfig>(() => {
-    const initialConfig: CustomBleakElementConfig = {};
-    Object.entries(BLEAK_ELEMENT_CONFIG).forEach(([key, value]) => {
-      initialConfig[key] = {
-        name: key.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-        description: value.description,
-        enabled: true
-      };
+  const [config, setConfig] =
+    useState<BleakElementConfig>(BLEAK_ELEMENT_CONFIG);
+  const [enabledState, setEnabledState] = useState<ElementEnabledState>(() => {
+    const initialEnabled: ElementEnabledState = {};
+    Object.keys(BLEAK_ELEMENT_CONFIG).forEach((key) => {
+      initialEnabled[key] = true;
     });
-    return initialConfig;
+    return initialEnabled;
   });
 
   const [editingType, setEditingType] = useState<string | null>(null);
   const [tempConfig, setTempConfig] = useState<{
-    name: string;
     description: string;
   }>({
-    name: "",
     description: ""
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,7 +72,6 @@ export const BleakElementConfigEditor: React.FC<
   const handleStartEdit = (type: string) => {
     setEditingType(type);
     setTempConfig({
-      name: config[type].name,
       description: config[type].description
     });
     setIsModalOpen(true);
@@ -84,7 +84,6 @@ export const BleakElementConfigEditor: React.FC<
       ...config,
       [editingType]: {
         ...config[editingType],
-        name: tempConfig.name,
         description: tempConfig.description
       }
     };
@@ -96,35 +95,39 @@ export const BleakElementConfigEditor: React.FC<
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingType(null);
-    setTempConfig({name: "", description: ""});
+    setTempConfig({description: ""});
   };
 
   const handleReset = () => {
-    const resetConfig: CustomBleakElementConfig = {};
-    Object.entries(BLEAK_ELEMENT_CONFIG).forEach(([key, value]) => {
-      resetConfig[key] = {
-        name: key.replace("_", " ").replace(/\b\w/g, (l) => l.toUpperCase()),
-        description: value.description,
-        enabled: true
-      };
+    setConfig(BLEAK_ELEMENT_CONFIG);
+    const resetEnabled: ElementEnabledState = {};
+    Object.keys(BLEAK_ELEMENT_CONFIG).forEach((key) => {
+      resetEnabled[key] = true;
     });
-    setConfig(resetConfig);
-    onConfigChange(resetConfig);
+    setEnabledState(resetEnabled);
+    onConfigChange(BLEAK_ELEMENT_CONFIG);
   };
 
   const handleToggleEnabled = (type: string) => {
-    const newConfig = {
-      ...config,
-      [type]: {
-        ...config[type],
-        enabled: !config[type].enabled
-      }
+    const newEnabledState = {
+      ...enabledState,
+      [type]: !enabledState[type]
     };
-    setConfig(newConfig);
-    onConfigChange(newConfig);
+    setEnabledState(newEnabledState);
+
+    // Create filtered config with only enabled elements
+    const filteredConfig: BleakElementConfig = {};
+    Object.entries(config).forEach(([key, value]) => {
+      if (newEnabledState[key]) {
+        filteredConfig[key] = value;
+      }
+    });
+    onConfigChange(filteredConfig);
   };
 
-  const enabledCount = Object.values(config).filter((c) => c.enabled).length;
+  const enabledCount = Object.values(enabledState).filter(
+    (enabled) => enabled
+  ).length;
 
   if (isCollapsed) {
     return null;
@@ -169,7 +172,9 @@ export const BleakElementConfigEditor: React.FC<
                     </div>
                     <div>
                       <h4 className="font-medium text-foreground">
-                        {typeConfig.name}
+                        {BLEAK_ELEMENT_DISPLAY_NAMES[
+                          type as keyof typeof BLEAK_ELEMENT_DISPLAY_NAMES
+                        ] || type}
                       </h4>
                       <p className="text-xs text-muted-foreground">
                         {type} component
@@ -191,17 +196,17 @@ export const BleakElementConfigEditor: React.FC<
                     <button
                       onClick={() => handleToggleEnabled(type)}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                        typeConfig.enabled
+                        enabledState[type]
                           ? "bg-primary/10 text-primary hover:bg-primary/20"
                           : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                       title={
-                        typeConfig.enabled
+                        enabledState[type]
                           ? "Disable component"
                           : "Enable component"
                       }
                     >
-                      {typeConfig.enabled ? (
+                      {enabledState[type] ? (
                         <>
                           <Check className="h-3 w-3" />
                           Enabled
@@ -220,7 +225,7 @@ export const BleakElementConfigEditor: React.FC<
                 <div className="pl-13">
                   <p
                     className={`text-sm leading-relaxed ${
-                      typeConfig.enabled
+                      enabledState[type]
                         ? "text-muted-foreground"
                         : "text-muted-foreground/60"
                     }`}
@@ -261,7 +266,10 @@ export const BleakElementConfigEditor: React.FC<
                       className: "h-5 w-5 text-muted-foreground"
                     }
                   )}
-                  Edit {config[editingType]?.name}
+                  Edit{" "}
+                  {BLEAK_ELEMENT_DISPLAY_NAMES[
+                    editingType as keyof typeof BLEAK_ELEMENT_DISPLAY_NAMES
+                  ] || editingType}
                 </>
               )}
             </DialogTitle>
@@ -271,19 +279,6 @@ export const BleakElementConfigEditor: React.FC<
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Display Name
-              </label>
-              <Input
-                value={tempConfig.name}
-                onChange={(e) =>
-                  setTempConfig((prev) => ({...prev, name: e.target.value}))
-                }
-                placeholder="Component type name"
-              />
-            </div>
-
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
                 AI Instructions

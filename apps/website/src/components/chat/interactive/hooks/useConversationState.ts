@@ -9,7 +9,8 @@ import {
   type ChatResponse,
   type AnsweredQuestion,
   type InteractiveQuestion,
-  type ChatBleakElement as BleakElement
+  type ChatBleakElement as BleakElement,
+  type BleakElementConfig
 } from "bleakai";
 import {BleakChat} from "bleakai";
 
@@ -28,7 +29,7 @@ function createAppChatConfig(apiKey?: string) {
 
 interface UseConversationStateProps {
   initialApiKey?: string | null;
-  customConfig?: any; // TODO: type this properly
+  customConfig?: BleakElementConfig | null;
   onConversationStart?: () => void;
 }
 
@@ -60,12 +61,10 @@ export function useConversationState({
   const getCustomBleakElements = (): BleakElement[] | undefined => {
     if (!customConfig) return undefined;
 
-    return Object.entries(customConfig)
-      .filter(([_, config]: [string, any]) => config.enabled)
-      .map(([name, config]: [string, any]) => ({
-        name,
-        description: config.description
-      }));
+    return Object.entries(customConfig).map(([name, config]) => ({
+      name,
+      description: config.description
+    }));
   };
 
   // Start session mutation

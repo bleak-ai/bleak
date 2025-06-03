@@ -1,8 +1,9 @@
+import React from "react";
 import {QuestionsSection} from "../questions/QuestionsSection";
 import {AnswerSection} from "../utils/AnswerSection";
 import {ErrorDisplay} from "../utils/ErrorDisplay";
+import type {BleakElementConfig} from "bleakai";
 import type {InteractiveQuestion, AnsweredQuestion} from "bleakai";
-import type {CustomBleakElementConfig} from "../config/BleakConfigEditor";
 
 interface ConversationViewProps {
   questions: InteractiveQuestion[];
@@ -12,7 +13,7 @@ interface ConversationViewProps {
   previousAnswers: AnsweredQuestion[];
   isLoading: boolean;
   allQuestionsAnswered: boolean;
-  customConfig?: CustomBleakElementConfig | null;
+  customConfig?: BleakElementConfig | null;
   error?: Error | null;
   onAnswerChange: (question: string, value: string) => void;
   onChoice: (choice: "more_questions" | "final_answer") => void;

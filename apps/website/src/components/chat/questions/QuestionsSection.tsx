@@ -1,12 +1,15 @@
+import React from "react";
 import {Loader} from "lucide-react";
 import {Button} from "../../ui/button";
 import {createResolverFromConfig} from "bleakai";
+import type {BleakElementConfig} from "bleakai";
 import type {
   InteractiveQuestion,
   AnsweredQuestion
 } from "../../../api/interactiveApi";
 import {BLEAK_ELEMENT_CONFIG} from "../../../config/bleakConfig";
-import type {CustomBleakElementConfig} from "../config/BleakConfigEditor";
+import {LoadingSpinner} from "../utils/LoadingSpinner";
+import {ErrorDisplay} from "../utils/ErrorDisplay";
 
 interface BleakElementsSectionProps {
   questions: InteractiveQuestion[];
@@ -16,7 +19,7 @@ interface BleakElementsSectionProps {
   isLoading: boolean;
   allQuestionsAnswered: boolean;
   previousAnswers?: AnsweredQuestion[];
-  customConfig?: CustomBleakElementConfig | null;
+  customConfig?: BleakElementConfig | null;
 }
 
 // Dynamic component that creates proper bleak elements based on config
@@ -24,14 +27,16 @@ const DynamicBleakElement = ({
   question,
   value,
   onChange,
-  questionIndex
+  questionIndex,
+  config
 }: {
   question: InteractiveQuestion;
   value: string;
   onChange: (value: string) => void;
   questionIndex: number;
+  config: BleakElementConfig;
 }) => {
-  const {resolve} = createResolverFromConfig(BLEAK_ELEMENT_CONFIG);
+  const {resolve} = createResolverFromConfig(config);
 
   const elementData = {
     type: question.type,
@@ -71,14 +76,12 @@ export const QuestionsSection = ({
   const getActiveElementTypes = () => {
     if (!customConfig) return null;
 
-    const activeTypes = Object.entries(customConfig)
-      .filter(([_, config]) => config.enabled)
-      .map(([_type, config]) => config.name);
-
+    const activeTypes = Object.keys(customConfig);
     return activeTypes.length > 0 ? activeTypes : null;
   };
 
   const activeTypes = getActiveElementTypes();
+  const configToUse = customConfig || BLEAK_ELEMENT_CONFIG;
 
   return (
     <div className="space-y-8">
@@ -114,6 +117,7 @@ export const QuestionsSection = ({
                   onAnswerChange(question.question, value)
                 }
                 questionIndex={index}
+                config={configToUse}
               />
               {index < questions.length - 1 && (
                 <div className="w-full h-px bg-border"></div>

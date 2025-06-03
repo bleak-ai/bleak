@@ -1,10 +1,10 @@
 import {ConversationWelcome} from "./ConversationWelcome";
 import {ConversationView} from "./ConversationView";
 import {useConversationState} from "./hooks/useConversationState";
-import type {CustomBleakElementConfig} from "../config/BleakConfigEditor";
+import type {BleakElementConfig} from "bleakai";
 
 interface ConversationContainerProps {
-  customConfig?: CustomBleakElementConfig | null;
+  customConfig?: BleakElementConfig | null;
   onConversationStart?: () => void;
   isWelcomeMode?: boolean;
   initialApiKey?: string | null;

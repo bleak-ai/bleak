@@ -1,22 +1,21 @@
 import {useState} from "react";
 import {SimpleInteractive} from "../chat/interactive";
-import {
-  BleakElementConfigEditor,
-  type CustomBleakElementConfig
-} from "../chat/config/BleakConfigEditor";
+import {BleakElementConfigEditor} from "../chat/config/BleakConfigEditor";
 import {Settings, Sparkles, MessageSquare, X} from "lucide-react";
 import {Button} from "../ui/button";
 import {ApiKeyInput} from "../ApiKeyInput";
+import type {BleakElementConfig} from "bleakai";
+import {BLEAK_ELEMENT_CONFIG} from "../../config/bleakConfig";
 
 const ChatPage = () => {
   const [customConfig, setCustomConfig] =
-    useState<CustomBleakElementConfig | null>(null);
+    useState<BleakElementConfig>(BLEAK_ELEMENT_CONFIG);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [conversationStarted, setConversationStarted] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [prefilledPrompt, setPrefilledPrompt] = useState<string>("");
 
-  const handleConfigChange = (config: CustomBleakElementConfig) => {
+  const handleConfigChange = (config: BleakElementConfig) => {
     setCustomConfig(config);
   };
 
