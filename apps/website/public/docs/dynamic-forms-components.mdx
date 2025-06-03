@@ -1,10 +1,8 @@
 # Create Custom Components
 
-The power of BleakAI lies in mapping element types to your existing components. This "Bring Your Own Components" approach gives you complete control over presentation while BleakAI handles the intelligence.
+Map component types to your existing components.
 
-## Radio Component Example
-
-Here's an example of a Radio Component that you might have in your project:
+## Component Example
 
 ```typescript
 import React from "react";
@@ -45,17 +43,7 @@ const RadioComponent: React.FC<RadioComponentProps> = ({
 };
 ```
 
-## Why This Matters for BleakAI
-
-- **Design System Integration**: Use your existing design system components
-- **Complete Control**: BleakAI provides the logic (what component to show), you provide the presentation (how it looks)
-- **Framework Agnostic**: Works with any UI framework or component library
-- **Type Safety**: Maintain TypeScript safety throughout the resolution process
-- **Extensible**: Add any custom element types your application needs
-
 ## Component Configuration
-
-Configure your component mapping using the resolver:
 
 ```typescript
 import {createResolverFromConfig} from "bleakai";
@@ -64,14 +52,19 @@ const config = {
   text: {component: YourTextInput, description: "Text input"},
   radio: {component: RadioComponent, description: "Single choice"},
   multiSelect: {component: YourMultiSelect, description: "Multiple choice"},
-  slider: {component: YourSlider, description: "Numeric range"},
-  // Add any custom element types your application needs
-  dateRange: {component: YourDateRangePicker, description: "Date selection"},
-  fileUpload: {component: YourFileUploader, description: "File upload"}
+  slider: {component: YourSlider, description: "Numeric range"}
 };
 
 const {resolve} = createResolverFromConfig(config);
 ```
+
+## Why This Matters for BleakAI
+
+- **Design System Integration**: Use your existing design system components
+- **Complete Control**: BleakAI provides the logic (what component to show), you provide the presentation (how it looks)
+- **Framework Agnostic**: Works with any UI framework or component library
+- **Type Safety**: Maintain TypeScript safety throughout the resolution process
+- **Extensible**: Add any custom element types your application needs
 
 ## Popular UI Libraries
 

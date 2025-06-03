@@ -1,38 +1,21 @@
 # Getting Started
 
-Get up and running with BleakAI in just a few minutes.
+Install and configure BleakAI to start building dynamic forms.
 
 ## Installation
-
-Install BleakAI using your preferred package manager:
 
 ```bash
 npm install bleakai
 ```
 
-## API Keys Setup
+## API Keys
 
-BleakAI requires two API keys to function properly:
+Get your API keys:
 
-### 1. BleakAI API Key (Beta)
+1. **BleakAI API Key**: Log into the BleakAI platform dashboard
+2. **OpenAI API Key**: Create one at [OpenAI's website](https://platform.openai.com/)
 
-The BleakAI API key is currently in beta mode. To get your API key:
-
-1. Visit the BleakAI platform and log in to your account
-2. Navigate to your dashboard to find your API key
-3. Copy the API key for use in your application
-
-### 2. OpenAI API Key
-
-You'll also need an OpenAI API key for the AI functionality:
-
-1. Visit [OpenAI's website](https://platform.openai.com/) and create an account
-2. Go to the API section and generate your API key
-3. Keep this key secure as you'll need it for configuration
-
-## Configuration
-
-Pass the API keys directly to the client when initializing:
+## Setup
 
 ```typescript
 import {createSimpleChatClient} from "bleakai";
@@ -46,5 +29,5 @@ const client = createSimpleChatClient({
 
 ## Next Steps
 
-- Learn about **Dynamic Forms** to understand how BleakAI maps to your custom components
-- Check the **API Reference** for complete method documentation
+- **Dynamic Forms**: Learn how to create and use dynamic forms
+- **API Reference**: Complete method documentation

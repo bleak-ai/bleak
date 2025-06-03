@@ -1,6 +1,6 @@
 # Initialize Chat Client
 
-Start by creating a chat client with the SDK to communicate with the BleakAI backend.
+Create a chat client to communicate with BleakAI.
 
 ## Creating the Client
 
@@ -14,28 +14,13 @@ const client = createSimpleChatClient({
 });
 ```
 
-## Backend Architecture
-
-The client handles communication with the BleakAI backend, which uses **LangGraph** to orchestrate sophisticated conversational flows with human-in-the-loop interactions.
-
-The graph architecture consists of specialized nodes:
-
-- **Clarify Node**: Generates contextual questions using LLM analysis
-- **Structure Questions Node**: Converts natural language questions into structured UI component specifications
-- **Choice Node**: Manages user decisions between requesting more questions or receiving final answers
-- **Answer Node**: Produces comprehensive responses based on collected user input
-
-LangGraph's state management and checkpoint system enables persistent conversations across multiple interactions, allowing users to progressively refine their queries through structured input collection.
-
-## Client Configuration Options
+## Configuration Options
 
 ```typescript
 interface ClientConfig {
-  baseUrl: string; // The BleakAI backend URL
-  apiKey: string; // Your BleakAI API key (beta)
+  baseUrl: string; // BleakAI backend URL
+  apiKey: string; // Your BleakAI API key
   openaiKey: string; // Your OpenAI API key
-  timeout?: number; // Request timeout in milliseconds (default: 30000)
+  timeout?: number; // Request timeout (default: 30000ms)
 }
 ```
-
-The client provides a clean interface to the powerful backend intelligence while maintaining simplicity for developers.

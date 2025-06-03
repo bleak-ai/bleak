@@ -1,147 +1,54 @@
 # Send Answers
 
-Once users provide answers to the generated questions, send them back to BleakAI to get the final AI response.
+Send user answers back to get the final AI response.
 
-## Collecting User Answers
-
-Collect answers from your rendered components and format them for the API:
+## Collecting Answers
 
 ```typescript
-// Collect user answers
 const answers = response.questions.map((question) => ({
   question_id: question.question_id,
   answer: getUserAnswer(question.question_id) // Your logic to get user input
 }));
 ```
 
-## Sending Answers Back
-
-Use the `answer` method to send the collected responses:
+## Sending Answers
 
 ```typescript
-// Send answers back to get the final response
 const finalResponse = await client.answer(answers);
 
 if (finalResponse.type === "answer") {
-  console.log("AI Generated Plan:", finalResponse.content);
-  // Display the final result in your UI
+  console.log("AI Response:", finalResponse.content);
+  // Display the result in your UI
 }
 ```
 
-## Complete Flow Example
-
-Here's a complete example showing the entire conversation flow:
+## Complete Flow
 
 ```typescript
-// 1. Initialize
+// 1. Initialize client
 const client = createSimpleChatClient({
   baseUrl: "http://localhost:8000",
   apiKey: "your-bleakai-api-key",
   openaiKey: "your-openai-api-key"
 });
 
-// 2. Setup component mapping
+// 2. Setup components
 const {resolve} = createResolverFromConfig(yourComponentConfig);
 
 // 3. Start conversation
 let response = await client.ask("Plan my vacation");
 
-// 4. Handle questions loop
-while (response.type === "questions") {
-  // Render questions using YOUR components and design
-  const answers = await renderQuestionsAndCollectAnswers(response.questions);
+// 4. Handle questions
+if (response.type === "questions") {
+  // Render questions and collect answers
+  const answers = await collectUserAnswers(response.questions);
 
   // Send answers back
   response = await client.answer(answers);
 }
 
-// 5. Display final result
+// 5. Display result
 if (response.type === "answer") {
-  displayFinalAnswer(response.content);
+  displayResult(response.content);
 }
 ```
-
-## Advanced Answer Handling
-
-### Validation Before Sending
-
-```typescript
-const validateAndSendAnswers = async (questions, userAnswers) => {
-  // Validate all required fields are answered
-  const missingAnswers = questions.filter(
-    (q) => q.required && !userAnswers[q.question_id]
-  );
-
-  if (missingAnswers.length > 0) {
-    throw new Error(
-      `Missing required answers: ${missingAnswers
-        .map((q) => q.text)
-        .join(", ")}`
-    );
-  }
-
-  // Format answers for API
-  const formattedAnswers = questions.map((question) => ({
-    question_id: question.question_id,
-    answer: userAnswers[question.question_id]
-  }));
-
-  // Send to BleakAI
-  return await client.answer(formattedAnswers);
-};
-```
-
-### Progressive Enhancement
-
-```typescript
-const handleProgressiveConversation = async (initialPrompt) => {
-  let response = await client.ask(initialPrompt);
-  let conversationHistory = [];
-
-  while (response.type === "questions") {
-    // Store conversation step
-    conversationHistory.push({
-      questions: response.questions,
-      timestamp: new Date()
-    });
-
-    // Render and collect answers
-    const answers = await collectUserAnswers(response.questions);
-
-    // Continue conversation
-    response = await client.answer(answers);
-  }
-
-  return {
-    finalAnswer: response.content,
-    conversationHistory
-  };
-};
-```
-
-### Error Handling
-
-```typescript
-const robustAnswerSubmission = async (answers) => {
-  try {
-    const response = await client.answer(answers);
-    return response;
-  } catch (error) {
-    if (error instanceof RateLimitError) {
-      // Handle rate limiting
-      await new Promise((resolve) =>
-        setTimeout(resolve, error.retryAfter * 1000)
-      );
-      return robustAnswerSubmission(answers); // Retry
-    } else if (error instanceof ValidationError) {
-      // Handle validation errors
-      throw new Error(`Please check your answers: ${error.message}`);
-    } else {
-      // Handle unexpected errors
-      throw new Error("Something went wrong. Please try again.");
-    }
-  }
-};
-```
-
-This approach ensures that BleakAI provides the conversational intelligence while you maintain complete control over your user interface, making it adaptable to any design system or component library.

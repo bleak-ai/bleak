@@ -1,10 +1,8 @@
 # SDK Methods
 
-The BleakAI SDK provides a simple interface for creating chat clients and managing conversations.
+Core SDK functions for creating chat clients and component resolvers.
 
 ## createSimpleChatClient
-
-Creates a chat client for basic conversations with the BleakAI backend.
 
 ```typescript
 function createSimpleChatClient(config: {
@@ -17,12 +15,10 @@ function createSimpleChatClient(config: {
 
 **Parameters:**
 
-- `baseUrl` - The BleakAI backend server URL
-- `apiKey` - Your BleakAI API key (obtain by logging into the platform)
-- `openaiKey` - Your OpenAI API key for AI functionality
-- `timeout` - Request timeout in milliseconds (optional, default: 30000)
-
-**Returns:** A `BleakChat` instance
+- `baseUrl` - BleakAI backend server URL
+- `apiKey` - Your BleakAI API key
+- `openaiKey` - Your OpenAI API key
+- `timeout` - Request timeout in milliseconds (default: 30000)
 
 **Example:**
 
@@ -32,14 +28,11 @@ import {createSimpleChatClient} from "bleakai";
 const client = createSimpleChatClient({
   baseUrl: "http://localhost:8000",
   apiKey: "your-bleakai-api-key",
-  openaiKey: "your-openai-api-key",
-  timeout: 45000 // 45 seconds
+  openaiKey: "your-openai-api-key"
 });
 ```
 
 ## createResolverFromConfig
-
-Creates a component resolver that maps element types to your custom components.
 
 ```typescript
 function createResolverFromConfig(config: ComponentConfig): {
@@ -49,9 +42,7 @@ function createResolverFromConfig(config: ComponentConfig): {
 
 **Parameters:**
 
-- `config` - Object mapping element types to component configurations
-
-**Returns:** Object with `resolve` function
+- `config` - Object mapping element types to components
 
 **Example:**
 
@@ -59,82 +50,29 @@ function createResolverFromConfig(config: ComponentConfig): {
 import {createResolverFromConfig} from "bleakai";
 
 const config = {
-  text: {component: MyTextInput, description: "Text input field"},
-  radio: {component: MyRadioGroup, description: "Single choice selection"},
-  multiSelect: {
-    component: MyMultiSelect,
-    description: "Multiple choice selection"
-  },
-  slider: {component: MySlider, description: "Numeric range selector"}
+  text: {component: MyTextInput, description: "Text input"},
+  radio: {component: MyRadioGroup, description: "Single choice"},
+  multiSelect: {component: MyMultiSelect, description: "Multiple choice"}
 };
 
 const {resolve} = createResolverFromConfig(config);
-
-// Later in your code
 const Component = resolve("radio");
 ```
 
-## Error Classes
-
-The SDK provides specific error types for different scenarios:
-
-### ChatError
-
-Base error class for chat-related errors.
-
-```typescript
-class ChatError extends Error {
-  constructor(message: string, public statusCode?: number) {
-    super(message);
-    this.name = "ChatError";
-  }
-}
-```
-
-### RateLimitError
-
-Thrown when API rate limits are exceeded.
-
-```typescript
-class RateLimitError extends ChatError {
-  constructor(message: string, public retryAfter: number) {
-    super(message, 429);
-    this.name = "RateLimitError";
-  }
-}
-```
-
-### AuthenticationError
-
-Thrown when API authentication fails.
-
-```typescript
-class AuthenticationError extends ChatError {
-  constructor(message: string) {
-    super(message, 401);
-    this.name = "AuthenticationError";
-  }
-}
-```
-
-## Configuration Types
+## Types
 
 ### ClientConfig
 
-Configuration object for creating a chat client.
-
 ```typescript
 interface ClientConfig {
-  baseUrl: string; // BleakAI backend URL
-  apiKey: string; // BleakAI API key
-  openaiKey: string; // OpenAI API key
-  timeout?: number; // Request timeout in milliseconds
+  baseUrl: string;
+  apiKey: string;
+  openaiKey: string;
+  timeout?: number;
 }
 ```
 
 ### ComponentConfig
-
-Configuration for mapping element types to components.
 
 ```typescript
 interface ComponentConfig {
