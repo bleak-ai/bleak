@@ -156,7 +156,7 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
   };
 
   return (
-    <div className="max-w-4xl prose prose-invert prose-zinc">
+    <div className="prose prose-invert prose-zinc max-w-none">
       <div className="space-y-1">{parseContent(content)}</div>
     </div>
   );

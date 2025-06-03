@@ -1,135 +1,201 @@
 # Dynamic Forms
 
-BleakAI's most powerful feature is dynamic form generation. The AI can create interactive questions based on conversation context.
+BleakAI's core philosophy is **"Bring Your Own Components"**. Instead of imposing a specific UI framework, BleakAI provides the intelligence layer that determines what type of input is needed, while you maintain complete control over how those components look and behave in your application.
 
-## Element Types
+BleakAI transforms conversational AI by dynamically generating structured UI components based on user interactions. The `BleakResolver` maps abstract element types to your own custom components, enabling you to use any UI framework (React, Vue, Angular) and any component library (Material-UI, Ant Design, Chakra UI, or custom implementations).
 
-BleakAI supports four types of form elements:
+## 1. Initialize Chat Client
 
-### Text Input
-
-For open-ended responses:
-
-```typescript
-{
-  type: "text",
-  text: "What's your name?",
-  options: null
-}
-```
-
-### Radio Selection
-
-For single-choice questions:
-
-```typescript
-{
-  type: "radio",
-  text: "What's your experience level?",
-  options: ["Beginner", "Intermediate", "Advanced"]
-}
-```
-
-### Multi-Select
-
-For multiple choice questions:
-
-```typescript
-{
-  type: "multi_select",
-  text: "Which topics interest you?",
-  options: ["JavaScript", "Python", "React", "AI"]
-}
-```
-
-### Slider/Rating
-
-For numeric input and ratings:
-
-```typescript
-{
-  type: "slider",
-  text: "Rate your satisfaction (1-10)",
-  options: ["1", "10"]
-}
-```
-
-## Using Elements
-
-Define elements when starting a conversation:
-
-```typescript
-const bleakElements = [
-  {
-    type: "text",
-    text: "What's your name?",
-    options: null
-  },
-  {
-    type: "radio",
-    text: "What's your budget range?",
-    options: ["Low", "Medium", "High"]
-  }
-];
-
-const response = await client.ask("Help me plan a trip", {
-  bleakElements
-});
-```
-
-## Handling Responses
-
-The AI will return questions when it needs more information:
-
-```typescript
-if (response.type === "questions") {
-  // Render questions in your UI
-  response.questions.forEach((question) => {
-    console.log(question.text);
-    console.log(question.type);
-    console.log(question.options);
-  });
-
-  // Collect answers and submit
-  const answers = response.questions.map((q) => ({
-    question_id: q.question_id,
-    answer: getUserInput(q)
-  }));
-
-  const nextResponse = await client.answer(answers);
-}
-```
-
-## Complete Flow Example
+Start by creating a chat client with the SDK:
 
 ```typescript
 import {createSimpleChatClient} from "bleakai";
 
 const client = createSimpleChatClient({
   baseUrl: "http://localhost:8000",
-  apiKey: "your-api-key"
+  apiKey: "your-bleakai-api-key",
+  openaiKey: "your-openai-api-key"
+});
+```
+
+The client handles communication with the BleakAI backend, which uses LangGraph to orchestrate sophisticated conversational flows with human-in-the-loop interactions.
+
+## 2. Create Custom Components
+
+The power of BleakAI lies in mapping element types to your existing components. Here's an example of a Radio Component that you might have in your project:
+
+```typescript
+import React from "react";
+
+interface RadioComponentProps {
+  text: string;
+  options: string[];
+  value?: string;
+  onChange: (value: string) => void;
+}
+
+const RadioComponent: React.FC<RadioComponentProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => {
+  return (
+    <div className="space-y-3">
+      <label className="text-sm font-medium text-gray-700">{text}</label>
+      <div className="space-y-2">
+        {options.map((option, index) => (
+          <label key={index} className="flex items-center space-x-2">
+            <input
+              type="radio"
+              name={text}
+              value={option}
+              checked={value === option}
+              onChange={(e) => onChange(e.target.value)}
+              className="text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-900">{option}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+**Why this is relevant for BleakAI:**
+
+- **Design System Integration**: You can use your existing design system components
+- **Complete Control**: BleakAI provides the logic (what component to show), you provide the presentation (how it looks)
+- **Framework Agnostic**: Works with any UI framework or component library
+- **Type Safety**: Maintain TypeScript safety throughout the resolution process
+
+Configure your component mapping:
+
+```typescript
+import {createResolverFromConfig} from "bleakai";
+
+const config = {
+  text: {component: YourTextInput, description: "Text input"},
+  radio: {component: RadioComponent, description: "Single choice"},
+  multiSelect: {component: YourMultiSelect, description: "Multiple choice"},
+  slider: {component: YourSlider, description: "Numeric range"}
+  // Add any custom element types your application needs
+};
+
+const {resolve} = createResolverFromConfig(config);
+```
+
+## 3. Ask a Question
+
+Use the `ask` method to start a conversation. BleakAI will analyze your prompt and determine what additional information is needed:
+
+```typescript
+// Ask a question that might require clarification
+const response = await client.ask("Help me plan a vacation to Europe");
+```
+
+**Understanding the Response:**
+
+The backend response will contain structured component specifications that you have complete freedom to render however you want:
+
+```typescript
+// Example response structure
+{
+  type: "questions",
+  questions: [
+    {
+      question_id: "q1",
+      type: "radio",
+      text: "What's your budget range?",
+      options: ["$1000-2000", "$2000-5000", "$5000+"]
+    },
+    {
+      question_id: "q2",
+      type: "text",
+      text: "How many days do you plan to travel?",
+      options: null
+    },
+    {
+      question_id: "q3",
+      type: "multiSelect",
+      text: "Which activities interest you?",
+      options: ["Museums", "Beaches", "Hiking", "Nightlife", "Food Tours"]
+    }
+  ]
+}
+```
+
+**Render with Complete Freedom:**
+
+```typescript
+// You decide how to render these components
+if (response.type === "questions") {
+  response.questions.forEach((question) => {
+    const Component = resolve(question.type);
+
+    // Render using your own styling, layout, validation, etc.
+    return (
+      <Component
+        text={question.text}
+        options={question.options}
+        onChange={(value) => handleAnswer(question.question_id, value)}
+        // Add any additional props your components need
+        className="your-custom-styles"
+        validation={yourValidationLogic}
+      />
+    );
+  });
+}
+```
+
+## 4. Send Answers and Get Final Response
+
+Once users provide answers, send them back to get the final AI response:
+
+```typescript
+// Collect user answers
+const answers = response.questions.map((question) => ({
+  question_id: question.question_id,
+  answer: getUserAnswer(question.question_id) // Your logic to get user input
+}));
+
+// Send answers back to get the final response
+const finalResponse = await client.answer(answers);
+
+if (finalResponse.type === "answer") {
+  console.log("AI Generated Plan:", finalResponse.content);
+  // Display the final result in your UI
+}
+```
+
+**Complete Flow Example:**
+
+```typescript
+// 1. Initialize
+const client = createSimpleChatClient({
+  /* config */
 });
 
-const elements = [
-  {type: "text", text: "What's your name?", options: null},
-  {type: "radio", text: "Budget?", options: ["Low", "Medium", "High"]}
-];
+// 2. Setup component mapping
+const {resolve} = createResolverFromConfig(yourComponentConfig);
 
-// Start conversation
-let response = await client.ask("Plan my vacation", {bleakElements: elements});
+// 3. Start conversation
+let response = await client.ask("Plan my vacation");
 
-// Handle conversation loop
+// 4. Handle questions loop
 while (response.type === "questions") {
-  const answers = response.questions.map((q) => ({
-    question_id: q.question_id,
-    answer: getAnswerFromUser(q) // Your UI logic
-  }));
+  // Render questions using YOUR components and design
+  const answers = await renderQuestionsAndCollectAnswers(response.questions);
 
+  // Send answers back
   response = await client.answer(answers);
 }
 
-// Final answer
+// 5. Display final result
 if (response.type === "answer") {
-  console.log("Plan ready:", response.content);
+  displayFinalAnswer(response.content);
 }
 ```
+
+This approach ensures that BleakAI provides the conversational intelligence while you maintain complete control over your user interface, making it adaptable to any design system or component library.

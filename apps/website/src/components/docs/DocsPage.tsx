@@ -41,12 +41,6 @@ const DocsPage: React.FC = () => {
       title: "API Reference",
       icon: BookOpen,
       content: ""
-    },
-    {
-      id: "examples",
-      title: "Examples",
-      icon: FileText,
-      content: ""
     }
   ];
 
@@ -70,11 +64,6 @@ const DocsPage: React.FC = () => {
         const apiReferenceResponse = await fetch("/docs/api-reference.mdx");
         if (apiReferenceResponse.ok) {
           contents["api-reference"] = await apiReferenceResponse.text();
-        }
-
-        const examplesResponse = await fetch("/docs/examples.mdx");
-        if (examplesResponse.ok) {
-          contents["examples"] = await examplesResponse.text();
         }
       } catch (error) {
         console.error("Failed to load MDX files:", error);
@@ -160,7 +149,7 @@ const DocsPage: React.FC = () => {
       </div>
 
       {/* Main content */}
-      <div className="w-full">
+      <div className="w-full text-left">
         {/* Header */}
         <div className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm sticky top-0 z-30">
           <div className="px-6 py-4">
@@ -186,15 +175,15 @@ const DocsPage: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="px-6 py-8">
-          <div className="max-w-4xl mx-auto">
+        <div className="px-24 py-8">
+          <div className="max-w-none">
             <MDXContent content={currentContent} />
           </div>
         </div>
 
         {/* Footer navigation */}
         <div className="border-t border-zinc-800 px-6 py-6">
-          <div className="max-w-4xl mx-auto flex justify-between">
+          <div className="max-w-none flex justify-between">
             {/* Previous section */}
             {sections.findIndex((s) => s.id === activeSection) > 0 && (
               <button

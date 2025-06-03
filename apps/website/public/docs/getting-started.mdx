@@ -10,21 +10,25 @@ Install BleakAI using your preferred package manager:
 npm install bleakai
 ```
 
-```bash
-yarn add bleakai
-```
+## API Keys Setup
 
-```bash
-pnpm add bleakai
-```
+BleakAI requires two API keys to function properly:
 
-## API Key Setup
+### 1. BleakAI API Key (Beta)
 
-BleakAI requires an API key to access the conversational AI features.
+The BleakAI API key is currently in beta mode. To get your API key:
 
-### Getting Your API Key
+1. Visit the BleakAI platform and log in to your account
+2. Navigate to your dashboard to find your API key
+3. Copy the API key for use in your application
 
-Contact the BleakAI team to obtain your API key. Once you have it, configure it in your environment:
+### 2. OpenAI API Key
+
+You'll also need an OpenAI API key for the AI functionality:
+
+1. Visit [OpenAI's website](https://platform.openai.com/) and create an account
+2. Go to the API section and generate your API key
+3. Keep this key secure as you'll need it for configuration
 
 ### Environment Configuration
 
@@ -33,19 +37,21 @@ Create a `.env.local` file in your project root:
 ```bash
 # .env.local
 VITE_API_BASE_URL=http://localhost:8000
-BLEAK_AI_API_KEY=your-api-key-here
+BLEAK_AI_API_KEY=your-bleakai-api-key-here
+OPENAI_API_KEY=your-openai-api-key-here
 ```
 
 ### Alternative: Direct Configuration
 
-You can also pass the API key directly to the client:
+You can also pass the API keys directly to the client:
 
 ```typescript
 import {createSimpleChatClient} from "bleakai";
 
 const client = createSimpleChatClient({
   baseUrl: "http://localhost:8000",
-  apiKey: "your-api-key-here"
+  apiKey: "your-bleakai-api-key-here",
+  openaiKey: "your-openai-api-key-here"
 });
 ```
 
@@ -59,7 +65,8 @@ import {createSimpleChatClient} from "bleakai";
 // Initialize the client
 const client = createSimpleChatClient({
   baseUrl: "http://localhost:8000",
-  apiKey: "your-api-key"
+  apiKey: "your-bleakai-api-key",
+  openaiKey: "your-openai-api-key"
 });
 
 // Start a conversation
@@ -69,6 +76,5 @@ console.log(response);
 
 ## Next Steps
 
-- Learn about **Dynamic Forms** to collect structured user input
+- Learn about **Dynamic Forms** to understand how BleakAI maps to your custom components
 - Check the **API Reference** for complete method documentation
-- See **Examples** for common implementation patterns
