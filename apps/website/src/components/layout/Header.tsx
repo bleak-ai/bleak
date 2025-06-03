@@ -65,6 +65,13 @@ const Header = () => {
               >
                 Demo
               </Button>
+              <Button
+                variant={currentPath === "/docs" ? "default" : "ghost"}
+                onClick={() => navigateTo("/docs")}
+                className="text-sm"
+              >
+                Docs
+              </Button>
             </nav>
           </div>
 

@@ -8,6 +8,7 @@ import {TestBleakAI} from "./components/demo";
 import {AuthWrapper} from "./components/auth/AuthWrapper";
 import {AuthPageWrapper} from "./components/auth/AuthPageWrapper";
 import DashboardPage from "./components/dashboard/UserDashboard";
+import DocsPage from "./components/docs/DocsPage";
 import {canHandleRoute} from "supertokens-auth-react/ui";
 import {PasswordlessPreBuiltUI} from "supertokens-auth-react/recipe/passwordless/prebuiltui";
 
@@ -50,6 +51,8 @@ function App() {
         return <TestBleakAI />;
       case "profile":
         return <DashboardPage />;
+      case "docs":
+        return <DocsPage />;
       default:
         return <Landing />;
     }

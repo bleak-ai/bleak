@@ -1,0 +1,135 @@
+# API Reference
+
+Complete reference for BleakAI's core functions and types.
+
+## createSimpleChatClient
+
+Creates a chat client for basic conversations.
+
+```typescript
+function createSimpleChatClient(config: {
+  baseUrl: string;
+  apiKey: string;
+  timeout?: number;
+}): BleakChat;
+```
+
+**Parameters:**
+
+- `baseUrl` - The API server URL
+- `apiKey` - Your BleakAI API key
+- `timeout` - Request timeout in milliseconds (optional, default: 30000)
+
+**Returns:** A `BleakChat` instance
+
+## BleakChat Methods
+
+### ask(prompt, options?)
+
+Start a new conversation.
+
+```typescript
+ask(prompt: string, options?: {
+  bleakElements?: BleakElement[];
+}): Promise<ChatResponse>
+```
+
+**Parameters:**
+
+- `prompt` - The initial question or prompt
+- `options.bleakElements` - Array of element definitions for dynamic forms
+
+**Returns:** Promise resolving to a `ChatResponse`
+
+### answer(answers)
+
+Continue conversation with answers to questions.
+
+```typescript
+answer(answers: AnsweredQuestion[]): Promise<ChatResponse>
+```
+
+**Parameters:**
+
+- `answers` - Array of answered questions
+
+**Returns:** Promise resolving to a `ChatResponse`
+
+### finish()
+
+End the conversation and get final response.
+
+```typescript
+finish(): Promise<ChatResponse>
+```
+
+**Returns:** Promise resolving to a `ChatResponse`
+
+## Core Types
+
+### BleakElement
+
+Defines a dynamic form element.
+
+```typescript
+interface BleakElement {
+  type: "text" | "radio" | "multi_select" | "slider";
+  text: string;
+  options?: string[] | null;
+}
+```
+
+### ChatResponse
+
+Union type for all possible chat responses.
+
+```typescript
+type ChatResponse =
+  | {type: "questions"; questions: InteractiveQuestion[]}
+  | {type: "answer"; content: string}
+  | {type: "complete"; content: string};
+```
+
+### InteractiveQuestion
+
+Represents a question from the AI.
+
+```typescript
+interface InteractiveQuestion {
+  question_id: string;
+  type: string;
+  text: string;
+  options?: string[] | null;
+}
+```
+
+### AnsweredQuestion
+
+Represents an answered question.
+
+```typescript
+interface AnsweredQuestion {
+  question_id: string;
+  answer: string;
+}
+```
+
+## Error Handling
+
+BleakAI throws specific error types for different scenarios:
+
+```typescript
+import {ChatError, RateLimitError, AuthenticationError} from "bleakai";
+
+try {
+  const response = await client.ask("Hello");
+} catch (error) {
+  if (error instanceof RateLimitError) {
+    console.log(`Rate limited. Retry after: ${error.retryAfter}s`);
+  } else if (error instanceof AuthenticationError) {
+    console.log("Authentication failed. Check API key.");
+  } else if (error instanceof ChatError) {
+    console.log(`Chat error: ${error.message}`);
+  }
+}
+```

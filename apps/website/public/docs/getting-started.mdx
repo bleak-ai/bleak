@@ -1,0 +1,74 @@
+# Getting Started
+
+Get up and running with BleakAI in just a few minutes.
+
+## Installation
+
+Install BleakAI using your preferred package manager:
+
+```bash
+npm install bleakai
+```
+
+```bash
+yarn add bleakai
+```
+
+```bash
+pnpm add bleakai
+```
+
+## API Key Setup
+
+BleakAI requires an API key to access the conversational AI features.
+
+### Getting Your API Key
+
+Contact the BleakAI team to obtain your API key. Once you have it, configure it in your environment:
+
+### Environment Configuration
+
+Create a `.env.local` file in your project root:
+
+```bash
+# .env.local
+VITE_API_BASE_URL=http://localhost:8000
+BLEAK_AI_API_KEY=your-api-key-here
+```
+
+### Alternative: Direct Configuration
+
+You can also pass the API key directly to the client:
+
+```typescript
+import {createSimpleChatClient} from "bleakai";
+
+const client = createSimpleChatClient({
+  baseUrl: "http://localhost:8000",
+  apiKey: "your-api-key-here"
+});
+```
+
+## Quick Start
+
+Here's your first BleakAI conversation:
+
+```typescript
+import {createSimpleChatClient} from "bleakai";
+
+// Initialize the client
+const client = createSimpleChatClient({
+  baseUrl: "http://localhost:8000",
+  apiKey: "your-api-key"
+});
+
+// Start a conversation
+const response = await client.ask("Help me plan a vacation");
+console.log(response);
+```
+
+## Next Steps
+
+- Learn about **Dynamic Forms** to collect structured user input
+- Check the **API Reference** for complete method documentation
+- See **Examples** for common implementation patterns

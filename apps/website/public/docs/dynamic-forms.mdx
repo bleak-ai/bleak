@@ -1,0 +1,135 @@
+# Dynamic Forms
+
+BleakAI's most powerful feature is dynamic form generation. The AI can create interactive questions based on conversation context.
+
+## Element Types
+
+BleakAI supports four types of form elements:
+
+### Text Input
+
+For open-ended responses:
+
+```typescript
+{
+  type: "text",
+  text: "What's your name?",
+  options: null
+}
+```
+
+### Radio Selection
+
+For single-choice questions:
+
+```typescript
+{
+  type: "radio",
+  text: "What's your experience level?",
+  options: ["Beginner", "Intermediate", "Advanced"]
+}
+```
+
+### Multi-Select
+
+For multiple choice questions:
+
+```typescript
+{
+  type: "multi_select",
+  text: "Which topics interest you?",
+  options: ["JavaScript", "Python", "React", "AI"]
+}
+```
+
+### Slider/Rating
+
+For numeric input and ratings:
+
+```typescript
+{
+  type: "slider",
+  text: "Rate your satisfaction (1-10)",
+  options: ["1", "10"]
+}
+```
+
+## Using Elements
+
+Define elements when starting a conversation:
+
+```typescript
+const bleakElements = [
+  {
+    type: "text",
+    text: "What's your name?",
+    options: null
+  },
+  {
+    type: "radio",
+    text: "What's your budget range?",
+    options: ["Low", "Medium", "High"]
+  }
+];
+
+const response = await client.ask("Help me plan a trip", {
+  bleakElements
+});
+```
+
+## Handling Responses
+
+The AI will return questions when it needs more information:
+
+```typescript
+if (response.type === "questions") {
+  // Render questions in your UI
+  response.questions.forEach((question) => {
+    console.log(question.text);
+    console.log(question.type);
+    console.log(question.options);
+  });
+
+  // Collect answers and submit
+  const answers = response.questions.map((q) => ({
+    question_id: q.question_id,
+    answer: getUserInput(q)
+  }));
+
+  const nextResponse = await client.answer(answers);
+}
+```
+
+## Complete Flow Example
+
+```typescript
+import {createSimpleChatClient} from "bleakai";
+
+const client = createSimpleChatClient({
+  baseUrl: "http://localhost:8000",
+  apiKey: "your-api-key"
+});
+
+const elements = [
+  {type: "text", text: "What's your name?", options: null},
+  {type: "radio", text: "Budget?", options: ["Low", "Medium", "High"]}
+];
+
+// Start conversation
+let response = await client.ask("Plan my vacation", {bleakElements: elements});
+
+// Handle conversation loop
+while (response.type === "questions") {
+  const answers = response.questions.map((q) => ({
+    question_id: q.question_id,
+    answer: getAnswerFromUser(q) // Your UI logic
+  }));
+
+  response = await client.answer(answers);
+}
+
+// Final answer
+if (response.type === "answer") {
+  console.log("Plan ready:", response.content);
+}
+```
