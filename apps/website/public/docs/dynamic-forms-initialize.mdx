@@ -1,8 +1,10 @@
 # Initialize Chat Client
 
-Create a chat client to communicate with BleakAI.
+Create a chat client to communicate with the BleakAI backend.
 
 ## Creating the Client
+
+The client handles all communication with BleakAI's conversational AI backend.
 
 ```typescript
 import {createSimpleChatClient} from "bleakai";
@@ -16,6 +18,8 @@ const client = createSimpleChatClient({
 
 ## Configuration Options
 
+Customize client behavior with these options:
+
 ```typescript
 interface ClientConfig {
   baseUrl: string; // BleakAI backend URL
@@ -24,3 +28,5 @@ interface ClientConfig {
   timeout?: number; // Request timeout (default: 30000ms)
 }
 ```
+
+The client is now ready to handle conversations and generate dynamic questions based on user input.

@@ -1,92 +1,72 @@
 # API Reference
 
-Core functions and types for BleakAI.
+Complete reference for all BleakAI functions, methods, and types.
 
-## createSimpleChatClient
+## Overview
+
+The BleakAI SDK provides a simple interface for creating conversational AI applications. Use these methods to initialize clients, handle conversations, and integrate with your existing components.
+
+## Documentation Sections
+
+- **[SDK Methods](api-reference-sdk)** - Core SDK functions for creating clients and resolvers
+- **[Core Methods](api-reference-core)** - BleakChat instance methods for conversations
+
+## Quick Reference
+
+### Client Creation
 
 ```typescript
-function createSimpleChatClient(config: {
-  baseUrl: string;
-  apiKey: string;
-  openaiKey: string;
-  timeout?: number;
-}): BleakChat;
+import {createSimpleChatClient} from "bleakai";
+
+const client = createSimpleChatClient({
+  baseUrl: "http://localhost:8000",
+  apiKey: "your-bleakai-api-key",
+  openaiKey: "your-openai-api-key"
+});
 ```
 
-**Parameters:**
-
-- `baseUrl` - The API server URL
-- `apiKey` - Your BleakAI API key
-- `openaiKey` - Your OpenAI API key
-- `timeout` - Request timeout (default: 30000ms)
-
-## BleakChat Methods
-
-### ask(prompt, options?)
+### Conversation Flow
 
 ```typescript
-ask(prompt: string, options?: {
-  context?: any;
-}): Promise<ChatResponse>
-```
+// Start conversation
+const response = await client.ask("Help me plan something");
 
-### answer(answers)
-
-```typescript
-answer(answers: AnsweredQuestion[]): Promise<ChatResponse>
-```
-
-### finish()
-
-```typescript
-finish(): Promise<ChatResponse>
-```
-
-## Types
-
-### ChatResponse
-
-```typescript
-type ChatResponse =
-  | {type: "questions"; questions: InteractiveQuestion[]}
-  | {type: "answer"; content: string}
-  | {type: "complete"; content: string};
-```
-
-### InteractiveQuestion
-
-```typescript
-interface InteractiveQuestion {
-  question_id: string;
-  type: string;
-  text: string;
-  options?: string[] | null;
+// Handle questions
+if (response.type === "questions") {
+  const answers = collectAnswers(response.questions);
+  const finalResponse = await client.answer(answers);
 }
 ```
 
-### AnsweredQuestion
+### Component Mapping
 
 ```typescript
-interface AnsweredQuestion {
-  question_id: string;
-  answer: string | string[];
-}
+import {createResolverFromConfig} from "bleakai";
+
+const {resolve} = createResolverFromConfig({
+  text: {component: MyTextInput, description: "Text input"},
+  radio: {component: MyRadioGroup, description: "Single choice"}
+});
 ```
+
+## Response Types
+
+All chat methods return a `ChatResponse` with one of these types:
+
+- **`questions`** - AI needs more information
+- **`answer`** - Final response ready
+- **`complete`** - Conversation finished
 
 ## Error Handling
 
 ```typescript
-import {ChatError, RateLimitError, AuthenticationError} from "bleakai";
-
 try {
   const response = await client.ask("Hello");
 } catch (error) {
   if (error instanceof RateLimitError) {
     console.log(`Rate limited. Retry after: ${error.retryAfter}s`);
   } else if (error instanceof AuthenticationError) {
-    console.log("Authentication failed. Check API key.");
-  } else if (error instanceof ChatError) {
-    console.log(`Chat error: ${error.message}`);
+    console.log("Check your API keys");
   }
 }
 ```

@@ -1,14 +1,18 @@
 # Ask Questions
 
-Start a conversation and render the generated questions.
+Start a conversation and render the AI-generated questions using your own components.
 
 ## Making a Request
+
+Use the `ask` method to start a conversation. BleakAI analyzes your prompt and determines what information is needed:
 
 ```typescript
 const response = await client.ask("Help me plan a vacation to Europe");
 ```
 
 ## Response Structure
+
+BleakAI returns structured question data that you can render with your components:
 
 ```typescript
 {
@@ -32,13 +36,15 @@ const response = await client.ask("Help me plan a vacation to Europe");
 
 ## Response Types
 
-- **`questions`**: More information needed
-- **`answer`**: Response ready
-- **`complete`**: Conversation finished
+BleakAI can return different response types:
+
+- **`questions`** - More information needed from the user
+- **`answer`** - Final response ready to display
+- **`complete`** - Conversation finished
 
 ## Rendering Questions
 
-First, create your component resolver:
+First, create your component resolver (see [Create Custom Components](dynamic-forms-components)):
 
 ```typescript
 import {createResolverFromConfig} from "bleakai";
@@ -69,3 +75,5 @@ if (response.type === "questions") {
   });
 }
 ```
+
+The `resolve` function returns the correct component for each question type, allowing you to maintain your design system while BleakAI handles the conversational logic.

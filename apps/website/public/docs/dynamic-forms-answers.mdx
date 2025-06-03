@@ -1,8 +1,10 @@
 # Send Answers
 
-Send user answers back to get the final AI response.
+Collect user responses and send them back to BleakAI to get the final AI-generated result.
 
 ## Collecting Answers
+
+After users fill out the generated questions, collect their responses in the required format:
 
 ```typescript
 const answers = response.questions.map((question) => ({
@@ -12,6 +14,8 @@ const answers = response.questions.map((question) => ({
 ```
 
 ## Sending Answers
+
+Use the `answer` method to send collected responses back to BleakAI:
 
 ```typescript
 const finalResponse = await client.answer(answers);
@@ -23,6 +27,8 @@ if (finalResponse.type === "answer") {
 ```
 
 ## Complete Flow
+
+Here's how the entire conversation process works together:
 
 ```typescript
 // 1. Initialize client
@@ -52,3 +58,5 @@ if (response.type === "answer") {
   displayResult(response.content);
 }
 ```
+
+The conversation continues until BleakAI has enough information to provide a complete response.

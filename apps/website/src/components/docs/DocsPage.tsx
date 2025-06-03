@@ -101,6 +101,12 @@ const DocsPage: React.FC = () => {
           contents["getting-started"] = await gettingStartedResponse.text();
         }
 
+        // Load Dynamic Forms parent page
+        const dynamicFormsResponse = await fetch("/docs/dynamic-forms.mdx");
+        if (dynamicFormsResponse.ok) {
+          contents["dynamic-forms"] = await dynamicFormsResponse.text();
+        }
+
         // Load Dynamic Forms subpages
         const dynamicFormsSubpages = [
           "dynamic-forms-initialize",
@@ -114,6 +120,12 @@ const DocsPage: React.FC = () => {
           if (response.ok) {
             contents[subpage] = await response.text();
           }
+        }
+
+        // Load API Reference parent page
+        const apiReferenceResponse = await fetch("/docs/api-reference.mdx");
+        if (apiReferenceResponse.ok) {
+          contents["api-reference"] = await apiReferenceResponse.text();
         }
 
         // Load API Reference subpages
@@ -161,7 +173,7 @@ const DocsPage: React.FC = () => {
 
     return (
       <div key={section.id}>
-        <div className={`flex items-center ${level > 0 ? "ml-4" : ""}`}>
+        <div className={`flex items-center ${level > 0 ? "ml-6" : ""}`}>
           {hasSubpages && (
             <button
               onClick={() => toggleSection(section.id)}
@@ -187,16 +199,20 @@ const DocsPage: React.FC = () => {
               isActive
                 ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
                 : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-            } ${!hasSubpages && level > 0 ? "ml-2" : ""}`}
+            } ${level === 0 ? "font-semibold" : "font-medium ml-2"}`}
           >
             <Icon
               className={`h-4 w-4 shrink-0 ${
                 isActive
                   ? "text-orange-400"
+                  : level === 0
+                  ? "text-zinc-300"
                   : "text-zinc-500 group-hover:text-zinc-300"
               }`}
             />
-            <span className="font-medium">{section.title}</span>
+            <span className={level === 0 ? "text-white" : ""}>
+              {section.title}
+            </span>
             {isActive && (
               <ChevronRight className="h-4 w-4 ml-auto text-orange-400" />
             )}

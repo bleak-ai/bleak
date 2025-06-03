@@ -4,6 +4,8 @@ Core SDK functions for creating chat clients and component resolvers.
 
 ## createSimpleChatClient
 
+Creates a chat client for basic conversations with the BleakAI backend.
+
 ```typescript
 function createSimpleChatClient(config: {
   baseUrl: string;
@@ -16,8 +18,8 @@ function createSimpleChatClient(config: {
 **Parameters:**
 
 - `baseUrl` - BleakAI backend server URL
-- `apiKey` - Your BleakAI API key
-- `openaiKey` - Your OpenAI API key
+- `apiKey` - Your BleakAI API key (get from platform dashboard)
+- `openaiKey` - Your OpenAI API key (required for AI functionality)
 - `timeout` - Request timeout in milliseconds (default: 30000)
 
 **Example:**
@@ -34,6 +36,8 @@ const client = createSimpleChatClient({
 
 ## createResolverFromConfig
 
+Creates a component resolver that maps question types to your React components.
+
 ```typescript
 function createResolverFromConfig(config: ComponentConfig): {
   resolve: (elementType: string) => React.ComponentType<any>;
@@ -42,7 +46,9 @@ function createResolverFromConfig(config: ComponentConfig): {
 
 **Parameters:**
 
-- `config` - Object mapping element types to components
+- `config` - Object mapping element types to your components
+
+**Returns:** Object containing a `resolve` function that returns the appropriate component for each question type.
 
 **Example:**
 
@@ -56,12 +62,14 @@ const config = {
 };
 
 const {resolve} = createResolverFromConfig(config);
-const Component = resolve("radio");
+const Component = resolve("radio"); // Returns MyRadioGroup
 ```
 
 ## Types
 
 ### ClientConfig
+
+Configuration object for creating a chat client.
 
 ```typescript
 interface ClientConfig {
@@ -73,6 +81,8 @@ interface ClientConfig {
 ```
 
 ### ComponentConfig
+
+Configuration for mapping element types to components.
 
 ```typescript
 interface ComponentConfig {

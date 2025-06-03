@@ -1,8 +1,10 @@
 # Create Custom Components
 
-Map component types to your existing components.
+Map component types to your existing components. BleakAI will use these mappings to render the right component for each question type.
 
 ## Component Example
+
+Here's how to create a component that works with BleakAI:
 
 ```typescript
 import React from "react";
@@ -45,6 +47,8 @@ const RadioComponent: React.FC<RadioComponentProps> = ({
 
 ## Component Configuration
 
+Create a resolver that maps question types to your components:
+
 ```typescript
 import {createResolverFromConfig} from "bleakai";
 
@@ -57,6 +61,15 @@ const config = {
 
 const {resolve} = createResolverFromConfig(config);
 ```
+
+## Key Benefits
+
+- **Use Your Design System** - Works with any UI library or custom components
+- **Full Control** - You handle styling, validation, and behavior
+- **Framework Agnostic** - Compatible with React, Vue, Angular, etc.
+- **Type Safe** - Complete TypeScript support
+
+You can now use `resolve(questionType)` to get the appropriate component for any question type BleakAI generates.
 
 ## Why This Matters for BleakAI
 
