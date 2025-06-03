@@ -383,3 +383,102 @@ npm install bleakai
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+## Quick Start with High-Level Utilities
+
+The `bleakai` package now includes high-level utilities that make it incredibly easy to implement conversational AI in any application:
+
+### Simple Conversation Flow
+
+```typescript
+import {
+  startConversation,
+  continueConversation,
+  finishConversation,
+  getChatErrorMessage
+} from "bleakai";
+
+// Configure your app
+const config = {
+  baseUrl: "https://your-api.com",
+  apiKey: "your-api-key",
+  timeout: 30000
+};
+
+// Start a conversation
+const {response, client} = await startConversation(
+  "Help me plan a vacation",
+  config
+);
+
+// Handle the response based on type - much cleaner!
+switch (response.type) {
+  case "questions":
+    // Show questions to user and collect answers
+    const answers = await collectAnswersFromUser(response.questions);
+    const nextResponse = await continueConversation(client, answers);
+    break;
+
+  case "answer":
+    // Display the final answer
+    console.log("Final answer:", response.content);
+    break;
+
+  case "clarification":
+    // Handle clarification requests
+    const clarificationAnswers = await handleClarification(response.questions);
+    const clarifiedResponse = await continueConversation(
+      client,
+      clarificationAnswers
+    );
+    break;
+}
+```
+
+### Error Handling Made Simple
+
+```typescript
+try {
+  const result = await startConversation(prompt, config);
+  // Handle result...
+} catch (error) {
+  const userFriendlyMessage = getChatErrorMessage(error);
+  console.error("Chat error:", userFriendlyMessage);
+}
+```
+
+### Before vs After
+
+**Before (complex):**
+
+```typescript
+// Had to write all this boilerplate in every app
+const client = createChatClient({baseUrl: API_URL, apiKey});
+const response = await client.ask(prompt);
+
+if (hasQuestions(response)) {
+  // handle questions
+} else if (isAnswer(response)) {
+  // handle answer
+} else if (isComplete(response)) {
+  // handle completion
+}
+```
+
+**After (simple):**
+
+```typescript
+// Just import and use - no boilerplate!
+const {response, client} = await startConversation(prompt, config);
+
+switch (response.type) {
+  case "questions" /* handle */:
+    break;
+  case "answer" /* handle */:
+    break;
+  case "clarification" /* handle */:
+    break;
+}
+```
+
+The package now handles all the complexity internally, so you can focus on your application logic!

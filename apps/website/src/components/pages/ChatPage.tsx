@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {SimpleInteractive} from "../chat/interactive/SimpleInteractive";
+import {SimpleInteractive} from "../chat/interactive";
 import {
   BleakElementConfigEditor,
   type CustomBleakElementConfig

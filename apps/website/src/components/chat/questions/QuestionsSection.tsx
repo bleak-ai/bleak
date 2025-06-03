@@ -16,8 +16,6 @@ interface BleakElementsSectionProps {
   isLoading: boolean;
   allQuestionsAnswered: boolean;
   previousAnswers?: AnsweredQuestion[];
-  noMoreQuestionsAvailable?: boolean;
-  noMoreQuestionsMessage?: string;
   customConfig?: CustomBleakElementConfig | null;
 }
 
@@ -67,8 +65,6 @@ export const QuestionsSection = ({
   isLoading,
   allQuestionsAnswered,
   previousAnswers,
-  noMoreQuestionsAvailable = false,
-  noMoreQuestionsMessage,
   customConfig
 }: BleakElementsSectionProps) => {
   // Get active element types for display
@@ -129,23 +125,21 @@ export const QuestionsSection = ({
 
       {/* Choice buttons */}
       <div className="flex flex-col sm:flex-row gap-4">
-        {!noMoreQuestionsAvailable && (
-          <Button
-            onClick={() => onChoice("more_questions")}
-            variant="outline"
-            disabled={!allQuestionsAnswered || isLoading}
-            className="flex-1 py-3 text-base font-medium"
-          >
-            {isLoading ? (
-              <>
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Getting more questions...
-              </>
-            ) : (
-              "Ask more questions"
-            )}
-          </Button>
-        )}
+        <Button
+          onClick={() => onChoice("more_questions")}
+          variant="outline"
+          disabled={!allQuestionsAnswered || isLoading}
+          className="flex-1 py-3 text-base font-medium"
+        >
+          {isLoading ? (
+            <>
+              <Loader className="mr-2 h-4 w-4 animate-spin" />
+              Getting more questions...
+            </>
+          ) : (
+            "Ask more questions"
+          )}
+        </Button>
 
         <Button
           onClick={() => onChoice("final_answer")}
@@ -162,15 +156,6 @@ export const QuestionsSection = ({
           )}
         </Button>
       </div>
-
-      {/* No more questions message */}
-      {noMoreQuestionsAvailable && noMoreQuestionsMessage && (
-        <div className="p-4 bg-secondary border border-border rounded-lg">
-          <p className="text-sm text-secondary-foreground">
-            {noMoreQuestionsMessage}
-          </p>
-        </div>
-      )}
     </div>
   );
 };
