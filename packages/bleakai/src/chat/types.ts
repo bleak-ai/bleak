@@ -1,5 +1,5 @@
 /**
- * TypeScript types for the conversational Bleak chat API (Strategy 2)
+ * TypeScript types for the Bleak class implementation
  *
  * These types mirror the backend Pydantic models to ensure type safety
  * across the API boundary.
@@ -149,7 +149,7 @@ export function isCompletionRequest(
   return request.type === "complete";
 }
 
-// Utility types for convenience
+// Utility types for conversation state
 export type ConversationState =
   | "starting"
   | "asking"
