@@ -173,16 +173,16 @@ const DocsPage: React.FC = () => {
 
     return (
       <div key={section.id}>
-        <div className={`flex items-center ${level > 0 ? "ml-6" : ""}`}>
+        <div className={`flex items-center ${level > 0 ? "ml-8" : ""}`}>
           {hasSubpages && (
             <button
               onClick={() => toggleSection(section.id)}
-              className="p-1 hover:bg-zinc-800 rounded mr-1"
+              className="p-1 hover:bg-accent rounded-lg mr-2 transition-colors duration-200"
             >
               {isExpanded ? (
-                <ChevronDown className="h-3 w-3 text-zinc-400" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground" />
               ) : (
-                <ChevronRight className="h-3 w-3 text-zinc-400" />
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               )}
             </button>
           )}
@@ -195,32 +195,19 @@ const DocsPage: React.FC = () => {
                 toggleSection(section.id);
               }
             }}
-            className={`flex-1 flex items-center gap-3 px-3 py-2 text-left text-sm transition-all duration-200 rounded-lg group ${
+            className={`flex-1 flex items-center gap-3 px-4 py-3 text-left text-sm transition-all duration-200 rounded-lg group ${
               isActive
-                ? "bg-orange-500/10 text-orange-400 border border-orange-500/20"
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800/50"
-            } ${level === 0 ? "font-semibold" : "font-medium ml-2"}`}
+                ? "bg-primary text-primary-foreground"
+                : "text-foreground hover:bg-accent hover:text-accent-foreground"
+            }`}
           >
-            <Icon
-              className={`h-4 w-4 shrink-0 ${
-                isActive
-                  ? "text-orange-400"
-                  : level === 0
-                  ? "text-zinc-300"
-                  : "text-zinc-500 group-hover:text-zinc-300"
-              }`}
-            />
-            <span className={level === 0 ? "text-white" : ""}>
-              {section.title}
-            </span>
-            {isActive && (
-              <ChevronRight className="h-4 w-4 ml-auto text-orange-400" />
-            )}
+            <Icon className="h-4 w-4 flex-shrink-0" />
+            <span className="font-medium">{section.title}</span>
           </button>
         </div>
 
         {hasSubpages && isExpanded && (
-          <div className="mt-1 space-y-1">
+          <div className="mt-2 space-y-1">
             {section.subpages!.map((subpage) =>
               renderSidebarSection(subpage, level + 1)
             )}
@@ -232,14 +219,10 @@ const DocsPage: React.FC = () => {
 
   const findSectionTitle = (sectionId: string): string => {
     for (const section of sections) {
-      if (section.id === sectionId) {
-        return section.title;
-      }
+      if (section.id === sectionId) return section.title;
       if (section.subpages) {
         for (const subpage of section.subpages) {
-          if (subpage.id === sectionId) {
-            return subpage.title;
-          }
+          if (subpage.id === sectionId) return subpage.title;
         }
       }
     }
@@ -247,125 +230,90 @@ const DocsPage: React.FC = () => {
   };
 
   return (
-    <div className="flex bg-zinc-950 text-white min-h-screen">
-      {/* Mobile sidebar overlay */}
+    <div className="min-h-screen bg-background">
+      {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div className="fixed left-0 top-0 bottom-0 w-80 bg-background border-r border-border overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-lg font-medium text-foreground">
+                  Documentation
+                </h2>
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="p-2 hover:bg-accent rounded-lg transition-colors duration-200"
+                >
+                  <X className="h-5 w-5 text-muted-foreground" />
+                </button>
+              </div>
+              <nav className="space-y-2">
+                {sections.map((section) => renderSidebarSection(section))}
+              </nav>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Sidebar */}
-      <div
-        className={`fixed lg:static inset-y-0 left-0 z-40 w-72 bg-zinc-900 border-r border-zinc-800 transform ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 transition-transform duration-300 ease-in-out`}
-      >
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-          <div>
-            <h2 className="text-lg font-semibold text-white">BleakAI</h2>
-            <p className="text-sm text-zinc-400">Documentation</p>
-          </div>
-          <button className="lg:hidden" onClick={() => setSidebarOpen(false)}>
-            <X className="h-5 w-5 text-zinc-400" />
-          </button>
-        </div>
-
-        <nav className="p-4 space-y-2">
-          <div className="mb-4">
-            <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3 px-4">
-              Documentation
+      <div className="flex">
+        {/* Desktop Sidebar - Silent Edge: Clean, structured */}
+        <aside className="hidden lg:block w-80 border-r border-border bg-muted/20">
+          <div className="sticky top-0 h-screen overflow-y-auto">
+            <div className="p-8 border-b border-border">
+              <h2 className="text-lg font-medium text-foreground">
+                Documentation
+              </h2>
             </div>
-            {sections.map((section) => renderSidebarSection(section))}
+            <nav className="p-6 space-y-2">
+              {sections.map((section) => renderSidebarSection(section))}
+            </nav>
           </div>
-        </nav>
-      </div>
+        </aside>
 
-      {/* Main content */}
-      <div className="w-full text-left">
-        {/* Header */}
-        <div className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm sticky top-0 z-30">
-          <div className="px-6 py-4">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="lg:hidden text-zinc-400 hover:text-white hover:bg-zinc-800"
-                onClick={() => setSidebarOpen(true)}
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-
-              <div className="flex items-center gap-2 text-sm text-zinc-400">
-                <span>Docs</span>
-                <ChevronRight className="h-4 w-4" />
-                <span className="text-white font-medium">
+        {/* Main Content - Silent Edge: Spacious, readable */}
+        <main className="flex-1 min-w-0">
+          {/* Header */}
+          <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-40">
+            <div className="flex items-center justify-between p-6">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors duration-200"
+                >
+                  <Menu className="h-5 w-5 text-muted-foreground" />
+                </button>
+                <h1 className="text-xl font-medium text-foreground">
                   {findSectionTitle(activeSection)}
-                </span>
+                </h1>
               </div>
             </div>
-          </div>
-        </div>
+          </header>
 
-        {/* Content */}
-        <div className="px-24 py-8">
-          <div className="max-w-none">
-            <MDXContent content={currentContent} />
-          </div>
-        </div>
-
-        {/* Footer navigation */}
-        <div className="border-t border-zinc-800 px-6 py-6">
-          <div className="max-w-none flex justify-between">
-            {/* Previous section */}
-            {sections.findIndex((s) => s.id === activeSection) > 0 && (
-              <button
-                onClick={() => {
-                  const currentIndex = sections.findIndex(
-                    (s) => s.id === activeSection
-                  );
-                  setActiveSection(sections[currentIndex - 1].id);
-                }}
-                className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
-              >
-                <ChevronRight className="h-4 w-4 rotate-180" />
-                <span>
-                  Previous:{" "}
-                  {
-                    sections[
-                      sections.findIndex((s) => s.id === activeSection) - 1
-                    ]?.title
-                  }
-                </span>
-              </button>
-            )}
-
-            {/* Next section */}
-            {sections.findIndex((s) => s.id === activeSection) <
-              sections.length - 1 && (
-              <button
-                onClick={() => {
-                  const currentIndex = sections.findIndex(
-                    (s) => s.id === activeSection
-                  );
-                  setActiveSection(sections[currentIndex + 1].id);
-                }}
-                className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors ml-auto"
-              >
-                <span>
-                  Next:{" "}
-                  {
-                    sections[
-                      sections.findIndex((s) => s.id === activeSection) + 1
-                    ]?.title
-                  }
-                </span>
-                <ChevronRight className="h-4 w-4" />
-              </button>
+          {/* Content */}
+          <div className="content-max section-padding">
+            {currentContent ? (
+              <div className="prose prose-invert max-w-none">
+                <MDXContent content={currentContent} />
+              </div>
+            ) : (
+              <div className="silent-card text-center space-y-4">
+                <BookOpen className="w-12 h-12 text-muted-foreground mx-auto" />
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium text-foreground">
+                    Loading documentation...
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Please wait while we load the content
+                  </p>
+                </div>
+              </div>
             )}
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./styles/animations.css";
@@ -43,47 +43,43 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* High Contrast Dark Theme - Much More Visible */
+/* Silent Edge Design System - Dark First Implementation */
 :root {
-  --radius: 0.625rem;
+  --radius: 0.5rem;
 
-  /* Deep black backgrounds with stark white text */
-  --background: oklch(
-    0.21 0.006 285.885
-  ); /* Even darker background for maximum contrast */
-  --foreground: oklch(1 0 0); /* Pure bright white text */
+  /* Deep blacks with high contrast whites - Silent Edge Core Palette */
+  --background: oklch(0.1 0 0); /* Deep black background */
+  --foreground: oklch(0.98 0 0); /* Pure white text */
 
-  /* Cards with clear distinction from background */
-  --card: oklch(0.25 0 0); /* More distinct card background */
-  --card-foreground: oklch(1 0 0); /* Bright white text on cards */
+  /* Cards and surfaces */
+  --card: oklch(0.15 0 0); /* Slightly lighter than background */
+  --card-foreground: oklch(0.98 0 0); /* High contrast white text */
 
   /* Popovers */
-  --popover: oklch(0.1 0 0);
-  --popover-foreground: oklch(1 0 0);
+  --popover: oklch(0.15 0 0);
+  --popover-foreground: oklch(0.98 0 0);
 
-  /* Primary - Bright white for maximum visibility */
-  --primary: oklch(1 0 0); /* Pure white for primary elements */
-  --primary-foreground: oklch(0.05 0 0); /* Deep black text on white */
+  /* Primary accent - clean white for key actions */
+  --primary: oklch(0.98 0 0); /* Clean white for primary elements */
+  --primary-foreground: oklch(0.1 0 0); /* Dark text on white */
 
-  /* Secondary - Much more visible gray */
-  --secondary: oklch(0.25 0 0); /* More visible secondary background */
-  --secondary-foreground: oklch(0.95 0 0); /* Bright text on secondary */
+  /* Secondary and muted elements */
+  --secondary: oklch(0.2 0 0); /* Subtle dark gray */
+  --secondary-foreground: oklch(0.9 0 0); /* Light gray text */
+  --muted: oklch(0.18 0 0); /* Muted dark background */
+  --muted-foreground: oklch(0.65 0 0); /* Muted gray text with good contrast */
 
-  /* Muted elements - increased visibility */
-  --muted: oklch(0.15 0 0); /* Lighter muted background for better visibility */
-  --muted-foreground: oklch(0.75 0 0); /* Much brighter muted text */
-
-  /* Accent - more prominent */
-  --accent: oklch(0.22 0 0); /* More visible accent background */
-  --accent-foreground: oklch(1 0 0); /* Bright white on accent */
+  /* Accent elements */
+  --accent: oklch(0.2 0 0); /* Hover/active background */
+  --accent-foreground: oklch(0.98 0 0); /* White text on accent */
 
   /* Destructive actions */
-  --destructive: oklch(0.65 0.25 25); /* Brighter, more visible red */
+  --destructive: oklch(0.6 0.2 25); /* Red with good contrast */
 
-  /* Borders and inputs - much more visible */
-  --border: oklch(0.35 0 0); /* Much brighter borders for clear definition */
-  --input: oklch(0.12 0 0); /* Slightly lighter input background */
-  --ring: oklch(0.7 0 0); /* Very bright focus ring */
+  /* Borders and inputs */
+  --border: oklch(0.25 0 0); /* Subtle border that's visible on dark */
+  --input: oklch(0.2 0 0); /* Input background */
+  --ring: oklch(0.6 0 0); /* Focus ring */
 
   /* Charts */
   --chart-1: oklch(0.7 0.25 260);
@@ -94,16 +90,16 @@
 
   /* Sidebar */
   --sidebar: oklch(0.1 0 0);
-  --sidebar-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(1 0 0);
-  --sidebar-primary-foreground: oklch(0.05 0 0);
-  --sidebar-accent: oklch(0.22 0 0);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.35 0 0);
-  --sidebar-ring: oklch(0.7 0 0);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.98 0 0);
+  --sidebar-primary-foreground: oklch(0.1 0 0);
+  --sidebar-accent: oklch(0.2 0 0);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.25 0 0);
+  --sidebar-ring: oklch(0.6 0 0);
 }
 
-/* Light theme (when explicitly needed) */
+/* Light theme override (when explicitly needed) */
 .light {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -111,14 +107,14 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.145 0 0);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --secondary-foreground: oklch(0.145 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --accent-foreground: oklch(0.145 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -130,18 +126,91 @@
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.145 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-accent-foreground: oklch(0.145 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-family: "Inter", sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Silent Edge Typography System */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply text-foreground font-light tracking-tight;
+    line-height: 1.2;
+  }
+
+  h1 {
+    @apply text-5xl md:text-6xl lg:text-7xl;
+  }
+
+  h2 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+
+  p {
+    @apply text-foreground leading-relaxed;
+  }
+
+  /* Silent Edge Spacing System */
+  .section-padding {
+    @apply py-32 px-6;
+  }
+
+  .container-max {
+    @apply max-w-6xl mx-auto;
+  }
+
+  .content-max {
+    @apply max-w-4xl mx-auto;
+  }
+
+  .text-max {
+    @apply max-w-2xl mx-auto;
+  }
+
+  /* Silent Edge Interactive Elements */
+  .interactive-scale {
+    @apply transition-all duration-200 ease-out;
+  }
+
+  .interactive-scale:hover {
+    @apply scale-[1.02];
+  }
+
+  .interactive-scale:active {
+    @apply scale-[0.98];
+  }
+
+  /* Focus states following Silent Edge principles */
+  .focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
 }
 
@@ -149,5 +218,32 @@
   button:not([disabled]),
   [role="button"]:not([disabled]) {
     cursor: pointer;
+  }
+}
+
+/* Silent Edge Component Styles */
+@layer components {
+  .silent-card {
+    @apply bg-card border border-border rounded-lg p-8 shadow-sm;
+  }
+
+  .silent-button {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium transition-all duration-200;
+  }
+
+  .silent-button-ghost {
+    @apply bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground px-6 py-3 rounded-lg font-medium transition-all duration-200;
+  }
+
+  .silent-input {
+    @apply bg-input border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all duration-200;
+  }
+
+  .silent-nav {
+    @apply bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50;
+  }
+
+  .silent-footer {
+    @apply bg-muted border-t border-border;
   }
 }

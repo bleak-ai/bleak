@@ -1,5 +1,4 @@
-import {useState, useEffect, type FormEvent} from "react";
-import {Loader} from "lucide-react";
+import {useState, type FormEvent} from "react";
 import {Button} from "../../ui/button";
 import {Textarea} from "../../ui/textarea";
 
@@ -14,14 +13,7 @@ export const PromptForm = ({
   isLoading,
   prefilledPrompt = ""
 }: PromptFormProps) => {
-  const [prompt, setPrompt] = useState(prefilledPrompt);
-
-  // Update prompt when prefilledPrompt changes
-  useEffect(() => {
-    if (prefilledPrompt && prefilledPrompt !== prompt) {
-      setPrompt(prefilledPrompt);
-    }
-  }, [prefilledPrompt]);
+  const [prompt, setPrompt] = useState(prefilledPrompt || "");
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -31,14 +23,13 @@ export const PromptForm = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="text-center">
-        <h2 className="text-2xl font-light mb-2 text-foreground">
+        <h2 className="text-2xl font-light mb-2">
           What would you like to know?
         </h2>
-        <p className="text-muted-foreground">
-          Ask a question and I'll generate interactive components to gather more
-          details.
+        <p className="text-gray-600">
+          Ask a question and I'll create interactive components for you.
         </p>
       </div>
 
@@ -53,17 +44,9 @@ export const PromptForm = ({
         <Button
           type="submit"
           disabled={!prompt.trim() || isLoading}
-          className="w-full py-3 text-base font-medium"
-          size="lg"
+          className="w-full"
         >
-          {isLoading ? (
-            <>
-              <Loader className="w-4 h-4 animate-spin mr-2" />
-              Processing...
-            </>
-          ) : (
-            "Ask Question"
-          )}
+          {isLoading ? "Processing..." : "Ask Question"}
         </Button>
       </form>
     </div>

@@ -1,15 +1,15 @@
 import {Label} from "../../ui/label";
 import {Textarea} from "../../ui/textarea";
-import type {BleakElementProps} from "bleakai";
+import type {BleakComponentProps} from "bleakai";
 
 export const TextBleakElement = ({
   text,
   value,
   onChange
-}: BleakElementProps) => {
+}: BleakComponentProps) => {
   return (
     <div className="space-y-3">
-      <Label className="text-base font-medium text-foreground">{text}</Label>
+      <Label className="text-base font-medium">{text}</Label>
       <Textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}

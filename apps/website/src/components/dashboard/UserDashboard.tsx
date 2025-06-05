@@ -2,31 +2,15 @@ import React, {useState} from "react";
 import {useQuery, useMutation, useQueryClient} from "@tanstack/react-query";
 import {Button} from "../ui/button";
 import {ProtectedRoute} from "../auth/AuthWrapper";
-import {
-  Key,
-  Plus,
-  Trash2,
-  Copy,
-  Eye,
-  EyeOff,
-  Activity,
-  Calendar,
-  Clock,
-  BarChart3
-} from "lucide-react";
-
-// Import API functions
 import {fetchUserProfile, createApiKey, revokeApiKey} from "../../api/authApi";
-
-// Import types
 import type {ApiKey, UserProfile, CreateApiKeyRequest} from "../../api/authApi";
+import {Copy, Trash2, Plus, Key} from "lucide-react";
 
 const ApiKeyCard: React.FC<{
   apiKey: ApiKey;
   onRevoke: (id: string) => void;
   isRevoking: boolean;
 }> = ({apiKey, onRevoke, isRevoking}) => {
-  const [showKey, setShowKey] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = async (text: string) => {
@@ -40,11 +24,11 @@ const ApiKeyCard: React.FC<{
   };
 
   return (
-    <div className="p-4 border border-border rounded-lg bg-card">
-      <div className="flex items-start justify-between mb-3">
-        <div>
+    <div className="silent-card space-y-4">
+      <div className="flex justify-between items-start">
+        <div className="space-y-1">
           <h3 className="font-medium text-foreground">{apiKey.name}</h3>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Created {new Date(apiKey.created_at).toLocaleDateString()}
           </p>
         </div>
@@ -53,50 +37,34 @@ const ApiKeyCard: React.FC<{
           variant="outline"
           size="sm"
           disabled={isRevoking}
-          className="text-destructive hover:text-destructive"
+          className="text-destructive hover:bg-destructive/10 interactive-scale"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-4 h-4 mr-1" />
+          Delete
         </Button>
       </div>
 
-      <div className="flex items-center gap-2 mb-3">
-        <div className="flex-1 font-mono text-sm bg-muted p-2 rounded">
-          {showKey && apiKey.key ? apiKey.key : apiKey.preview}
+      <div className="flex gap-3">
+        <div className="flex-1 p-3 bg-input rounded-lg border border-border">
+          <code className="text-sm text-foreground break-all">
+            {apiKey.key || apiKey.preview}
+          </code>
         </div>
-        {apiKey.key && (
-          <Button
-            onClick={() => setShowKey(!showKey)}
-            variant="outline"
-            size="sm"
-          >
-            {showKey ? (
-              <EyeOff className="w-4 h-4" />
-            ) : (
-              <Eye className="w-4 h-4" />
-            )}
-          </Button>
-        )}
         <Button
           onClick={() => copyToClipboard(apiKey.key || apiKey.preview)}
           variant="outline"
           size="sm"
-          className={copied ? "text-green-600" : ""}
+          className={`${copied ? "text-green-500" : ""} interactive-scale`}
         >
-          <Copy className="w-4 h-4" />
+          <Copy className="w-4 h-4 mr-1" />
+          {copied ? "Copied!" : "Copy"}
         </Button>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <span className="flex items-center gap-1">
-          <Activity className="w-3 h-3" />
-          {apiKey.usage_count} uses
-        </span>
-        {apiKey.last_used_at && (
-          <span className="flex items-center gap-1">
-            <Clock className="w-3 h-3" />
-            Last used {new Date(apiKey.last_used_at).toLocaleDateString()}
-          </span>
-        )}
+      <div className="text-xs text-muted-foreground">
+        {apiKey.usage_count} uses
+        {apiKey.last_used_at &&
+          ` • Last used ${new Date(apiKey.last_used_at).toLocaleDateString()}`}
       </div>
     </div>
   );
@@ -140,244 +108,147 @@ const UserDashboard: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-1/3"></div>
-          <div className="h-4 bg-muted rounded w-1/2"></div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="h-32 bg-muted rounded"></div>
-            <div className="h-32 bg-muted rounded"></div>
-          </div>
-        </div>
+      <div className="container-max section-padding flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="text-center py-8">
-          <p className="text-destructive">
-            Error loading profile: {(error as Error).message}
-          </p>
-          <Button onClick={() => window.location.reload()} className="mt-4">
-            Retry
-          </Button>
+      <div className="container-max section-padding">
+        <div className="silent-card text-center">
+          <div className="text-destructive font-medium">
+            Error: {(error as Error).message}
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!profile) {
-    return null;
-  }
+  if (!profile) return null;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
-      {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-3xl font-light text-foreground">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome back, {profile.email}</p>
+    <div className="container-max section-padding space-y-12">
+      {/* Header - Silent Edge: Clean, confident */}
+      <div className="space-y-4">
+        <h1 className="text-4xl font-light tracking-tight text-foreground">
+          Dashboard
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Welcome back, {profile.email}
+        </p>
       </div>
 
-      {/* Usage Statistics */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="p-4 border border-border rounded-lg bg-card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Total Requests</p>
-              <p className="text-2xl font-bold text-foreground">
-                {profile.usage_stats.total_requests}
-              </p>
-            </div>
-            <BarChart3 className="w-8 h-8 text-muted-foreground" />
+      {/* Usage Stats - Clear metrics */}
+      <div className="grid gap-6 md:grid-cols-3">
+        {[
+          {
+            label: "Total Requests",
+            value: profile.usage_stats.total_requests,
+            description: "All-time API usage"
+          },
+          {
+            label: "This Month",
+            value: profile.usage_stats.monthly_requests,
+            description: "Current month requests"
+          },
+          {
+            label: "API Keys",
+            value: profile.api_keys.length,
+            description: "Active API keys"
+          }
+        ].map((stat) => (
+          <div key={stat.label} className="silent-card text-center space-y-3">
+            <p className="text-sm text-muted-foreground font-medium">
+              {stat.label}
+            </p>
+            <p className="text-3xl font-light text-foreground">{stat.value}</p>
+            <p className="text-xs text-muted-foreground">{stat.description}</p>
           </div>
-        </div>
-
-        <div className="p-4 border border-border rounded-lg bg-card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">This Month</p>
-              <p className="text-2xl font-bold text-foreground">
-                {profile.usage_stats.monthly_requests}
-              </p>
-            </div>
-            <Calendar className="w-8 h-8 text-muted-foreground" />
-          </div>
-        </div>
-
-        <div className="p-4 border border-border rounded-lg bg-card">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">API Keys</p>
-              <p className="text-2xl font-bold text-foreground">
-                {profile.api_keys.length}
-              </p>
-            </div>
-            <Key className="w-8 h-8 text-muted-foreground" />
-          </div>
-        </div>
+        ))}
       </div>
 
       {/* API Keys Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-medium text-foreground">API Key</h2>
-          {profile.api_keys.length === 0 && (
-            <Button
-              onClick={() => setShowCreateForm(true)}
-              className="flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Create API Key
-            </Button>
-          )}
+      <div className="space-y-8">
+        <div className="flex justify-between items-center">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-medium text-foreground">API Keys</h2>
+            <p className="text-sm text-muted-foreground">
+              Manage your API keys for accessing Bleak services
+            </p>
+          </div>
+          <Button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="interactive-scale"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {showCreateForm ? "Cancel" : "Create New Key"}
+          </Button>
         </div>
 
-        {profile.api_keys.length === 0 && !showCreateForm && (
-          <div className="text-center py-8 border border-border rounded-lg bg-card">
-            <Key className="w-12 h-12 mx-auto mb-4 opacity-50 text-muted-foreground" />
-            <p className="text-muted-foreground mb-4">
-              You need an API key to access Bleak AI services
-            </p>
-            <Button
-              onClick={() => setShowCreateForm(true)}
-              className="flex items-center gap-2 mx-auto"
-            >
-              <Plus className="w-4 h-4" />
-              Create Your API Key
-            </Button>
-          </div>
-        )}
-
+        {/* Create Form - Clean input */}
         {showCreateForm && (
-          <div className="p-4 border border-border rounded-lg bg-card">
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-foreground">
-                  API Key Name
-                </label>
-                <input
-                  type="text"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                  placeholder="e.g., My Bleak API Key"
-                  className="w-full mt-1 px-3 py-2 border border-border rounded-lg bg-input text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleCreateApiKey}
-                  disabled={!newKeyName.trim() || createMutation.isPending}
-                >
-                  {createMutation.isPending ? "Creating..." : "Create"}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowCreateForm(false);
-                    setNewKeyName("");
-                  }}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </div>
-              {createMutation.error && (
-                <p className="text-sm text-destructive">
-                  Error: {(createMutation.error as Error).message}
-                </p>
-              )}
+          <div className="silent-card space-y-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Key className="w-5 h-5 text-muted-foreground" />
+              <h3 className="text-lg font-medium text-foreground">
+                Create New API Key
+              </h3>
+            </div>
+            <div className="flex gap-3">
+              <input
+                value={newKeyName}
+                onChange={(e) => setNewKeyName(e.target.value)}
+                placeholder="Enter a name for this key"
+                className="flex-1 silent-input"
+              />
+              <Button
+                onClick={handleCreateApiKey}
+                disabled={!newKeyName.trim() || createMutation.isPending}
+                className="interactive-scale"
+              >
+                {createMutation.isPending ? "Creating..." : "Create"}
+              </Button>
             </div>
           </div>
         )}
 
-        {profile.api_keys.length > 0 && (
-          <div className="space-y-4">
-            <div className="p-4 border border-amber-200 bg-amber-50 rounded-lg">
-              <p className="text-sm text-amber-800">
-                <strong>Important:</strong> You have one API key for your
-                account. Keep it secure and don't share it. If compromised, you
-                can revoke it and create a new one.
-              </p>
-            </div>
+        {/* API Keys List */}
+        <div className="space-y-4">
+          {profile.api_keys.map((apiKey) => (
+            <ApiKeyCard
+              key={apiKey.id}
+              apiKey={apiKey}
+              onRevoke={revokeMutation.mutate}
+              isRevoking={revokeMutation.isPending}
+            />
+          ))}
+        </div>
 
-            <div className="grid gap-4">
-              {profile.api_keys.map((apiKey) => (
-                <ApiKeyCard
-                  key={apiKey.id}
-                  apiKey={apiKey}
-                  onRevoke={revokeMutation.mutate}
-                  isRevoking={revokeMutation.isPending}
-                />
-              ))}
-            </div>
-
-            {/* Allow creating a new key only after revoking the old one */}
-            <div className="text-center py-4">
-              <p className="text-sm text-muted-foreground mb-2">
-                Need a new API key? Revoke your current key first.
+        {/* Empty State */}
+        {profile.api_keys.length === 0 && (
+          <div className="silent-card text-center space-y-4">
+            <Key className="w-12 h-12 text-muted-foreground mx-auto" />
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium text-foreground">
+                No API keys yet
+              </h3>
+              <p className="text-muted-foreground">
+                Create your first API key to start using Bleak services
               </p>
             </div>
           </div>
         )}
       </div>
-
-      {/* Recent Activity */}
-      {profile.usage_stats.recent_usage.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-medium text-foreground">
-            Recent Activity
-          </h2>
-          <div className="border border-border rounded-lg bg-card">
-            <div className="divide-y divide-border">
-              {profile.usage_stats.recent_usage.map((usage, index) => (
-                <div
-                  key={index}
-                  className="p-4 flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        usage.status_code >= 200 && usage.status_code < 300
-                          ? "bg-green-500"
-                          : "bg-red-500"
-                      }`}
-                    />
-                    <div>
-                      <p className="font-mono text-sm text-foreground">
-                        {usage.method} {usage.endpoint}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(usage.timestamp).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right text-sm">
-                    <p className="text-foreground">
-                      Status: {usage.status_code}
-                    </p>
-                    {usage.response_time_ms && (
-                      <p className="text-muted-foreground">
-                        {usage.response_time_ms}ms
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-const DashboardPage: React.FC = () => {
-  return (
-    <ProtectedRoute>
-      <UserDashboard />
-    </ProtectedRoute>
-  );
-};
+const DashboardPage: React.FC = () => (
+  <ProtectedRoute>
+    <UserDashboard />
+  </ProtectedRoute>
+);
 
 export default DashboardPage;

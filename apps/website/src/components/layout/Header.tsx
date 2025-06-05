@@ -32,43 +32,38 @@ const Header = () => {
   };
 
   return (
-    <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-6 py-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-8">
+    <header className="silent-nav">
+      <div className="container-max">
+        <div className="flex items-center justify-between py-8">
+          {/* Brand - Silent Edge: Confident, simple */}
+          <div className="flex items-center space-x-12">
             <div
               onClick={() => navigateTo("/")}
-              className="text-2xl font-bold cursor-pointer hover:opacity-80 transition-opacity"
+              className="text-2xl font-light tracking-tight cursor-pointer hover:opacity-80 transition-opacity duration-200 text-foreground"
             >
               Bleak
             </div>
 
-            <nav className="hidden md:flex items-center space-x-6">
-              <Button
-                variant={currentPath === "/" ? "default" : "ghost"}
-                onClick={() => navigateTo("/")}
-                className="text-sm"
-              >
-                Home
-              </Button>
-              <Button
-                variant={currentPath === "/chat" ? "default" : "ghost"}
-                onClick={() => navigateTo("/chat")}
-                className="text-sm"
-              >
-                Chat
-              </Button>
-              <Button
-                variant={currentPath === "/docs" ? "default" : "ghost"}
-                onClick={() => navigateTo("/docs")}
-                className="text-sm"
-              >
-                Docs
-              </Button>
+            {/* Navigation - Clean, minimal */}
+            <nav className="hidden md:flex items-center space-x-2">
+              {[
+                {path: "/", label: "Home"},
+                {path: "/chat", label: "Chat"},
+                {path: "/docs", label: "Docs"}
+              ].map((item) => (
+                <Button
+                  key={item.path}
+                  variant={currentPath === item.path ? "default" : "ghost"}
+                  onClick={() => navigateTo(item.path)}
+                  className="text-sm font-medium px-4 py-2 transition-all duration-200"
+                >
+                  {item.label}
+                </Button>
+              ))}
             </nav>
           </div>
 
-          {/* Authentication Button - Always visible */}
+          {/* Authentication - Purposeful placement */}
           <div className="flex items-center">
             <AuthButton onProfileClick={handleProfileClick} />
           </div>
