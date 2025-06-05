@@ -58,6 +58,12 @@ export {ChatError, RateLimitError, AuthenticationError} from "./chat/Bleak";
  *
  *   // Render components...
  *
+ *   // Optional: Request more questions for refinement
+ *   const moreResult = await bleak.requestMoreBleakQuestions(answers);
+ *   if (moreResult.questions) {
+ *     // Handle additional questions...
+ *   }
+ *
  *   // Finish the conversation
  *   const finalAnswer = await bleak.finishBleakConversation(answers);
  * } else if (result.answer) {

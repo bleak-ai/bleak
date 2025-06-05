@@ -145,6 +145,34 @@ function App() {
     }
   };
 
+  const handleRequestMoreQuestions = async () => {
+    console.log("Requesting more questions with current answers:", answers);
+    if (!questions) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Request additional questions based on current answers
+      const result = await bleak.requestMoreBleakQuestions(answers);
+
+      if (result.questions) {
+        // Update with new questions, keeping existing answers
+        setQuestions(result.questions);
+      } else if (result.isComplete) {
+        // No more questions available, get final result
+        const finalResult = await bleak.finishBleakConversation(answers);
+        setFinalAnswer(finalResult);
+        setQuestions(null);
+      }
+    } catch (err) {
+      console.log("Error requesting more questions:", err);
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleAnswerChange = (question: string, value: string) => {
     setAnswers((prev) => ({...prev, [question]: value}));
   };
@@ -209,12 +237,30 @@ function App() {
               <Component key={key} {...props} />
             ))}
 
-          <button
-            onClick={handleSubmit}
-            disabled={!allQuestionsAnswered || isLoading}
-          >
-            {isLoading ? "Processing..." : "Finish Bleak Conversation"}
-          </button>
+          <div style={{marginTop: "20px", display: "flex", gap: "10px"}}>
+            <button
+              onClick={handleSubmit}
+              disabled={!allQuestionsAnswered || isLoading}
+            >
+              {isLoading ? "Processing..." : "Finish Bleak Conversation"}
+            </button>
+
+            <button
+              onClick={handleRequestMoreQuestions}
+              disabled={!allQuestionsAnswered || isLoading}
+              style={{
+                backgroundColor: "#6c757d",
+                color: "white",
+                border: "none",
+                padding: "8px 16px",
+                borderRadius: "4px",
+                cursor:
+                  allQuestionsAnswered && !isLoading ? "pointer" : "not-allowed"
+              }}
+            >
+              {isLoading ? "Processing..." : "Request More Questions"}
+            </button>
+          </div>
         </div>
       )}
 

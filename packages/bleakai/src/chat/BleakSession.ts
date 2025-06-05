@@ -111,7 +111,6 @@ export class BleakSession {
     answer?: string;
     getState: () => SessionState;
   }> {
-    console.log("startBleakConversation called with prompt:", prompt);
     this.state.isLoading = true;
     this.state.error = undefined;
 
@@ -124,12 +123,7 @@ export class BleakSession {
           }))
         : undefined;
 
-      console.log("Making initial request with bleakElements:", bleakElements);
       const response = await this.makeInitialRequest(prompt, {bleakElements});
-
-      // Debug logging to see what we get from the API
-      console.log("API Response:", JSON.stringify(response, null, 2));
-
       this.updateStateFromResponse(response);
 
       const needsInput = Boolean(
@@ -139,9 +133,6 @@ export class BleakSession {
           response.questions.length > 0
       );
 
-      console.log("startBleakConversation - threadId:", this.state.threadId); // Debug log
-      console.log("startBleakConversation - needsInput:", needsInput);
-
       return {
         needsInput,
         questions: needsInput ? this.state.questions : undefined,
@@ -149,7 +140,6 @@ export class BleakSession {
         getState: () => ({...this.state})
       };
     } catch (error) {
-      console.error("Error in startBleakConversation:", error);
       this.state.error = error as Error;
       this.state.isLoading = false;
       throw error;
@@ -164,18 +154,7 @@ export class BleakSession {
   async finishBleakConversation(
     answers: Record<string, string>
   ): Promise<string> {
-    console.log("finishBleakConversation called with answers:", answers);
-    console.log(
-      "finishBleakConversation - current threadId:",
-      this.state.threadId
-    );
-    console.log("finishBleakConversation - current state:", this.state);
-
     if (!this.state.threadId) {
-      console.error(
-        "ERROR: No threadId found in state when trying to finish conversation"
-      );
-      console.error("Current state:", JSON.stringify(this.state, null, 2));
       throw new Error(
         "No active conversation thread. You must call startBleakConversation() first."
       );
@@ -186,11 +165,10 @@ export class BleakSession {
 
     try {
       const standardAnswers = this.convertAnswers(answers);
-      console.log(
-        "Making continuation request with standardAnswers:",
-        standardAnswers
+      const response = await this.makeContinuationRequest(
+        standardAnswers,
+        false
       );
-      const response = await this.makeContinuationRequest(standardAnswers);
       this.updateStateFromResponse(response);
 
       if (response.is_complete) {
@@ -202,7 +180,46 @@ export class BleakSession {
         );
       }
     } catch (error) {
-      console.error("Error in finishBleakConversation:", error);
+      this.state.error = error as Error;
+      throw error;
+    } finally {
+      this.state.isLoading = false;
+    }
+  }
+
+  /**
+   * Request more questions after answering the current ones
+   * This allows for iterative refinement of the conversation
+   */
+  async requestMoreBleakQuestions(answers: Record<string, string>): Promise<{
+    questions?: InteractiveQuestion[];
+    isComplete: boolean;
+    getState: () => SessionState;
+  }> {
+    if (!this.state.threadId) {
+      throw new Error(
+        "No active conversation thread. You must call startBleakConversation() first."
+      );
+    }
+
+    this.state.answers = {...this.state.answers, ...answers};
+    this.state.isLoading = true;
+
+    try {
+      const standardAnswers = this.convertAnswers(answers);
+      const response = await this.makeContinuationRequest(
+        standardAnswers,
+        true
+      );
+      this.updateStateFromResponse(response);
+
+      return {
+        questions:
+          response.type === "questions" ? response.questions : undefined,
+        isComplete: response.is_complete,
+        getState: () => ({...this.state})
+      };
+    } catch (error) {
       this.state.error = error as Error;
       throw error;
     } finally {
@@ -305,7 +322,8 @@ export class BleakSession {
   }
 
   private async makeContinuationRequest(
-    answers: AnsweredQuestion[]
+    answers: AnsweredQuestion[],
+    wantMoreQuestions: boolean = false
   ): Promise<ChatResponse> {
     if (!this.state.threadId) {
       throw new Error("No active conversation thread");
@@ -315,7 +333,7 @@ export class BleakSession {
       type: "continue",
       thread_id: this.state.threadId,
       answers,
-      want_more_questions: false
+      want_more_questions: wantMoreQuestions
     };
 
     const response = await this.client.post<ChatResponse>("/chat", request, {
@@ -350,15 +368,6 @@ export class BleakSession {
   }
 
   private updateStateFromResponse(response: ChatResponse): void {
-    console.log(
-      "updateStateFromResponse - response.thread_id:",
-      response.thread_id
-    );
-    console.log(
-      "updateStateFromResponse - full response keys:",
-      Object.keys(response)
-    );
-
     this.state.threadId = response.thread_id;
     this.state.isComplete = response.is_complete;
 
@@ -371,11 +380,6 @@ export class BleakSession {
     if (response.is_complete) {
       this.state.result = response.content;
     }
-
-    console.log(
-      "updateStateFromResponse - state.threadId after update:",
-      this.state.threadId
-    );
   }
 
   private convertAnswers(answers: Record<string, string>): AnsweredQuestion[] {
