@@ -1,319 +1,230 @@
-// import {useState} from "react";
-// import {
-//   startConversation,
-//   finishConversation,
-//   type AnsweredQuestion,
-//   type InteractiveQuestion,
-//   type BleakElementConfig,
-//   createResolverFromConfig
-// } from "bleakai";
-// import "./App.css";
+import React, {useState} from "react";
+import {BleakSession, type InteractiveQuestion} from "bleakai";
 
-// // Simple configuration
-// function createAppChatConfig(apiKey?: string) {
-//   return {
-//     baseUrl: "http://0.0.0.0:8008",
-//     apiKey: apiKey,
-//     // openaiKey: "asdfasfsdaf",
-//     timeout: 30000
-//   };
-// }
+// Simple components with clean styling
+const TextInput = ({question, value, onChange}: any) => (
+  <div style={{marginBottom: "16px"}}>
+    <label>{question}</label>
+    <input
+      type="text"
+      value={value || ""}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={question}
+    />
+  </div>
+);
 
-// // Very simple components with no styling
-// const TextInput = ({question, value, onChange}: any) => (
-//   <div>
-//     <label>{question}</label>
-//     <input
-//       type="text"
-//       value={value || ""}
-//       onChange={(e) => onChange(e.target.value)}
-//     />
-//   </div>
-// );
+const RadioGroup = ({question, options, value, onChange}: any) => (
+  <div style={{marginBottom: "16px"}}>
+    <label>{question}</label>
+    {options?.map((option: string, i: number) => (
+      <div key={i}>
+        <input
+          type="radio"
+          name={question.replace(/\s+/g, "_")}
+          checked={value === option}
+          onChange={() => onChange(option)}
+        />
+        <span>{option}</span>
+      </div>
+    ))}
+  </div>
+);
 
-// const RadioGroup = ({question, options, value, onChange}: any) => (
-//   <div>
-//     <label>{question}</label>
-//     {options?.map((option: string, i: number) => (
-//       <div key={i}>
-//         <input
-//           type="radio"
-//           name={question}
-//           checked={value === option}
-//           onChange={() => onChange(option)}
-//         />
-//         <span>{option}</span>
-//       </div>
-//     ))}
-//   </div>
-// );
+const MultiSelect = ({question, options, value, onChange}: any) => {
+  const selected = Array.isArray(value) ? value : value ? [value] : [];
+  return (
+    <div>
+      <label>{question}</label>
+      {options?.map((option: string, i: number) => (
+        <div key={i}>
+          <input
+            type="checkbox"
+            checked={selected.includes(option)}
+            onChange={() => {
+              const newSelected = selected.includes(option)
+                ? selected.filter((v) => v !== option)
+                : [...selected, option];
+              onChange(newSelected.join(", "));
+            }}
+          />
+          <span>{option}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
-// const MultiSelect = ({question, options, value, onChange}: any) => {
-//   const selected = Array.isArray(value) ? value : value ? [value] : [];
-//   return (
-//     <div>
-//       <label>{question}</label>
-//       {options?.map((option: string, i: number) => (
-//         <div key={i}>
-//           <input
-//             type="checkbox"
-//             checked={selected.includes(option)}
-//             onChange={() => {
-//               const newSelected = selected.includes(option)
-//                 ? selected.filter((v) => v !== option)
-//                 : [...selected, option];
-//               onChange(newSelected.join(", "));
-//             }}
-//           />
-//           <span>{option}</span>
-//         </div>
-//       ))}
-//     </div>
-//   );
-// };
+// Element configuration with default components
+const BLEAK_ELEMENT_CONFIG = {
+  text: {
+    component: TextInput,
+    description:
+      "Use text for open-ended elements requiring free-form text input. Best for: names, descriptions, explanations, specific details, custom responses."
+  },
+  radio: {
+    component: RadioGroup,
+    description:
+      "Use radio for single-choice elements with 2-5 predefined options. Best for: yes/no elements, multiple choice with exclusive selection, categorical choices."
+  },
+  multi_select: {
+    component: MultiSelect,
+    description:
+      "Use multiselect for elements where users can select multiple options from a list. Best for: skills selection, feature preferences, multiple interests."
+  }
+};
 
-// export const BLEAK_ELEMENT_CONFIG = {
-//   text: {
-//     component: TextInput,
-//     description:
-//       "Use text for open-ended elements requiring free-form text input. Best for: names, descriptions, explanations, specific details, custom responses (e.g., 'What is your company name?', 'Describe your requirements', 'Any additional comments?'). Never provide options array."
-//   },
-//   radio: {
-//     component: RadioGroup,
-//     description:
-//       "Use radio for single-choice elements with 2-5 predefined options. Best for: yes/no elements, multiple choice with exclusive selection, categorical choices (e.g., 'What is your experience level?', 'Which option do you prefer?', 'Are you satisfied?'). Always provide options array."
-//   },
-//   multi_select: {
-//     component: MultiSelect,
-//     description:
-//       "Use multiselect for elements where users can select multiple options from a list. Best for: skills selection, feature preferences, multiple interests, tags (e.g., 'Which programming languages do you know?', 'Select all that apply', 'What features do you need?'). Always provide options array with 3+ choices."
-//   }
-// } satisfies BleakElementConfig;
+function App() {
+  const [prompt, setPrompt] = useState("");
+  const [questions, setQuestions] = useState<InteractiveQuestion[] | null>(
+    null
+  );
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [finalAnswer, setFinalAnswer] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-// function App() {
-//   const [prompt, setPrompt] = useState("");
-//   const [chatClient, setChatClient] = useState<any>(null);
-//   const [questions, setQuestions] = useState<InteractiveQuestion[]>([]);
-//   const [answers, setAnswers] = useState<Record<string, string>>({});
-//   const [finalAnswer, setFinalAnswer] = useState<string | null>(null);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [error, setError] = useState<Error | null>(null);
+  // Create BleakSession instance with configuration
+  const bleak = new BleakSession({
+    apiKey: "your-api-key",
+    baseUrl: "http://localhost:8008/bleak",
+    timeout: 30000,
+    elements: BLEAK_ELEMENT_CONFIG
+  });
 
-//   const handleAsk = async () => {
-//     if (!prompt.trim()) return;
+  const handleAsk = async () => {
+    if (!prompt.trim()) return;
 
-//     setIsLoading(true);
-//     setError(null);
-//     setQuestions([]);
-//     setAnswers({});
-//     setFinalAnswer(null);
+    setIsLoading(true);
+    setError(null);
+    setQuestions(null);
+    setAnswers({});
+    setFinalAnswer(null);
 
-//     try {
-//       const {response, client} = await startConversation(
-//         prompt,
-//         createAppChatConfig(),
-//         {
-//           bleakElements: Object.entries(BLEAK_ELEMENT_CONFIG).map(
-//             ([name, config]) => ({
-//               name,
-//               description: config.description
-//             })
-//           )
-//         }
-//       );
+    try {
+      const {createSession} = bleak;
+      // Create session with the new clean API
+      const session = await createSession(prompt);
 
-//       setChatClient(client);
+      const {hasQuestions, getQuestions, getResult} = session;
 
-//       if (response.type === "questions") {
-//         setQuestions(response.questions || []);
-//       } else if (response.type === "answer") {
-//         setFinalAnswer(response.content);
-//       }
-//     } catch (err) {
-//       setError(err as Error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
+      if (hasQuestions) {
+        // Get questions and update UI state
+        const sessionQuestions = await getQuestions();
+        setQuestions(sessionQuestions);
+        setIsLoading(false);
+      } else {
+        // No questions, get result directly
+        const result = await session.getResult();
+        setFinalAnswer(result);
+        setIsLoading(false);
+      }
+    } catch (err) {
+      setError(err as Error);
+      setIsLoading(false);
+    }
+  };
 
-//   const handleSubmit = async () => {
-//     if (!chatClient || !questions.length) return;
+  const handleSubmit = async () => {
+    if (!questions) return;
 
-//     setIsLoading(true);
-//     setError(null);
+    setIsLoading(true);
+    setError(null);
 
-//     try {
-//       const answeredQuestions: AnsweredQuestion[] = questions
-//         .map((q) => {
-//           const answer = answers[q.question];
-//           if (answer && answer.trim()) {
-//             return {question: q.question, answer: answer.trim()};
-//           }
-//           return null;
-//         })
-//         .filter((item): item is AnsweredQuestion => item !== null);
+    try {
+      // Create a new session and submit answers
+      const session = await bleak.createSession(prompt);
+      const result = await session.submitAnswers(answers);
+      setFinalAnswer(result);
+      setQuestions(null);
+    } catch (err) {
+      setError(err as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-//       const response = await finishConversation(chatClient, answeredQuestions);
+  const handleAnswerChange = (question: string, value: string) => {
+    setAnswers((prev) => ({...prev, [question]: value}));
+  };
 
-//       if (response.type === "answer") {
-//         setFinalAnswer(response.content);
-//         setQuestions([]);
-//       } else if (response.type === "questions") {
-//         setQuestions(response.questions || []);
-//         setAnswers({});
-//       }
-//     } catch (err) {
-//       setError(err as Error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
+  const reset = () => {
+    bleak.reset();
+    setQuestions(null);
+    setAnswers({});
+    setFinalAnswer(null);
+    setError(null);
+    setIsLoading(false);
+    setPrompt("");
+  };
 
-//   const handleAnswerChange = (question: string, value: string) => {
-//     setAnswers((prev) => ({...prev, [question]: value}));
-//   };
+  const allQuestionsAnswered = questions?.every((q) =>
+    answers[q.question]?.trim()
+  );
 
-//   const reset = () => {
-//     setQuestions([]);
-//     setAnswers({});
-//     setFinalAnswer(null);
-//     setChatClient(null);
-//     setError(null);
-//     setIsLoading(false);
-//     setPrompt("");
-//   };
+  return (
+    <div>
+      <h1>BleakAI Demo - Improved API</h1>
 
-//   const allQuestionsAnswered = questions.every((q) =>
-//     answers[q.question]?.trim()
-//   );
+      {/* Error display */}
+      {error && <div>Error: {error.message}</div>}
 
-//   const renderQuestion = (question: any, questionIndex: number) => {
-//     const value = answers[question.question] || "";
-//     const onChange = (val: string) =>
-//       handleAnswerChange(question.question, val);
+      {/* Initial prompt input */}
+      {!questions && !finalAnswer && (
+        <div>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows={4}
+          />
+          <button onClick={handleAsk} disabled={isLoading || !prompt.trim()}>
+            {isLoading ? "Loading..." : "Ask AI"}
+          </button>
+        </div>
+      )}
 
-//     const {resolve} = createResolverFromConfig(BLEAK_ELEMENT_CONFIG);
+      {/* Questions */}
+      {questions && (
+        <div>
+          <h3>Please answer these questions:</h3>
+          {questions.map((question) => {
+            // Simple component rendering without complex resolver
+            const Component =
+              BLEAK_ELEMENT_CONFIG[
+                question.type as keyof typeof BLEAK_ELEMENT_CONFIG
+              ]?.component || TextInput;
 
-//     const elementData = {
-//       type: question.type,
-//       text: question.question,
-//       options: question.options || []
-//     };
+            return (
+              <Component
+                key={question.question}
+                question={question.question}
+                value={answers[question.question] || ""}
+                onChange={(value: string) =>
+                  handleAnswerChange(question.question, value)
+                }
+                options={question.options}
+              />
+            );
+          })}
+          <button
+            onClick={handleSubmit}
+            disabled={!allQuestionsAnswered || isLoading}
+          >
+            {isLoading ? "Processing..." : "Submit Answers"}
+          </button>
+        </div>
+      )}
 
-//     try {
-//       const {Component, props} = resolve(
-//         elementData,
-//         value,
-//         onChange,
-//         questionIndex
-//       );
-//       return (
-//         <div key={question.question}>
-//           <h3>{question.question}</h3>
-//           <Component {...props} />
-//         </div>
-//       );
-//     } catch (error) {
-//       console.error("Error resolving bleak element:", error);
-//       return (
-//         <div className="text-destructive text-sm">
-//           Error rendering question: {question.question}
-//         </div>
-//       );
-//     }
+      {/* Final answer */}
+      {finalAnswer && (
+        <div>
+          <h3>AI Response:</h3>
+          <div>{finalAnswer}</div>
+          <button onClick={reset}>Start Over</button>
+        </div>
+      )}
+    </div>
+  );
+}
 
-//     // switch (question.type) {
-//     //   case "text":
-//     //     return (
-//     //       <TextInput
-//     //         key={question.question}
-//     //         question={question.question}
-//     //         value={value}
-//     //         onChange={onChange}
-//     //       />
-//     //     );
-//     //   case "radio":
-//     //     return (
-//     //       <RadioGroup
-//     //         key={question.question}
-//     //         question={question.question}
-//     //         options={question.options}
-//     //         value={value}
-//     //         onChange={onChange}
-//     //       />
-//     //     );
-//     //   case "multiSelect":
-//     //     return (
-//     //       <MultiSelect
-//     //         key={question.question}
-//     //         question={question.question}
-//     //         options={question.options}
-//     //         value={value}
-//     //         onChange={onChange}
-//     //       />
-//     //     );
-//     //   default:
-//     //     return (
-//     //       <TextInput
-//     //         key={question.question}
-//     //         question={question.question}
-//     //         value={value}
-//     //         onChange={onChange}
-//     //       />
-//     //     );
-//     // }
-//   };
-
-//   return (
-//     <div>
-//       <h1>BleakAI Demo</h1>
-
-//       {/* Error display */}
-//       {error && (
-//         <div style={{color: "red", margin: "10px 0"}}>
-//           Error: {error.message}
-//         </div>
-//       )}
-
-//       {/* Initial prompt input */}
-//       {!questions.length && !finalAnswer && (
-//         <div>
-//           <textarea
-//             value={prompt}
-//             onChange={(e) => setPrompt(e.target.value)}
-//             placeholder="Ask something"
-//             rows={3}
-//           />
-//           <button onClick={handleAsk} disabled={isLoading}>
-//             {isLoading ? "Loading..." : "Ask AI"}
-//           </button>
-//         </div>
-//       )}
-
-//       {/* Questions */}
-//       {questions.length > 0 && (
-//         <div>
-//           <h3>Answer these questions:</h3>
-//           {questions.map((question, index) => renderQuestion(question, index))}
-//           <button
-//             onClick={handleSubmit}
-//             disabled={!allQuestionsAnswered || isLoading}
-//           >
-//             {isLoading ? "Processing..." : "Submit Answers"}
-//           </button>
-//         </div>
-//       )}
-
-//       {/* Final answer */}
-//       {finalAnswer && (
-//         <div>
-//           <h3>AI Response:</h3>
-//           <div>{finalAnswer}</div>
-//           <button onClick={reset}>Start Over</button>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default App;
+export default App;
