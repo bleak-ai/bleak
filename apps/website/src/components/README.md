@@ -91,7 +91,6 @@ import {Button, Input, Card} from "@/components/ui";
 - **layout/**: Components that define the app structure and navigation
 - **features/**: Business logic components specific to app features
 - **chat/**: All chat-related components, organized by purpose
-- **demo/**: Demo and testing components
 - **ui/**: Reusable UI primitives and basic components
 
 ## Benefits of This Structure

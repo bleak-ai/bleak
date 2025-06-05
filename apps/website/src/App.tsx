@@ -4,7 +4,6 @@ import {useState, useEffect} from "react";
 import {Landing, ChatPage} from "./components/pages";
 import {Header, Footer} from "./components/layout";
 // import {DynamicDemo} from "./components/chat/interactive";
-import {TestBleakAI} from "./components/demo";
 import {AuthWrapper} from "./components/auth/AuthWrapper";
 import {AuthPageWrapper} from "./components/auth/AuthPageWrapper";
 import DashboardPage from "./components/dashboard/UserDashboard";
@@ -47,8 +46,6 @@ function App() {
     switch (currentRoute) {
       case "chat":
         return <ChatPage />;
-      case "demo":
-        return <TestBleakAI />;
       case "profile":
         return <DashboardPage />;
       case "docs":

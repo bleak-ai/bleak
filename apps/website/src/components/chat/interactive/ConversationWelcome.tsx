@@ -69,7 +69,6 @@ export const ConversationWelcome = ({
           />
         </div>
       )}
-
       {/* Ollama Connection Error */}
       {ollamaConnectionError && (
         <div className="p-4 border border-destructive/50 rounded-lg bg-destructive/10">
@@ -94,7 +93,6 @@ export const ConversationWelcome = ({
         isLoading={isLoading}
         prefilledPrompt={prefilledPrompt}
       />
-
       {/* Non-API Key Errors */}
       {nonApiKeyError && <ErrorDisplay error={nonApiKeyError} />}
     </div>

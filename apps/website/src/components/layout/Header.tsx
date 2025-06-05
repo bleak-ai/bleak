@@ -59,13 +59,6 @@ const Header = () => {
                 Chat
               </Button>
               <Button
-                variant={currentPath === "/demo" ? "default" : "ghost"}
-                onClick={() => navigateTo("/demo")}
-                className="text-sm"
-              >
-                Demo
-              </Button>
-              <Button
                 variant={currentPath === "/docs" ? "default" : "ghost"}
                 onClick={() => navigateTo("/docs")}
                 className="text-sm"

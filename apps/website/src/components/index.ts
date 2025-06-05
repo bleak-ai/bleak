@@ -10,9 +10,6 @@ export * from "./features";
 // Chat Components
 export * from "./chat";
 
-// Demo Components
-export * from "./demo";
-
 // UI Components (re-export for convenience)
 export * from "./ui/button";
 export * from "./ui/input";

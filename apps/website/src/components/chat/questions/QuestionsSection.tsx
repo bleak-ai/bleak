@@ -2,24 +2,21 @@ import React from "react";
 import {Loader} from "lucide-react";
 import {Button} from "../../ui/button";
 import {createResolverFromConfig} from "bleakai";
-import type {BleakElementConfig} from "bleakai";
-import type {
-  InteractiveQuestion,
-  AnsweredQuestion
-} from "../../../api/interactiveApi";
+import type {BleakElementConfig, InteractiveQuestion} from "bleakai";
 import {BLEAK_ELEMENT_CONFIG} from "../../../config/bleakConfig";
-import {LoadingSpinner} from "../utils/LoadingSpinner";
-import {ErrorDisplay} from "../utils/ErrorDisplay";
+
+// Use the proper types from bleakai
+type InteractiveQuestionType = InteractiveQuestion;
 
 interface BleakElementsSectionProps {
-  questions: InteractiveQuestion[];
+  questions: InteractiveQuestionType[];
   answers: Record<string, string>;
   onAnswerChange: (question: string, value: string) => void;
   onChoice: (choice: "more_questions" | "final_answer") => void;
   isLoading: boolean;
-  allQuestionsAnswered: boolean;
-  previousAnswers?: AnsweredQuestion[];
+  allQuestionsAnswered: boolean; // Still needed for interface compatibility
   customConfig?: BleakElementConfig | null;
+  bleak?: unknown; // Changed from any to unknown
 }
 
 // Dynamic component that creates proper bleak elements based on config
@@ -30,7 +27,7 @@ const DynamicBleakElement = ({
   questionIndex,
   config
 }: {
-  question: InteractiveQuestion;
+  question: InteractiveQuestionType;
   value: string;
   onChange: (value: string) => void;
   questionIndex: number;
@@ -68,10 +65,12 @@ export const QuestionsSection = ({
   onAnswerChange,
   onChoice,
   isLoading,
-  allQuestionsAnswered,
-  previousAnswers,
-  customConfig
+  customConfig,
+  bleak
 }: BleakElementsSectionProps) => {
+  // Check if all questions have been answered
+  const allAnswered = questions.every((q) => answers[q.question]?.trim());
+
   // Get active element types for display
   const getActiveElementTypes = () => {
     if (!customConfig) return null;
@@ -81,7 +80,6 @@ export const QuestionsSection = ({
   };
 
   const activeTypes = getActiveElementTypes();
-  const configToUse = customConfig || BLEAK_ELEMENT_CONFIG;
 
   return (
     <div className="space-y-8">
@@ -94,11 +92,6 @@ export const QuestionsSection = ({
             <p className="text-muted-foreground">
               Please answer these questions to get a more personalized response
             </p>
-            {previousAnswers && previousAnswers.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Building on your previous {previousAnswers.length} answer(s)
-              </p>
-            )}
             {activeTypes && (
               <p className="text-xs text-muted-foreground">
                 Using custom element types: {activeTypes.join(", ")}
@@ -108,22 +101,47 @@ export const QuestionsSection = ({
         </div>
 
         <div className="space-y-8">
-          {questions.map((question, index) => (
-            <div key={index} className="space-y-3">
-              <DynamicBleakElement
-                question={question}
-                value={answers[question.question] || ""}
-                onChange={(value: string) =>
-                  onAnswerChange(question.question, value)
+          {bleak && typeof bleak === "object" && "getBleakComponents" in bleak
+            ? // Use the new getBleakComponents approach from App.tsx
+              (
+                bleak as {
+                  getBleakComponents: (
+                    questions: InteractiveQuestionType[],
+                    answers: Record<string, string>,
+                    onAnswerChange: (question: string, value: string) => void
+                  ) => {
+                    Component: React.ComponentType<unknown>;
+                    props: Record<string, unknown>;
+                    key: string;
+                  }[];
                 }
-                questionIndex={index}
-                config={configToUse}
-              />
-              {index < questions.length - 1 && (
-                <div className="w-full h-px bg-border"></div>
-              )}
-            </div>
-          ))}
+              )
+                .getBleakComponents(questions, answers, onAnswerChange)
+                .map(({Component, props, key}) => (
+                  <div key={key} className="space-y-3">
+                    <Component {...props} />
+                    {key !== `question-${questions.length - 1}` && (
+                      <div className="w-full h-px bg-border"></div>
+                    )}
+                  </div>
+                ))
+            : // Fallback to old approach if bleak session not available
+              questions.map((question, index) => (
+                <div key={index} className="space-y-3">
+                  <DynamicBleakElement
+                    question={question}
+                    value={answers[question.question] || ""}
+                    onChange={(value: string) =>
+                      onAnswerChange(question.question, value)
+                    }
+                    questionIndex={index}
+                    config={customConfig || BLEAK_ELEMENT_CONFIG}
+                  />
+                  {index < questions.length - 1 && (
+                    <div className="w-full h-px bg-border"></div>
+                  )}
+                </div>
+              ))}
         </div>
       </div>
 
@@ -132,7 +150,7 @@ export const QuestionsSection = ({
         <Button
           onClick={() => onChoice("more_questions")}
           variant="outline"
-          disabled={!allQuestionsAnswered || isLoading}
+          disabled={!allAnswered || isLoading}
           className="flex-1 py-3 text-base font-medium"
         >
           {isLoading ? (
@@ -141,13 +159,13 @@ export const QuestionsSection = ({
               Getting more questions...
             </>
           ) : (
-            "Ask more questions"
+            "I need to provide more details"
           )}
         </Button>
 
         <Button
           onClick={() => onChoice("final_answer")}
-          disabled={!allQuestionsAnswered || isLoading}
+          disabled={!allAnswered || isLoading}
           className="flex-1 py-3 text-base font-medium"
         >
           {isLoading ? (
@@ -156,7 +174,7 @@ export const QuestionsSection = ({
               Generating answer...
             </>
           ) : (
-            "Get my answer"
+            "Get My Answer"
           )}
         </Button>
       </div>
