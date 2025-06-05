@@ -1,8 +1,8 @@
-import {useState} from "react";
+import React from "react";
 import {PromptForm} from "../utils/PromptForm";
 
-interface ChatWelcomeProps {
-  onPromptSubmit: (prompt: string) => void;
+interface ChatInputProps {
+  onSubmit: (prompt: string) => void;
   isLoading: boolean;
   prefilledPrompt?: string;
   apiKey?: string | null;
@@ -10,25 +10,25 @@ interface ChatWelcomeProps {
   error?: Error | null;
 }
 
-export const ChatWelcome = ({
-  onPromptSubmit,
+export const ChatInput = ({
+  onSubmit,
   isLoading,
   prefilledPrompt = "",
-  apiKey,
-  onApiKeyChange,
   error
-}: ChatWelcomeProps) => {
+}: ChatInputProps) => {
   return (
     <div className="space-y-6">
       <PromptForm
-        onSubmit={onPromptSubmit}
+        onSubmit={onSubmit}
         isLoading={isLoading}
         prefilledPrompt={prefilledPrompt}
       />
 
-      {error && apiKey && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
-          {error.message}
+      {error && (
+        <div className="p-4 border border-destructive/50 rounded-lg bg-destructive/10">
+          <p className="text-destructive text-sm">
+            <strong>Error:</strong> {error.message}
+          </p>
         </div>
       )}
     </div>

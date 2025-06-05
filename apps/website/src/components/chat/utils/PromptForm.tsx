@@ -1,4 +1,4 @@
-import {useState, type FormEvent} from "react";
+import {useEffect, useState, type FormEvent} from "react";
 import {Button} from "../../ui/button";
 import {Textarea} from "../../ui/textarea";
 
@@ -14,13 +14,21 @@ export const PromptForm = ({
   prefilledPrompt = ""
 }: PromptFormProps) => {
   const [prompt, setPrompt] = useState(prefilledPrompt || "");
+  console.log("prefilledPrompt", prefilledPrompt);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("prompt", prompt);
     if (prompt.trim() && !isLoading) {
       onSubmit(prompt.trim());
     }
   };
+
+  useEffect(() => {
+    if (prefilledPrompt) {
+      setPrompt(prefilledPrompt);
+    }
+  }, [prefilledPrompt]);
 
   return (
     <div className="space-y-4">
