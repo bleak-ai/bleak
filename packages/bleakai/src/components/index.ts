@@ -1,21 +1,12 @@
 // Default components for BleakAI
 // These provide immediate functionality without requiring custom component setup
 
-export interface BleakComponentProps {
-  question: string;
-  value?: string;
-  onChange: (value: string) => void;
-  options?: string[];
-}
+import type {ComponentProps} from "../types/components";
 
 /**
  * Simple text input component that can be used directly
  */
-export function BleakText({
-  question,
-  value = "",
-  onChange
-}: BleakComponentProps) {
+export function BleakText({question, value = "", onChange}: ComponentProps) {
   const element = document.createElement("div");
   element.innerHTML = `
     <div style="margin-bottom: 16px;">
@@ -45,7 +36,7 @@ export function BleakRadio({
   value = "",
   onChange,
   options = []
-}: BleakComponentProps) {
+}: ComponentProps) {
   const element = document.createElement("div");
   element.style.marginBottom = "16px";
 
@@ -85,9 +76,10 @@ export function BleakRadio({
 }
 
 /**
- * Default element configuration using the built-in components
+ * Default component mapping using the built-in components
+ * Use this as a starting point or reference for your own mapping
  */
-export const DEFAULT_BLEAK_ELEMENTS = {
+export const defaultComponents = {
   text: {
     component: BleakText,
     description:
@@ -99,3 +91,20 @@ export const DEFAULT_BLEAK_ELEMENTS = {
       "Use radio for single-choice elements with 2-5 predefined options. Best for: yes/no elements, multiple choice with exclusive selection, categorical choices (e.g., 'What is your experience level?', 'Which option do you prefer?', 'Are you satisfied?'). Always provide options array."
   }
 };
+
+// Keep the old export for backward compatibility
+/**
+ * @deprecated Use `defaultComponents` instead
+ */
+export const DEFAULT_BLEAK_ELEMENTS = defaultComponents;
+
+// Keep the old interface for backward compatibility
+/**
+ * @deprecated Use `ComponentProps` from types/components instead
+ */
+export interface BleakComponentProps {
+  question: string;
+  value?: string;
+  onChange: (value: string) => void;
+  options?: string[];
+}

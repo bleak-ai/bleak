@@ -1,484 +1,385 @@
-# bleakai - Framework-Agnostic Bleak Element Component Resolver
+# BleakAI
 
-A truly framework-agnostic library that handles the **logic** of determining which component to use for dynamic bleak elements. No rendering, no framework dependencies - just pure component resolution logic.
+**Transform AI conversations into structured forms with your own components.**
 
-## 🌟 Features
+Instead of parsing messy text responses, BleakAI generates proper form elements (text inputs, dropdowns, sliders) when the AI needs more information. You bring your own UI components, BleakAI provides the intelligence.
 
-- **Zero Framework Dependencies**: Works with React, Vue, Angular, Svelte, plain JS, anything
-- **Pure Logic**: Only handles component selection - you handle rendering
-- **Type Safe**: Full TypeScript support
-- **Tiny**: Minimal bundle size with no framework bloat
-- **Intuitive**: Simple API that's easy to understand and use
+## Core Philosophy: Bring Your Own Components
 
-## 📦 Installation
+BleakAI doesn't come with a specific UI framework. It works with **your existing components** - React, Vue, Angular, or plain JavaScript. You map your components to form types, and BleakAI decides which ones to use based on the conversation.
+
+## Quick Start
 
 ```bash
 npm install bleakai
 ```
 
-## 🚀 Quick Start
-
-### The Core Concept
-
-1. **Define your config** following the library's type structure (single source of truth)
-2. **Use the library's helper** to create a resolver from your config
-3. **Get components and props** directly - no manual mapping needed!
-
 ```typescript
-import {createResolverFromConfig, type BleakElementConfig} from "bleakai";
-import {TextInput, RadioGroup, TextArea} from "./my-components";
+import {BleakSession} from "bleakai";
 
-// 1. Define your config - enforced by library types!
-const BLEAK_CONFIG = {
+// 1. Map your components to form types
+const componentConfig = {
   text: {
-    component: TextInput,
-    description: "Use for open-ended text input"
+    component: YourTextInput,
+    description: "For text input and messages"
   },
   radio: {
-    component: RadioGroup,
-    description: "Use for single choice from options"
+    component: YourRadioGroup,
+    description: "For single choice from options"
   },
-  textarea: {
-    component: TextArea,
-    description: "Use for longer text input"
+  date: {
+    component: YourDatePicker,
+    description: "For dates and times"
   }
-} satisfies BleakElementConfig;
+};
 
-// 2. Create resolver from config (super smooth!)
-const {resolve} = createResolverFromConfig(BLEAK_CONFIG);
+// 2. Create a BleakAI session
+const bleak = new BleakSession({
+  apiKey: "your-api-key",
+  elements: componentConfig
+});
 
-// 3. Use it - get Component and props directly!
-function DynamicBleakElement({element, value, onChange}) {
-  const {Component, props} = resolve(element, value, onChange);
-  return <Component {...props} />;
+// 3. Start a conversation (single call!)
+const result = await bleak.startBleakConversation(
+  "Help me plan a trip to Japan"
+);
+
+if (result.needsInput && result.questions) {
+  // AI wants form input - questions are immediately available
+
+  // 4. Convert questions to your components
+  const components = bleak.getBleakComponents(
+    result.questions,
+    answers,
+    onAnswerChange
+  );
+
+  components.forEach(({Component, props, key}) => {
+    render(<Component key={key} {...props} />);
+  });
+
+  // 5. Finish the conversation when done
+  const finalAnswer = await bleak.finishBleakConversation(answers);
+} else if (result.answer) {
+  // Direct answer - no form needed
+  console.log(result.answer);
 }
 ```
 
-### Why This Approach Rocks
+## How It Works
 
-✅ **Single source of truth** - your config defines everything  
-✅ **Type enforced** - library ensures you follow the right structure  
-✅ **No manual mapping** - library handles component resolution  
-✅ **Framework agnostic** - same pattern works everywhere
+### 1. **Component Mapping**
 
-## 🎯 Framework Examples
+Tell BleakAI about your components:
 
-### React
+```typescript
+const config = {
+  text: {
+    component: MyTextInput,
+    description: "Use for names, descriptions, open-ended responses"
+  },
+  radio: {
+    component: MyRadioButtons,
+    description: "Use for single choice between 2-5 options"
+  },
+  multi_select: {
+    component: MyCheckboxGroup,
+    description: "Use when users can select multiple options"
+  },
+  date: {
+    component: MyDatePicker,
+    description: "Use for dates, times, and deadlines"
+  },
+  slider: {
+    component: MySlider,
+    description: "Use for numeric ranges and ratings"
+  }
+};
+```
+
+### 2. **AI Decision Making**
+
+BleakAI analyzes the conversation and automatically chooses the right component types:
+
+- **"When do you want to travel?"** → Date picker
+- **"What's your budget range?"** → Slider
+- **"Which cities interest you?"** → Multi-select checkboxes
+- **"Any special requirements?"** → Text input
+
+### 3. **Framework Agnostic**
+
+Your components receive standard props:
+
+```typescript
+// Your components get these props automatically
+interface ComponentProps {
+  text: string; // The question text (note: 'text', not 'question')
+  value: string; // Current value
+  onChange: (value: string) => void; // Update callback
+  options?: string[]; // For choice components
+  id?: string; // Unique identifier
+}
+```
+
+## React Example
 
 ```tsx
-import {createResolver} from "bleakai";
-import {TextInput, RadioGroup, TextArea} from "./my-components";
+import React, {useState} from "react";
+import {BleakSession} from "bleakai";
 
-// Your component registry
-const components = {
-  TextInput,
-  RadioGroup,
-  TextArea
-};
+// Your existing components
+const TextInput = ({text, value, onChange}) => (
+  <div>
+    <label>{text}</label>
+    <input value={value} onChange={(e) => onChange(e.target.value)} />
+  </div>
+);
 
-// Component map for the resolver
-const componentMap = {
-  text: "TextInput",
-  radio: "RadioGroup",
-  textarea: "TextArea"
-};
+const RadioGroup = ({text, options, value, onChange}) => (
+  <div>
+    <label>{text}</label>
+    {options.map((option) => (
+      <label key={option}>
+        <input
+          type="radio"
+          checked={value === option}
+          onChange={() => onChange(option)}
+        />
+        {option}
+      </label>
+    ))}
+  </div>
+);
 
-function DynamicBleakElement({element, value, onChange}) {
-  const resolver = createResolver(componentMap);
-  const {componentKey, props} = resolver.resolve(element, value, onChange);
-
-  // Get the actual component from your registry
-  const Component = components[componentKey];
-
-  return <Component {...props} />;
-}
-
-// Usage
 function App() {
-  const [value, setValue] = useState("");
-  const element = {type: "text", text: "Enter your name:"};
+  const [answers, setAnswers] = useState({});
 
-  return (
-    <DynamicBleakElement element={element} value={value} onChange={setValue} />
+  const bleak = new BleakSession({
+    apiKey: "your-key",
+    elements: {
+      text: {component: TextInput, description: "For text input"},
+      radio: {component: RadioGroup, description: "For single choice"}
+    }
+  });
+
+  const handleStartConversation = async (prompt) => {
+    // Single call - clean and simple!
+    const result = await bleak.startBleakConversation(prompt);
+
+    if (result.needsInput && result.questions) {
+      // Questions are immediately available
+      const components = bleak.getBleakComponents(
+        result.questions,
+        answers,
+        (question, value) =>
+          setAnswers((prev) => ({...prev, [question]: value}))
+      );
+
+      // Render your components
+      return components.map(({Component, props, key}) => (
+        <Component key={key} {...props} />
+      ));
+    } else if (result.answer) {
+      // Direct answer available
+      return <div>{result.answer}</div>;
+    }
+  };
+
+  const handleFinishConversation = async () => {
+    const finalAnswer = await bleak.finishBleakConversation(answers);
+    return finalAnswer;
+  };
+
+  // ... rest of your component
+}
+```
+
+## API Reference
+
+### BleakSession
+
+The main class for managing AI conversations.
+
+#### Constructor
+
+```typescript
+const bleak = new BleakSession({
+  apiKey: string;              // Your BleakAI API key
+  baseUrl?: string;            // API endpoint (optional)
+  timeout?: number;            // Request timeout in ms
+  elements: ComponentMapping;  // Your component configuration
+});
+```
+
+#### Methods
+
+##### `startBleakConversation(prompt: string)`
+
+Start a new conversation. Returns questions immediately if needed, or a direct answer.
+
+```typescript
+const result = await bleak.startBleakConversation("Help me plan an event");
+
+if (result.needsInput && result.questions) {
+  // AI needs form input - questions are immediately available
+  const components = bleak.getBleakComponents(
+    result.questions,
+    answers,
+    onChange
   );
+  // ... render form
+} else if (result.answer) {
+  // Direct answer available
+  console.log(result.answer);
 }
 ```
 
-### Vue
+##### `getBleakComponents(questions, answers?, onChange?)`
 
-```vue
-<template>
-  <component :is="resolvedComponent" v-bind="resolvedProps" />
-</template>
-
-<script setup>
-import {computed} from "vue";
-import {createResolver} from "bleakai";
-import TextInput from "./TextInput.vue";
-import RadioGroup from "./RadioGroup.vue";
-
-const props = defineProps(["element", "value", "onChange"]);
-
-// Your component registry
-const components = {
-  TextInput,
-  RadioGroup
-};
-
-// Component map
-const componentMap = {
-  text: "TextInput",
-  radio: "RadioGroup"
-};
-
-const resolver = createResolver(componentMap);
-
-const resolved = computed(() =>
-  resolver.resolve(props.element, props.value, props.onChange)
-);
-
-const resolvedComponent = computed(
-  () => components[resolved.value.componentKey]
-);
-const resolvedProps = computed(() => resolved.value.props);
-</script>
-```
-
-### Vanilla JavaScript
-
-```javascript
-import {createResolver} from "bleakai";
-
-// Your component factory functions
-const components = {
-  TextInput: (props) => {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.value = props.value;
-    input.placeholder = props.text;
-    input.addEventListener("input", (e) => props.onChange(e.target.value));
-    return input;
-  },
-
-  RadioGroup: (props) => {
-    const container = document.createElement("div");
-    container.innerHTML = `<label>${props.text}</label>`;
-
-    props.options?.forEach((option) => {
-      const label = document.createElement("label");
-      const radio = document.createElement("input");
-      radio.type = "radio";
-      radio.value = option;
-      radio.checked = props.value === option;
-      radio.addEventListener("change", () => props.onChange(option));
-
-      label.appendChild(radio);
-      label.appendChild(document.createTextNode(option));
-      container.appendChild(label);
-    });
-
-    return container;
-  }
-};
-
-// Component map
-const componentMap = {
-  text: "TextInput",
-  radio: "RadioGroup"
-};
-
-// Usage
-function renderBleakElement(targetElement, element, value, onChange) {
-  const resolver = createResolver(componentMap);
-  const {componentKey, props} = resolver.resolve(element, value, onChange);
-
-  // Get the factory function and create the element
-  const factory = components[componentKey];
-  const domElement = factory(props);
-
-  targetElement.innerHTML = "";
-  targetElement.appendChild(domElement);
-}
-
-// Example usage
-const targetEl = document.getElementById("element-container");
-const element = {type: "text", text: "Enter your email:"};
-renderBleakElement(targetEl, element, "", (value) =>
-  console.log("Value:", value)
-);
-```
-
-## 🎨 Advanced Usage
-
-### Batch Processing
+Convert AI questions into your renderable components.
 
 ```typescript
-import {resolveElements} from "bleakai";
-
-const elements = [
-  {type: "text", text: "Name?"},
-  {type: "radio", text: "Experience?", options: ["Beginner", "Expert"]}
-];
-
-const values = {"Name?": "John", "Experience?": "Expert"};
-
-const resolved = resolveElements(
-  elements,
-  values,
-  (elementText, value) => console.log(elementText, "=", value),
-  {text: "TextInput", radio: "RadioGroup"}
+const components = bleak.getBleakComponents(
+  result.questions, // Questions from startBleakConversation
+  answers, // Current answer values
+  onChange // Callback for value changes
 );
 
-// Now render each resolved component in your framework
-resolved.forEach(({componentKey, props}, index) => {
-  // Your rendering logic here
+// Each component has: { Component, props, question, key }
+components.forEach(({Component, props, key}) => {
+  render(<Component key={key} {...props} />);
 });
 ```
 
-### Custom Resolver with Options
+##### `finishBleakConversation(answers: Record<string, string>)`
+
+Finish the conversation by submitting user answers.
 
 ```typescript
-import {BleakResolver} from "bleakai";
+const finalAnswer = await bleak.finishBleakConversation(answers);
+```
 
-const resolver = new BleakResolver({
-  components: {
-    text: "TextInput",
-    radio: "RadioGroup",
-    slider: "SliderInput"
+##### `quickBleakAsk(prompt: string)`
+
+Get a quick answer without form interaction.
+
+```typescript
+const answer = await bleak.quickBleakAsk("What's the weather like?");
+```
+
+##### `getBleakState()` and `resetBleakSession()`
+
+Manage session state.
+
+```typescript
+const state = bleak.getBleakState();
+bleak.resetBleakSession(); // Start fresh
+```
+
+## Component Configuration
+
+Your component configuration tells BleakAI:
+
+1. **What component to use** for each form type
+2. **When to use it** (via description)
+
+```typescript
+const elements = {
+  // Element type -> Your component + description
+  text: {
+    component: YourTextComponent,
+    description: "Use for open-ended text input like names, descriptions"
   },
-  fallbackComponent: "TextInput",
-  shouldHaveOptions: (type) => ["radio", "select"].includes(type),
-  getDefaultOptions: (type) => (type === "radio" ? ["Yes", "No"] : []),
-  logger: {
-    onResolve: (type, componentKey) =>
-      console.log(`Resolved ${type} to ${componentKey}`),
-    onFallback: (type, fallback, reason) =>
-      console.warn(`Fallback for ${type}: ${reason}`)
+  radio: {
+    component: YourRadioComponent,
+    description: "Use for single choice between 2-5 options"
+  },
+  multi_select: {
+    component: YourCheckboxComponent,
+    description: "Use when users can select multiple options"
   }
-});
-
-const result = resolver.resolve({type: "unknown", text: "Test?"}, "", () => {});
-// Will use fallback component
-```
-
-## 🔧 API Reference
-
-### Types
-
-```typescript
-interface BleakElement {
-  type: string;
-  text: string;
-  options?: string[] | null;
-}
-
-interface BleakElementProps {
-  text: string;
-  value: string;
-  onChange: (value: string) => void;
-  elementIndex?: number;
-  options?: string[];
-}
-
-interface ComponentResolution {
-  type: string;
-  componentKey: string;
-  props: BleakElementProps;
-}
-```
-
-### Functions
-
-- `createResolver(componentMap, options?)` - Quick resolver setup
-- `resolveElement(element, value, onChange, componentMap)` - One-off resolution
-- `resolveElements(elements, values, onChange, componentMap)` - Batch resolution
-- `createStandardComponentMap(customComponents?)` - Helper for common component types
-
-### Classes
-
-- `BleakResolver` - Main resolver class with full configuration options
-
-## 🛠️ Local Development & Testing
-
-### Building and Linking Locally
-
-If you want to test local changes to this library in your project:
-
-1. **Build the library:**
-
-   ```bash
-   cd library
-   npm run build
-   ```
-
-2. **Create a local npm link:**
-
-   ```bash
-   npm link
-   ```
-
-3. **In your project, link to the local version:**
-
-   ```bash
-   cd your-project
-   npm link bleakai
-   ```
-
-4. **After making changes, rebuild and test:**
-   ```bash
-   cd library
-   npm run build
-   # Changes will be automatically available in your linked project
-   ```
-
-### Testing the Build
-
-To test that the library builds correctly and all exports work:
-
-```bash
-cd library
-npm run build
-npm run test  # If you have tests set up
-```
-
-### Unlinking
-
-When you're done with local development:
-
-```bash
-# In your project
-npm unlink bleakai
-
-# In the library
-npm unlink
-
-# Then reinstall the published version
-cd your-project
-npm install bleakai
-```
-
-### Development Workflow
-
-1. Make changes to the library code
-2. Run `npm run build` in the library directory
-3. Test in your linked project
-4. Repeat until satisfied
-5. Commit and publish when ready
-
-### Common Issues
-
-- **Changes not reflecting**: Make sure to rebuild (`npm run build`) after code changes
-- **Type errors**: Ensure TypeScript is generating declaration files correctly
-- **Import errors**: Check that the `package.json` exports are configured properly
-
-## 💡 Why This Approach?
-
-1. **True Framework Agnostic**: No framework dependencies at all
-2. **Separation of Concerns**: Logic vs. rendering are completely separate
-3. **Lightweight**: Tiny bundle size
-4. **Flexible**: Use any component library, any rendering approach
-5. **Type Safe**: Full TypeScript support
-6. **Intuitive**: Easy to understand and debug
-
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## Quick Start with High-Level Utilities
-
-The `bleakai` package now includes high-level utilities that make it incredibly easy to implement conversational AI in any application:
-
-### Simple Conversation Flow
-
-```typescript
-import {
-  startConversation,
-  continueConversation,
-  finishConversation,
-  getChatErrorMessage
-} from "bleakai";
-
-// Configure your app
-const config = {
-  baseUrl: "https://your-api.com",
-  apiKey: "your-api-key",
-  timeout: 30000
 };
-
-// Start a conversation
-const {response, client} = await startConversation(
-  "Help me plan a vacation",
-  config
-);
-
-// Handle the response based on type - much cleaner!
-switch (response.type) {
-  case "questions":
-    // Show questions to user and collect answers
-    const answers = await collectAnswersFromUser(response.questions);
-    const nextResponse = await continueConversation(client, answers);
-    break;
-
-  case "answer":
-    // Display the final answer
-    console.log("Final answer:", response.content);
-    break;
-
-  case "clarification":
-    // Handle clarification requests
-    const clarificationAnswers = await handleClarification(response.questions);
-    const clarifiedResponse = await continueConversation(
-      client,
-      clarificationAnswers
-    );
-    break;
-}
 ```
 
-### Error Handling Made Simple
+### Built-in Types
+
+BleakAI understands these element types out of the box:
+
+- **`text`** - Free-form text input
+- **`radio`** - Single choice from options
+- **`multi_select`** - Multiple choice from options
+- **`date`** - Date/time picker
+- **`slider`** - Numeric range selector
+- **`checkbox`** - Single yes/no option
+
+You can also add **custom types** by including them in your configuration.
+
+## Error Handling
 
 ```typescript
 try {
-  const result = await startConversation(prompt, config);
-  // Handle result...
+  const result = await bleak.startBleakConversation(prompt);
+  // ... handle conversation
 } catch (error) {
-  const userFriendlyMessage = getChatErrorMessage(error);
-  console.error("Chat error:", userFriendlyMessage);
+  if (error instanceof RateLimitError) {
+    // Handle rate limiting
+  } else if (error instanceof AuthenticationError) {
+    // Handle auth issues
+  } else {
+    // General error
+  }
 }
 ```
 
-### Before vs After
+## TypeScript Support
 
-**Before (complex):**
+Full TypeScript support with proper types:
 
 ```typescript
-// Had to write all this boilerplate in every app
-const client = createChatClient({baseUrl: API_URL, apiKey});
-const response = await client.ask(prompt);
-
-if (hasQuestions(response)) {
-  // handle questions
-} else if (isAnswer(response)) {
-  // handle answer
-} else if (isComplete(response)) {
-  // handle completion
-}
+import {
+  BleakSession,
+  type InteractiveQuestion,
+  type BleakElementConfig
+} from "bleakai";
 ```
 
-**After (simple):**
+## Examples
 
-```typescript
-// Just import and use - no boilerplate!
-const {response, client} = await startConversation(prompt, config);
+- **React**: [React Example](./examples/react)
+- **Vue**: [Vue Example](./examples/vue)
+- **Angular**: [Angular Example](./examples/angular)
+- **Vanilla JS**: [Plain JavaScript Example](./examples/vanilla)
 
-switch (response.type) {
-  case "questions" /* handle */:
-    break;
-  case "answer" /* handle */:
-    break;
-  case "clarification" /* handle */:
-    break;
-}
-```
+## Key Features
 
-The package now handles all the complexity internally, so you can focus on your application logic!
+### ✅ **Single Call API**
+
+No more confusing double awaits. Start a conversation and get everything you need immediately.
+
+### ✅ **Bleak-Oriented Naming**
+
+All methods clearly indicate they're Bleak functions: `startBleakConversation`, `getBleakComponents`, `finishBleakConversation`.
+
+### ✅ **Component Mapping**
+
+Map your existing components to form types. BleakAI picks the right one based on context.
+
+### ✅ **Framework Agnostic**
+
+Works with React, Vue, Angular, Svelte, or vanilla JavaScript.
+
+### ✅ **TypeScript Ready**
+
+Full type safety with comprehensive TypeScript definitions.
+
+### ✅ **Clean State Management**
+
+Simple session state management with `getBleakState()` and `resetBleakSession()`.
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
+
+## License
+
+MIT License - see [LICENSE](./LICENSE) for details.

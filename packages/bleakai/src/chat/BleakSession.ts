@@ -32,8 +32,8 @@ export interface SessionState {
 }
 
 /**
- * BleakSession provides a clean async/await API for managing AI conversations
- * with automatic state management and destructuring capabilities
+ * BleakSession provides a clean API for managing AI conversations
+ * with automatic state management and component resolution
  */
 export class BleakSession {
   private client: AxiosInstance;
@@ -102,15 +102,16 @@ export class BleakSession {
   }
 
   /**
-   * Create a new conversation session
+   * Start a new Bleak conversation
+   * Returns questions immediately if the AI needs input, or a direct answer
    */
-  async createSession(prompt: string): Promise<{
-    hasQuestions: boolean;
-    getQuestions: () => Promise<InteractiveQuestion[]>;
-    submitAnswers: (answers: Record<string, string>) => Promise<string>;
-    getResult: () => Promise<string>;
+  async startBleakConversation(prompt: string): Promise<{
+    needsInput: boolean;
+    questions?: InteractiveQuestion[];
+    answer?: string;
     getState: () => SessionState;
   }> {
+    console.log("startBleakConversation called with prompt:", prompt);
     this.state.isLoading = true;
     this.state.error = undefined;
 
@@ -123,59 +124,32 @@ export class BleakSession {
           }))
         : undefined;
 
+      console.log("Making initial request with bleakElements:", bleakElements);
       const response = await this.makeInitialRequest(prompt, {bleakElements});
+
+      // Debug logging to see what we get from the API
+      console.log("API Response:", JSON.stringify(response, null, 2));
+
       this.updateStateFromResponse(response);
 
-      const hasQuestions = Boolean(
+      const needsInput = Boolean(
         !response.is_complete &&
           response.type === "questions" &&
           response.questions &&
           response.questions.length > 0
       );
 
+      console.log("startBleakConversation - threadId:", this.state.threadId); // Debug log
+      console.log("startBleakConversation - needsInput:", needsInput);
+
       return {
-        hasQuestions,
-        getQuestions: async () => {
-          if (!this.state.questions) {
-            throw new Error("No questions available");
-          }
-          return this.state.questions;
-        },
-        submitAnswers: async (answers: Record<string, string>) => {
-          this.state.answers = {...this.state.answers, ...answers};
-          this.state.isLoading = true;
-
-          try {
-            const standardAnswers = this.convertAnswers(answers);
-            const response = await this.makeContinuationRequest(
-              standardAnswers
-            );
-            this.updateStateFromResponse(response);
-
-            if (response.is_complete) {
-              this.state.result = response.content;
-              return response.content;
-            } else {
-              // If more questions, throw error for now
-              throw new Error("Additional questions required");
-            }
-          } finally {
-            this.state.isLoading = false;
-          }
-        },
-        getResult: async () => {
-          if (this.state.result) {
-            return this.state.result;
-          }
-
-          const response = await this.makeCompletionRequest([]);
-          this.updateStateFromResponse(response);
-          this.state.result = response.content;
-          return response.content;
-        },
+        needsInput,
+        questions: needsInput ? this.state.questions : undefined,
+        answer: !needsInput ? response.content : undefined,
         getState: () => ({...this.state})
       };
     } catch (error) {
+      console.error("Error in startBleakConversation:", error);
       this.state.error = error as Error;
       this.state.isLoading = false;
       throw error;
@@ -185,48 +159,88 @@ export class BleakSession {
   }
 
   /**
-   * Simple one-shot question for quick interactions
+   * Finish a Bleak conversation by submitting user answers
    */
-  async quickAsk(prompt: string): Promise<string> {
-    const session = await this.createSession(prompt);
+  async finishBleakConversation(
+    answers: Record<string, string>
+  ): Promise<string> {
+    console.log("finishBleakConversation called with answers:", answers);
+    console.log(
+      "finishBleakConversation - current threadId:",
+      this.state.threadId
+    );
+    console.log("finishBleakConversation - current state:", this.state);
 
-    if (session.hasQuestions) {
-      // For quickAsk, we'll try to complete without questions
-      return session.getResult();
-    } else {
-      return session.getResult();
+    if (!this.state.threadId) {
+      console.error(
+        "ERROR: No threadId found in state when trying to finish conversation"
+      );
+      console.error("Current state:", JSON.stringify(this.state, null, 2));
+      throw new Error(
+        "No active conversation thread. You must call startBleakConversation() first."
+      );
+    }
+
+    this.state.answers = {...this.state.answers, ...answers};
+    this.state.isLoading = true;
+
+    try {
+      const standardAnswers = this.convertAnswers(answers);
+      console.log(
+        "Making continuation request with standardAnswers:",
+        standardAnswers
+      );
+      const response = await this.makeContinuationRequest(standardAnswers);
+      this.updateStateFromResponse(response);
+
+      if (response.is_complete) {
+        this.state.result = response.content;
+        return response.content;
+      } else {
+        throw new Error(
+          "Conversation not completed - more input may be required"
+        );
+      }
+    } catch (error) {
+      console.error("Error in finishBleakConversation:", error);
+      this.state.error = error as Error;
+      throw error;
+    } finally {
+      this.state.isLoading = false;
     }
   }
 
   /**
-   * Get current session state
+   * Get a quick answer without form interaction
    */
-  getState(): SessionState {
-    return {...this.state};
+  async quickBleakAsk(prompt: string): Promise<string> {
+    const result = await this.startBleakConversation(prompt);
+
+    if (result.needsInput) {
+      // For quick ask, we'll try to complete without questions
+      return this.finishBleakConversation({});
+    } else {
+      return result.answer!;
+    }
   }
 
   /**
-   * Reset session state
+   * Convert Bleak questions into renderable components with proper props
+   * This makes it easy to integrate with any UI framework
    */
-  reset(): void {
-    this.state = {
-      answers: {},
-      isLoading: false,
-      isComplete: false
-    };
-  }
-
-  /**
-   * Render questions using configured components
-   */
-  renderQuestions(questions: InteractiveQuestion[]): Array<{
+  getBleakComponents(
+    questions: InteractiveQuestion[],
+    answers: Record<string, string> = {},
+    onAnswerChange?: (question: string, value: string) => void
+  ): Array<{
     question: InteractiveQuestion;
     Component: any;
     props: any;
+    key: string;
   }> {
     if (!this.resolver) {
       throw new Error(
-        "No element configuration provided. Either configure elements in constructor or use the renderQuestions method only after setting up elements."
+        "No components configured. Please provide an 'elements' configuration in the BleakSession constructor."
       );
     }
 
@@ -237,17 +251,38 @@ export class BleakSession {
           text: question.question,
           options: question.options || null
         },
-        "", // Default empty value - will be managed by the component
-        () => {}, // No-op onChange - will be overridden by the component
+        answers[question.question] || "",
+        onAnswerChange
+          ? (value: string) => onAnswerChange(question.question, value)
+          : () => {},
         index
       );
       const Component = this.elementConfig![resolution.componentKey].component;
       return {
         question,
         Component,
-        props: resolution.props
+        props: resolution.props,
+        key: `bleak-question-${index}-${question.question.replace(/\s+/g, "-")}`
       };
     });
+  }
+
+  /**
+   * Get the current Bleak session state
+   */
+  getBleakState(): SessionState {
+    return {...this.state};
+  }
+
+  /**
+   * Reset the Bleak session
+   */
+  resetBleakSession(): void {
+    this.state = {
+      answers: {},
+      isLoading: false,
+      isComplete: false
+    };
   }
 
   private async makeInitialRequest(
@@ -315,6 +350,15 @@ export class BleakSession {
   }
 
   private updateStateFromResponse(response: ChatResponse): void {
+    console.log(
+      "updateStateFromResponse - response.thread_id:",
+      response.thread_id
+    );
+    console.log(
+      "updateStateFromResponse - full response keys:",
+      Object.keys(response)
+    );
+
     this.state.threadId = response.thread_id;
     this.state.isComplete = response.is_complete;
 
@@ -327,6 +371,11 @@ export class BleakSession {
     if (response.is_complete) {
       this.state.result = response.content;
     }
+
+    console.log(
+      "updateStateFromResponse - state.threadId after update:",
+      this.state.threadId
+    );
   }
 
   private convertAnswers(answers: Record<string, string>): AnsweredQuestion[] {

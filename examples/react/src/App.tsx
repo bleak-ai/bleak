@@ -1,27 +1,27 @@
-import React, {useState} from "react";
+import React, {useState, useMemo} from "react";
 import {BleakSession, type InteractiveQuestion} from "bleakai";
 
 // Simple components with clean styling
-const TextInput = ({question, value, onChange}: any) => (
+const TextInput = ({text, value, onChange}: any) => (
   <div style={{marginBottom: "16px"}}>
-    <label>{question}</label>
+    <label>{text}</label>
     <input
       type="text"
       value={value || ""}
       onChange={(e) => onChange(e.target.value)}
-      placeholder={question}
+      placeholder={text}
     />
   </div>
 );
 
-const RadioGroup = ({question, options, value, onChange}: any) => (
+const RadioGroup = ({text, options, value, onChange}: any) => (
   <div style={{marginBottom: "16px"}}>
-    <label>{question}</label>
+    <label>{text}</label>
     {options?.map((option: string, i: number) => (
       <div key={i}>
         <input
           type="radio"
-          name={question.replace(/\s+/g, "_")}
+          name={text.replace(/\s+/g, "_")}
           checked={value === option}
           onChange={() => onChange(option)}
         />
@@ -31,11 +31,11 @@ const RadioGroup = ({question, options, value, onChange}: any) => (
   </div>
 );
 
-const MultiSelect = ({question, options, value, onChange}: any) => {
+const MultiSelect = ({text, options, value, onChange}: any) => {
   const selected = Array.isArray(value) ? value : value ? [value] : [];
   return (
     <div>
-      <label>{question}</label>
+      <label>{text}</label>
       {options?.map((option: string, i: number) => (
         <div key={i}>
           <input
@@ -55,8 +55,8 @@ const MultiSelect = ({question, options, value, onChange}: any) => {
   );
 };
 
-// Element configuration with default components
-const BLEAK_ELEMENT_CONFIG = {
+// Element configuration for the backend
+const elementConfig = {
   text: {
     component: TextInput,
     description:
@@ -84,13 +84,17 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Create BleakSession instance with configuration
-  const bleak = new BleakSession({
-    apiKey: "your-api-key",
-    baseUrl: "http://localhost:8008/bleak",
-    timeout: 30000,
-    elements: BLEAK_ELEMENT_CONFIG
-  });
+  // Create BleakSession instance with configuration - useMemo ensures it's only created once
+  const bleak = useMemo(
+    () =>
+      new BleakSession({
+        apiKey: "your-api-key",
+        baseUrl: "http://localhost:8008/bleak",
+        timeout: 30000,
+        elements: elementConfig
+      }),
+    []
+  );
 
   const handleAsk = async () => {
     if (!prompt.trim()) return;
@@ -102,21 +106,16 @@ function App() {
     setFinalAnswer(null);
 
     try {
-      const {createSession} = bleak;
-      // Create session with the new clean API
-      const session = await createSession(prompt);
+      // New Bleak API - single call, no confusing double await!
+      const result = await bleak.startBleakConversation(prompt);
 
-      const {hasQuestions, getQuestions, getResult} = session;
-
-      if (hasQuestions) {
-        // Get questions and update UI state
-        const sessionQuestions = await getQuestions();
-        setQuestions(sessionQuestions);
+      if (result.needsInput && result.questions) {
+        // Questions are immediately available, no second await needed
+        setQuestions(result.questions);
         setIsLoading(false);
-      } else {
-        // No questions, get result directly
-        const result = await session.getResult();
-        setFinalAnswer(result);
+      } else if (result.answer) {
+        // Direct answer available
+        setFinalAnswer(result.answer);
         setIsLoading(false);
       }
     } catch (err) {
@@ -126,18 +125,20 @@ function App() {
   };
 
   const handleSubmit = async () => {
+    console.log("Current questions:", questions);
+    console.log("Current answers:", answers);
     if (!questions) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      // Create a new session and submit answers
-      const session = await bleak.createSession(prompt);
-      const result = await session.submitAnswers(answers);
+      // New Bleak API - finish the conversation with user answers
+      const result = await bleak.finishBleakConversation(answers);
       setFinalAnswer(result);
       setQuestions(null);
     } catch (err) {
+      console.log("Error:", err);
       setError(err as Error);
     } finally {
       setIsLoading(false);
@@ -149,7 +150,7 @@ function App() {
   };
 
   const reset = () => {
-    bleak.reset();
+    bleak.resetBleakSession();
     setQuestions(null);
     setAnswers({});
     setFinalAnswer(null);
@@ -164,10 +165,22 @@ function App() {
 
   return (
     <div>
-      <h1>BleakAI Demo - Improved API</h1>
+      <h1>BleakAI Demo - Clean Bleak API</h1>
 
       {/* Error display */}
-      {error && <div>Error: {error.message}</div>}
+      {error && (
+        <div
+          style={{
+            marginBottom: "20px",
+            padding: "10px",
+            backgroundColor: "#ffebee",
+            border: "1px solid #f44336",
+            borderRadius: "4px"
+          }}
+        >
+          <strong>Error:</strong> {error.message}
+        </div>
+      )}
 
       {/* Initial prompt input */}
       {!questions && !finalAnswer && (
@@ -176,41 +189,31 @@ function App() {
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             rows={4}
+            placeholder="Ask BleakAI anything..."
+            style={{width: "100%", marginBottom: "10px"}}
           />
           <button onClick={handleAsk} disabled={isLoading || !prompt.trim()}>
-            {isLoading ? "Loading..." : "Ask AI"}
+            {isLoading ? "Loading..." : "Start Bleak Conversation"}
           </button>
         </div>
       )}
 
-      {/* Questions */}
+      {/* Questions with Bleak component resolution */}
       {questions && (
         <div>
           <h3>Please answer these questions:</h3>
-          {questions.map((question) => {
-            // Simple component rendering without complex resolver
-            const Component =
-              BLEAK_ELEMENT_CONFIG[
-                question.type as keyof typeof BLEAK_ELEMENT_CONFIG
-              ]?.component || TextInput;
 
-            return (
-              <Component
-                key={question.question}
-                question={question.question}
-                value={answers[question.question] || ""}
-                onChange={(value: string) =>
-                  handleAnswerChange(question.question, value)
-                }
-                options={question.options}
-              />
-            );
-          })}
+          {bleak
+            .getBleakComponents(questions, answers, handleAnswerChange)
+            .map(({Component, props, key}) => (
+              <Component key={key} {...props} />
+            ))}
+
           <button
             onClick={handleSubmit}
             disabled={!allQuestionsAnswered || isLoading}
           >
-            {isLoading ? "Processing..." : "Submit Answers"}
+            {isLoading ? "Processing..." : "Finish Bleak Conversation"}
           </button>
         </div>
       )}
@@ -218,9 +221,20 @@ function App() {
       {/* Final answer */}
       {finalAnswer && (
         <div>
-          <h3>AI Response:</h3>
-          <div>{finalAnswer}</div>
-          <button onClick={reset}>Start Over</button>
+          <h3>Bleak AI Response:</h3>
+          <div
+            style={{
+              padding: "15px",
+              backgroundColor: "#f0f8ff",
+              border: "1px solid #0066cc",
+              borderRadius: "4px"
+            }}
+          >
+            {finalAnswer}
+          </div>
+          <button onClick={reset} style={{marginTop: "10px"}}>
+            Start New Bleak Conversation
+          </button>
         </div>
       )}
     </div>
