@@ -16,7 +16,6 @@ interface ShowcaseExample {
   id: string;
   title: string;
   description: string;
-  icon: React.ReactNode;
   scenario: string;
   traditionalFlow: {
     aiQuestion: string;
@@ -35,7 +34,6 @@ const examples: ShowcaseExample[] = [
     id: "restaurant",
     title: "Restaurant Reservation",
     description: "AI needs booking details to make a reservation",
-    icon: <FileText className="w-5 h-5" />,
     scenario: "User: I want to book a table for dinner",
     traditionalFlow: {
       aiQuestion:
@@ -43,9 +41,7 @@ const examples: ShowcaseExample[] = [
       userTyping:
         "Um, let me think... next Friday, around 7pm, for 4 people. My friend is vegetarian. My number is 555-0123 and email is john@email.com",
       problems: [
-        "User must remember all details",
         "Easy to forget information",
-        "AI must parse messy text",
         "Prone to errors and misunderstanding"
       ]
     },
@@ -103,9 +99,7 @@ const examples: ShowcaseExample[] = [
       ),
       benefits: [
         "Clear, organized input fields",
-        "Impossible to miss information",
-        "Structured data from start",
-        "No parsing errors"
+        "Helps users add important information"
       ]
     }
   },
@@ -113,7 +107,6 @@ const examples: ShowcaseExample[] = [
     id: "product",
     title: "Product Configuration",
     description: "AI helps configure a laptop order",
-    icon: <ShoppingBag className="w-5 h-5" />,
     scenario: "User: I need to configure a laptop for my team",
     traditionalFlow: {
       aiQuestion:
@@ -195,7 +188,6 @@ const examples: ShowcaseExample[] = [
     id: "support",
     title: "Technical Support",
     description: "AI diagnoses a software issue",
-    icon: <MapPin className="w-5 h-5" />,
     scenario: "User: My app keeps crashing, can you help?",
     traditionalFlow: {
       aiQuestion:
@@ -342,11 +334,8 @@ export const BleakShowcase = () => {
       </div>
 
       {/* Current Example */}
-      <div className="bg-card border border-border rounded-lg p-8">
+      <div className="">
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-            {example.icon}
-          </div>
           <div>
             <h3 className="text-2xl font-medium text-foreground">
               {example.title}
@@ -367,11 +356,8 @@ export const BleakShowcase = () => {
           {/* Traditional Approach */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                <MessageSquare className="w-4 h-4 text-muted-foreground" />
-              </div>
               <h4 className="text-lg font-medium text-foreground">
-                Traditional AI
+                Without BleakAI
               </h4>
             </div>
 
@@ -412,10 +398,9 @@ export const BleakShowcase = () => {
           {/* BleakAI Approach */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
-              </div>
-              <h4 className="text-lg font-medium text-foreground">BleakAI</h4>
+              <h4 className="text-lg font-medium text-foreground">
+                With BleakAI
+              </h4>
             </div>
 
             <div className="space-y-4">
@@ -446,35 +431,6 @@ export const BleakShowcase = () => {
                 </ul>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Summary */}
-      <div className="mt-12 bg-muted/30 rounded-lg p-8 text-center">
-        <h3 className="text-xl font-medium mb-4 text-foreground">
-          The Core Difference
-        </h3>
-        <div className="grid md:grid-cols-2 gap-8 text-sm">
-          <div>
-            <h4 className="font-medium text-muted-foreground mb-3">
-              Traditional AI
-            </h4>
-            <ul className="space-y-2 text-muted-foreground">
-              <li>❌ Overwhelming text questions</li>
-              <li>❌ Users type unstructured answers</li>
-              <li>❌ AI must parse messy text</li>
-              <li>❌ Information gets lost or misunderstood</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium text-primary mb-3">BleakAI</h4>
-            <ul className="space-y-2 text-muted-foreground">
-              <li>✅ Smart, focused form components</li>
-              <li>✅ Users click, select, and slide</li>
-              <li>✅ Perfect structured data every time</li>
-              <li>✅ Nothing gets lost in translation</li>
-            </ul>
           </div>
         </div>
       </div>

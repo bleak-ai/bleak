@@ -2,7 +2,7 @@ import {Separator} from "../ui/separator";
 
 const Footer = () => {
   return (
-    <footer className="silent-footer section-padding">
+    <footer className="py-32 px-4 lg:px-16">
       <div className="container-max space-y-12">
         <div className="flex flex-col md:flex-row justify-between items-center gap-8">
           {/* Brand - Silent Edge: Simple, confident */}

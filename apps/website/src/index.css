@@ -178,11 +178,6 @@
     @apply text-foreground leading-relaxed;
   }
 
-  /* Silent Edge Spacing System */
-  .section-padding {
-    @apply py-32 px-6;
-  }
-
   .container-max {
     @apply max-w-6xl mx-auto;
   }
@@ -218,32 +213,5 @@
   button:not([disabled]),
   [role="button"]:not([disabled]) {
     cursor: pointer;
-  }
-}
-
-/* Silent Edge Component Styles */
-@layer components {
-  .silent-card {
-    @apply bg-card border border-border rounded-lg p-8 shadow-sm;
-  }
-
-  .silent-button {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium transition-all duration-200;
-  }
-
-  .silent-button-ghost {
-    @apply bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground px-6 py-3 rounded-lg font-medium transition-all duration-200;
-  }
-
-  .silent-input {
-    @apply bg-input border border-border rounded-lg px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all duration-200;
-  }
-
-  .silent-nav {
-    @apply bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50;
-  }
-
-  .silent-footer {
-    @apply bg-muted border-t border-border;
   }
 }

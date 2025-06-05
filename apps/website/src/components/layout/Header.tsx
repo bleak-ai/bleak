@@ -34,7 +34,7 @@ const Header = () => {
   return (
     <header className="silent-nav">
       <div className="container-max ">
-        <div className="flex items-center justify-between py-8 px-20">
+        <div className="flex items-center justify-between py-8 px-10 md:px-20">
           {/* Brand - Silent Edge: Confident, simple */}
           <div className="flex items-center space-x-12">
             <div

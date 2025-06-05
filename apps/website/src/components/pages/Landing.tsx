@@ -68,8 +68,8 @@ export default function Landing() {
 
           {/* Concept Preview - Clean comparison */}
           <div className="content-max">
-            <div className="silent-card">
-              <div className="grid md:grid-cols-2 gap-12 text-left">
+            <div className="bg-card border border-border rounded-lg p-8 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 text-left">
                 <div className="space-y-4">
                   <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                     Normal AI
@@ -125,7 +125,7 @@ export default function Landing() {
       </section>
 
       {/* Interactive Showcase Section */}
-      <section className="section-padding">
+      <section className="py-32 px-4 lg:px-16">
         <BleakShowcase />
       </section>
 
@@ -179,7 +179,7 @@ export default function Landing() {
       </section>
 
       {/* Component Mapping Examples - Clear code example */}
-      <section className="section-padding">
+      <section className="py-32 px-4 lg:px-16">
         <div className="container-max space-y-16">
           <div className="text-center space-y-6">
             <h2 className="font-light tracking-tight text-foreground">
@@ -191,22 +191,23 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
             <div className="space-y-6">
               <h3 className="text-2xl font-medium text-foreground">
                 Component Mapping
               </h3>
-              <div className="silent-card">
-                <CodeBlock language="typescript">
-                  {`// Tell BleakAI about your components
+              <div className="bg-card border border-border rounded-lg p-6 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <CodeBlock language="typescript">
+                    {`// Map your components to form types
 const config = {
   text: {
     component: YourTextInput,
-    description: "For text input and messages"
+    description: "For text and messages"
   },
   select: {
     component: YourDropdown,
-    description: "For choosing from 2-10 options"
+    description: "For 2-10 options"
   },
   date: {
     component: YourDatePicker,
@@ -218,9 +219,10 @@ const config = {
   }
 };
 
-// AI picks the right component for each question
-const form = generateForm(userMessage, config);`}
-                </CodeBlock>
+// AI picks the right component
+const form = generateForm(message, config);`}
+                  </CodeBlock>
+                </div>
               </div>
             </div>
 
@@ -243,7 +245,10 @@ const form = generateForm(userMessage, config);`}
                     answer: "Checkboxes"
                   }
                 ].map((example) => (
-                  <div key={example.question} className="silent-card space-y-2">
+                  <div
+                    key={example.question}
+                    className="bg-card border border-border rounded-lg p-6 shadow-sm space-y-2"
+                  >
                     <h4 className="font-medium text-foreground">
                       "{example.question}"
                     </h4>
@@ -259,7 +264,7 @@ const form = generateForm(userMessage, config);`}
       </section>
 
       {/* Call to Action - Strong, confident close */}
-      <section className="section-padding bg-muted/20">
+      <section className="py-32 px-4 lg:px-16 bg-muted/20">
         <div className="content-max text-center space-y-12">
           <div className="space-y-6">
             <h2 className="font-light tracking-tight text-foreground">
