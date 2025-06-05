@@ -4,5 +4,25 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=packages/bleakai",
+    "build:all": "npm run build --workspaces",
+    "dev": "npm run dev --workspace=packages/bleakai",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "type-check": "npm run type-check --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
+    "install:all": "npm install && npm install --workspaces",
+    "example:react": "npm run dev --workspace=examples/react",
+    "website": "npm run dev --workspace=apps/website"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
 }

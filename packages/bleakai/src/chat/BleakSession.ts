@@ -3,11 +3,10 @@ import type {
   AnsweredQuestion,
   InteractiveQuestion,
   ChatResponse,
-  BleakElement as ChatBleakElement,
+  BleakElement,
   InitialChatRequest,
   ContinuationChatRequest,
-  CompletionChatRequest,
-  ConversationContext
+  CompletionChatRequest
 } from "./types";
 import type {BleakElementConfig} from "../types/core";
 import {createResolverFromConfig} from "../core/BleakResolver";
@@ -116,7 +115,7 @@ export class BleakSession {
 
     try {
       // Start conversation
-      const bleakElements: ChatBleakElement[] | undefined = this.elementConfig
+      const bleakElements: BleakElement[] | undefined = this.elementConfig
         ? Object.entries(this.elementConfig).map(([name, config]) => ({
             name,
             description: config.description
@@ -304,7 +303,7 @@ export class BleakSession {
 
   private async makeInitialRequest(
     prompt: string,
-    options: {bleakElements?: ChatBleakElement[]} = {}
+    options: {bleakElements?: BleakElement[]} = {}
   ): Promise<ChatResponse> {
     const request: InitialChatRequest = {
       type: "start",

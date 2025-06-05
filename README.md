@@ -1,8 +1,61 @@
-# BleakAI - Stop Making Users Type Everything
+# BleakAI - Transform AI Conversations into Structured Forms
 
-BleakAI transforms text-based AI conversations into smart form interactions. Instead of asking users to type responses, AI generates the right form components - date pickers, sliders, dropdowns - to get structured data from the start.
+**Stop making users type everything.** BleakAI transforms text-based AI conversations into smart form interactions. Instead of asking users to type responses, AI generates the right form components - date pickers, sliders, dropdowns - to get structured data from the start.
 
-## The Problem
+[![npm version](https://badge.fury.io/js/bleakai.svg)](https://badge.fury.io/js/bleakai)
+[![CI](https://github.com/bleak-ai/bleak/actions/workflows/ci.yml/badge.svg)](https://github.com/bleak-ai/bleak/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/%3C%2F%3E-TypeScript-%230074c1.svg)](http://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+---
+
+## 🚀 Quick Start
+
+```bash
+npm install bleakai
+```
+
+```typescript
+import {BleakSession} from "bleakai";
+
+// 1. Map your components to AI element types
+const elementConfig = {
+  text: {
+    component: TextInput,
+    description: "Text input for detailed responses"
+  },
+  radio: {component: RadioGroup, description: "Single choice selection"},
+  multi_select: {
+    component: MultiSelect,
+    description: "Multiple choice selection"
+  }
+};
+
+// 2. Create a BleakAI session
+const bleak = new BleakSession({
+  apiKey: "your-api-key",
+  baseUrl: "http://localhost:8008/bleak",
+  elements: elementConfig
+});
+
+// 3. Start AI-powered conversations
+const result = await bleak.startBleakConversation("Help me plan a vacation");
+
+if (result.needsInput && result.questions) {
+  // AI generated smart form questions - render them!
+  const components = bleak.getBleakComponents(
+    result.questions,
+    answers,
+    onChange
+  );
+}
+```
+
+**[📖 Get Started →](./docs/getting-started.md)**
+
+---
+
+## ❓ The Problem
 
 Traditional AI conversations look like this:
 
@@ -19,7 +72,7 @@ Traditional AI conversations look like this:
 - AI must parse messy text
 - Prone to errors and misunderstanding
 
-## The BleakAI Solution
+## ✨ The BleakAI Solution
 
 With BleakAI, the same conversation becomes:
 
@@ -36,7 +89,9 @@ With BleakAI, the same conversation becomes:
 
 **Result: Perfect structured data, no parsing needed.**
 
-## When to Use BleakAI
+---
+
+## 🎯 When to Use BleakAI
 
 BleakAI is ideal when:
 
@@ -45,66 +100,51 @@ BleakAI is ideal when:
 🧩 **The form itself isn't the product, but rather input for another intelligent process**  
 🔁 **User input refines a multi-step, dynamic decision or generation process**
 
-## Core Features
+---
 
-### 🎯 Smart Form Generation
+## 🧩 Core Philosophy: "Bring Your Own Components"
 
-- AI analyzes what information it needs
-- Automatically generates appropriate form components
-- Gets structured data instead of parsing text
+BleakAI provides the **intelligence** to decide what components to use, while you maintain complete **control** over how they look and behave.
 
-### 🧩 Your Components, AI's Logic
+### Framework Agnostic
 
-- Works with any UI library (React, Vue, Angular, vanilla JS)
-- Use your existing design system
-- BleakAI provides the intelligence, you provide the presentation
+- ✅ **React, Vue, Angular, Vanilla JS**
+- ✅ **Material-UI, Ant Design, Chakra UI, Custom Components**
+- ✅ **Your existing design system**
 
-### ⚡ Dynamic & Context-Aware
+### Smart Generation
 
-- Forms generated based on conversation context
-- Can't be predicted beforehand
-- Adapts to user needs in real-time
+- 🎯 AI analyzes conversation context
+- 🔧 Generates appropriate form components
+- 📊 Returns structured data (no parsing!)
 
-## How It Works
+---
 
-### 1. Map Your Components
+## 🏗 How It Works
 
-Tell BleakAI about your existing UI components:
+### 1. **Map Your Components**
 
 ```typescript
-const config = {
-  text: {
-    component: YourTextInput,
-    description: "For text input and messages"
-  },
-  select: {
-    component: YourDropdown,
-    description: "For choosing from 2-10 options"
-  },
-  date: {
-    component: YourDatePicker,
-    description: "For dates and times"
-  },
-  slider: {
-    component: YourSlider,
-    description: "For numbers and ranges"
-  }
+const elementConfig = {
+  text: {component: YourTextInput, description: "Text input"},
+  radio: {component: YourRadioGroup, description: "Single choice"},
+  multi_select: {component: YourMultiSelect, description: "Multiple choice"},
+  slider: {component: YourSlider, description: "Number ranges"},
+  date: {component: YourDatePicker, description: "Date selection"}
 };
 ```
 
-### 2. AI Picks the Right Components
-
-When AI needs information, it generates the optimal form:
+### 2. **AI Picks the Right Components**
 
 ```typescript
 // User: "I need help booking a restaurant"
 // AI analyzes and generates appropriate form elements
 
-const form = generateForm(userMessage, config);
-// Returns: date picker, time selector, party size, dietary checkboxes
+const result = await bleak.startBleakConversation(userMessage);
+// AI returns: date picker, time selector, party size, dietary checkboxes
 ```
 
-### 3. Get Perfect Data
+### 3. **Get Perfect Structured Data**
 
 Instead of parsing "next Friday around 7pm for 4 people", you get:
 
@@ -117,159 +157,123 @@ Instead of parsing "next Friday around 7pm for 4 people", you get:
 }
 ```
 
-## Real-World Examples
+---
 
-### Restaurant Reservation
+## 📱 Framework Examples
 
-- **Traditional**: "Please tell me date, time, party size, dietary requirements..."
-- **BleakAI**: Date picker + time dropdown + number input + dietary checkboxes
-
-### Product Configuration
-
-- **Traditional**: "Tell me your specs, budget, and requirements..."
-- **BleakAI**: RAM buttons + storage options + budget slider + feature checkboxes
-
-### Technical Support
-
-- **Traditional**: "Describe your device, when it crashes, and what you were doing..."
-- **BleakAI**: Device dropdown + frequency slider + structured reproduction steps
-
-## Framework Agnostic
-
-BleakAI doesn't ship with UI components. It generates component trees that you render with your existing setup:
-
-**React:**
+### React
 
 ```tsx
-const {Component, props} = resolve(element, value, onChange);
-return <Component {...props} />;
+const components = bleak.getBleakComponents(questions, answers, onChange);
+components.map(({Component, props, key}) => <Component key={key} {...props} />);
 ```
 
-**Vue:**
+### Vue
 
 ```vue
-<component :is="resolvedComponent" v-bind="props" />
+<component
+  v-for="resolved in resolvedComponents"
+  :key="resolved.key"
+  :is="resolved.component"
+  v-bind="resolved.props"
+/>
 ```
 
-**Vanilla JS:**
-
-```javascript
-const element = resolve(elementConfig, value, onChange);
-document.body.appendChild(element);
-```
-
-## Quick Start
-
-### 1. Install
-
-```bash
-npm install @bleakai/core
-```
-
-### 2. Configure Your Components
+### Angular
 
 ```typescript
-import {createResolverFromConfig} from "@bleakai/core";
-
-const config = {
-  text: {component: MyTextInput, description: "For text input"},
-  select: {component: MyDropdown, description: "For selections"}
-  // ... map your components
-};
-
-const {resolve} = createResolverFromConfig(config);
+// Coming soon - Angular adapter
 ```
 
-### 3. Generate Forms
+---
 
-```typescript
-// When AI needs information
-const formElements = generateForm(conversation, config);
+## 🎬 Examples
 
-// Render each element
-formElements.map((element) => {
-  const {Component, props} = resolve(element, value, onChange);
-  return <Component {...props} />;
-});
+### 🗂 Working Demos
+
+- **[React Example](./examples/react/)** - Complete implementation with custom components
+- **[Vue Example](./examples/vue/)** - Coming soon
+- **[Angular Example](./examples/angular/)** - Coming soon
+
+### 🎯 Use Cases
+
+- **Travel Planning** - Budget sliders, activity multi-select, date pickers
+- **Product Recommendations** - Feature checkboxes, price ranges, category selection
+- **Event Planning** - Guest count, venue selection, catering preferences
+- **Support Triage** - Issue categories, priority levels, device selection
+
+**[🔍 More Examples →](./docs/examples.md)**
+
+---
+
+## 📚 Documentation
+
+### 📖 **Guides**
+
+- **[Getting Started](./docs/getting-started.md)** - Quick setup and first implementation
+- **[Architecture](./docs/architecture.md)** - How BleakAI works under the hood
+- **[Examples](./docs/examples.md)** - Real-world implementation examples
+
+### 🔧 **Reference**
+
+- **[API Reference](./docs/api-reference.md)** - Complete API documentation
+- **[Contributing](./docs/contributing.md)** - How to contribute to BleakAI
+- **[Deployment](./docs/deployment.md)** - Publishing and release guide
+
+---
+
+## 🏗 Project Structure
+
+```
+bleak/
+├── packages/
+│   └── bleakai/           # 📦 Core TypeScript library
+├── apps/
+│   └── website/           # 🌐 Documentation site
+├── examples/
+│   └── react/             # ⚛️ React example implementation
+└── docs/                  # 📚 Documentation files
 ```
 
-## Architecture
+---
 
-### Core Components
+## 🚦 Project Status
 
-- **Form Generator**: AI logic that determines what information is needed
-- **Component Resolver**: Maps form requirements to your UI components
-- **Type System**: Ensures type safety across the entire pipeline
-- **Framework Adapters**: Render generated forms in any frontend framework
+- ✅ **Core Library**: Stable and production-ready
+- ✅ **React Integration**: Full support with hooks and utilities
+- ✅ **TypeScript**: Complete type definitions
+- 🔄 **Vue Integration**: Planned for next release
+- 🔄 **Angular Integration**: Planned for future release
 
-### Backend Integration
+---
 
-```python
-# Python backend example
-from bleakai import FormGenerator
+## 🤝 Contributing
 
-generator = FormGenerator()
-form_spec = generator.analyze_conversation(messages)
-# Returns structured form specification for frontend
-```
+We welcome contributions! Please see our [Contributing Guide](./docs/contributing.md) for details.
 
-### Frontend Integration
+### 🎯 Areas We Need Help
 
-```typescript
-// Frontend renders the form
-const formElements = await fetchFormSpec(conversationId);
-const renderedForm = renderForm(formElements, componentConfig);
-```
+- **Vue.js example** implementation
+- **Angular example** implementation
+- **Additional component types** (file upload, rich text, location)
+- **Performance optimizations**
+- **Documentation** improvements
 
-## The Difference
+---
 
-| Traditional AI                            | BleakAI                               |
-| ----------------------------------------- | ------------------------------------- |
-| ❌ Overwhelming text questions            | ✅ Smart, focused form components     |
-| ❌ Users type unstructured answers        | ✅ Users click, select, and slide     |
-| ❌ AI must parse messy text               | ✅ Perfect structured data every time |
-| ❌ Information gets lost or misunderstood | ✅ Nothing gets lost in translation   |
+## 📄 License
 
-## Contributing
+MIT License - see [LICENSE](./LICENSE) for details.
 
-BleakAI is open source. We welcome contributions:
+---
 
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Submit a pull request
+## 🔗 Links
 
-### Adding New Component Types
+- **[📖 Documentation](./docs/README.md)** - Complete documentation
+- **[🎬 React Example](./examples/react/)** - Working demo
+- **[🐛 Issues](https://github.com/bleak-ai/bleak/issues)** - Bug reports and feature requests
+- **[💬 Discussions](https://github.com/bleak-ai/bleak/discussions)** - Questions and community
 
-```typescript
-// Define new component type
-export interface SliderElement {
-  type: "slider";
-  min: number;
-  max: number;
-  step?: number;
-  label: string;
-}
+---
 
-// Add to configuration
-const config = {
-  slider: {
-    component: YourSliderComponent,
-    description: "For numeric ranges and ratings"
-  }
-};
-```
-
-## License
-
-MIT License - see LICENSE file for details
-
-## Get Started
-
-Ready to stop parsing messy text and start getting perfect data?
-
-```bash
-npm install @bleakai/core
-```
-
-Visit our [documentation](https://bleakai.dev) for detailed guides and examples.
+**Ready to transform your AI conversations?** → **[Get Started](./docs/getting-started.md)**

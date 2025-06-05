@@ -47,7 +47,7 @@ export function BleakRadio({
   label.style.fontWeight = "bold";
   element.appendChild(label);
 
-  options.forEach((option, index) => {
+  options.forEach((option) => {
     const optionDiv = document.createElement("div");
     optionDiv.style.marginBottom = "4px";
 

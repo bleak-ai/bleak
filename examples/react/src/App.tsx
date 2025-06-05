@@ -183,12 +183,6 @@ const PromptInput = ({
   isLoading: boolean;
 }) => (
   <div className="prompt-section">
-    <h2>Ask AI Assistant</h2>
-    <p>
-      Describe what you need help with, and I'll guide you through it step by
-      step.
-    </p>
-
     <textarea
       value={prompt}
       onChange={(e) => setPrompt(e.target.value)}
