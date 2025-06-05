@@ -8,9 +8,41 @@ export interface BleakElement {
   options?: string[] | null;
 }
 
+/**
+ * Base props that all Bleak components should accept
+ * This provides type safety for the fundamental properties
+ */
+export interface BleakComponentProps {
+  /** The question text to display to the user */
+  text: string;
+  /** Current value of the input */
+  value: string;
+  /** Callback function when the value changes */
+  onChange: (value: string) => void;
+  /** Optional unique identifier for the component instance */
+  uniqueId?: string;
+  /** Optional index of this element in a list */
+  elementIndex?: number;
+}
+
+/**
+ * Props for Bleak components that don't require options (like text inputs)
+ */
+export interface BleakInputProps extends BleakComponentProps {
+  // No additional props needed for basic input components
+}
+
+/**
+ * Props for Bleak components that work with predefined options (like radio groups, multi-select)
+ */
+export interface BleakChoiceProps extends BleakComponentProps {
+  /** Array of available options for the user to choose from */
+  options: string[];
+}
+
 // Keep BleakElementProps for backward compatibility but mark as deprecated
 /**
- * @deprecated Use generic props instead. UI components should be framework-agnostic.
+ * @deprecated Use BleakComponentProps, BleakInputProps, or BleakChoiceProps instead. UI components should be framework-agnostic.
  */
 export interface BleakElementProps {
   text: string;

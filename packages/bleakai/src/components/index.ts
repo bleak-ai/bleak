@@ -97,14 +97,3 @@ export const defaultComponents = {
  * @deprecated Use `defaultComponents` instead
  */
 export const DEFAULT_BLEAK_ELEMENTS = defaultComponents;
-
-// Keep the old interface for backward compatibility
-/**
- * @deprecated Use `ComponentProps` from types/components instead
- */
-export interface BleakComponentProps {
-  question: string;
-  value?: string;
-  onChange: (value: string) => void;
-  options?: string[];
-}

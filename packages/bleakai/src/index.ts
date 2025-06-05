@@ -14,7 +14,12 @@ export type {BleakSessionConfig, SessionState} from "./chat/BleakSession";
 // === Component System ===
 // Framework-agnostic component resolution
 export {createResolverFromConfig} from "./core/BleakResolver";
-export type {BleakElementConfig} from "./types/core";
+export type {
+  BleakElementConfig,
+  BleakComponentProps,
+  BleakInputProps,
+  BleakChoiceProps
+} from "./types/core";
 
 // === Built-in Components ===
 // Ready-to-use components that work out of the box
@@ -24,7 +29,6 @@ export {
   defaultComponents,
   DEFAULT_BLEAK_ELEMENTS
 } from "./components";
-export type {BleakComponentProps} from "./components";
 
 // === Conversation Types ===
 // Types for handling conversations and questions

@@ -1,8 +1,13 @@
 import React, {useState, useMemo} from "react";
-import {BleakSession, type InteractiveQuestion} from "bleakai";
+import {
+  BleakSession,
+  type InteractiveQuestion,
+  type BleakInputProps,
+  type BleakChoiceProps
+} from "bleakai";
 
-// Clean input components without styles
-const TextInput = ({text, value, onChange}: any) => (
+// Clean input components with proper TypeScript types
+const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => (
   <div className="question-group">
     <label className="question-label">{text}</label>
     <input
@@ -15,7 +20,12 @@ const TextInput = ({text, value, onChange}: any) => (
   </div>
 );
 
-const RadioGroup = ({text, options, value, onChange}: any) => (
+const RadioGroup: React.FC<BleakChoiceProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => (
   <div className="question-group">
     <label className="question-label">{text}</label>
     <div className="radio-options">
@@ -34,7 +44,12 @@ const RadioGroup = ({text, options, value, onChange}: any) => (
   </div>
 );
 
-const MultiSelect = ({text, options, value, onChange}: any) => {
+const MultiSelect: React.FC<BleakChoiceProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => {
   const selected = Array.isArray(value) ? value : value ? [value] : [];
 
   return (
