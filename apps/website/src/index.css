@@ -207,11 +207,90 @@
   .focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
-}
 
-@layer base {
   button:not([disabled]),
   [role="button"]:not([disabled]) {
     cursor: pointer;
+  }
+}
+
+/* Silent Edge Documentation Utilities */
+@layer utilities {
+  /* Navigation styling */
+  .silent-nav {
+    @apply bg-background/95 backdrop-blur-sm border-b border-border;
+  }
+
+  /* Documentation specific spacing */
+  .section-padding {
+    @apply px-8 py-12;
+  }
+
+  /* Card styling following Silent Edge principles */
+  .silent-card {
+    @apply bg-card border border-border rounded-lg p-6 shadow-sm;
+  }
+
+  /* Prose improvements for documentation */
+  .prose {
+    @apply text-foreground;
+  }
+
+  .prose h1 {
+    @apply text-foreground border-b border-border pb-4 mb-8;
+  }
+
+  .prose h2 {
+    @apply text-foreground border-b border-border pb-3 mb-6 mt-12;
+  }
+
+  .prose h3 {
+    @apply text-foreground mb-4 mt-8;
+  }
+
+  .prose p {
+    @apply text-muted-foreground leading-relaxed mb-4;
+  }
+
+  .prose strong {
+    @apply text-foreground font-semibold;
+  }
+
+  .prose code {
+    @apply bg-muted text-foreground px-2 py-1 rounded border border-border font-mono text-sm;
+  }
+
+  .prose pre {
+    @apply bg-muted border border-border rounded-lg overflow-x-auto;
+  }
+
+  .prose blockquote {
+    @apply border-l-4 border-border pl-4 italic text-muted-foreground;
+  }
+
+  .prose ul,
+  .prose ol {
+    @apply text-muted-foreground;
+  }
+
+  .prose li {
+    @apply mb-2;
+  }
+
+  .prose a {
+    @apply text-primary hover:text-primary/90 underline font-medium transition-colors;
+  }
+
+  .prose table {
+    @apply border-collapse border border-border;
+  }
+
+  .prose th,
+  .prose td {
+    @apply border border-border px-4 py-2 text-left;
+  }
+
+  .prose th {
+    @apply bg-muted font-semibold;
   }
 }

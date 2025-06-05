@@ -1,72 +1,188 @@
 # API Reference
 
-Complete reference for all BleakAI functions, methods, and types.
+Complete reference for BleakSession methods and types used in App.tsx.
 
-## Overview
+## BleakSession Class
 
-The BleakAI SDK provides a simple interface for creating conversational AI applications. Use these methods to initialize clients, handle conversations, and integrate with your existing components.
+The main class for managing AI conversations with automatic component resolution.
 
-## Documentation Sections
-
-- **[SDK Methods](api-reference-sdk)** - Core SDK functions for creating clients and resolvers
-- **[Core Methods](api-reference-core)** - BleakChat instance methods for conversations
-
-## Quick Reference
-
-### Client Creation
+### Constructor
 
 ```typescript
-import {createSimpleChatClient} from "bleakai";
-
-const client = createSimpleChatClient({
-  baseUrl: "http://localhost:8000",
-  apiKey: "your-bleakai-api-key",
-  openaiKey: "your-openai-api-key"
-});
+new BleakSession(config: BleakSessionConfig)
 ```
 
-### Conversation Flow
+#### BleakSessionConfig
 
 ```typescript
-// Start conversation
-const response = await client.ask("Help me plan something");
-
-// Handle questions
-if (response.type === "questions") {
-  const answers = collectAnswers(response.questions);
-  const finalResponse = await client.answer(answers);
+interface BleakSessionConfig {
+  baseUrl?: string; // API endpoint (default: "https://api.bleak.ai")
+  apiKey?: string; // Your BleakAI API key
+  timeout?: number; // Request timeout in ms (default: 30000)
+  retries?: number; // Number of retries (default: 3)
+  elements?: BleakElementConfig; // Your component configuration
 }
 ```
 
-### Component Mapping
+### Core Methods
+
+#### `startBleakConversation(prompt: string)`
+
+Starts a new conversation with the AI. Returns immediately with either questions or a direct answer.
 
 ```typescript
-import {createResolverFromConfig} from "bleakai";
+const result = await bleak.startBleakConversation("Help me plan a trip");
 
-const {resolve} = createResolverFromConfig({
-  text: {component: MyTextInput, description: "Text input"},
-  radio: {component: MyRadioGroup, description: "Single choice"}
-});
+// Returns:
+{
+  needsInput: boolean;        // true if AI needs more info
+  questions?: InteractiveQuestion[]; // Questions to ask user
+  answer?: string;            // Direct answer if available
+  getState: () => SessionState;
+}
 ```
 
-## Response Types
+#### `finishBleakConversation(answers: Record<string, string>)`
 
-All chat methods return a `ChatResponse` with one of these types:
+Submits user answers and gets the final response.
 
-- **`questions`** - AI needs more information
-- **`answer`** - Final response ready
-- **`complete`** - Conversation finished
+```typescript
+const finalAnswer = await bleak.finishBleakConversation({
+  "What's your budget?": "Under $2000",
+  "How many days?": "7 days"
+});
+// Returns: string (final answer)
+```
+
+#### `requestMoreBleakQuestions(answers: Record<string, string>)`
+
+Requests additional questions for conversation refinement.
+
+```typescript
+const result = await bleak.requestMoreBleakQuestions(answers);
+
+// Returns:
+{
+  questions?: InteractiveQuestion[]; // Additional questions
+  isComplete: boolean;               // true if no more questions needed
+  getState: () => SessionState;
+}
+```
+
+#### `getBleakComponents(questions, answers, onAnswerChange)`
+
+Converts questions into renderable components using your configuration.
+
+```typescript
+const components = bleak.getBleakComponents(
+  questions, // InteractiveQuestion[]
+  answers, // Record<string, string>
+  onAnswerChange // (question: string, value: string) => void
+);
+
+// Returns array of:
+{
+  question: InteractiveQuestion;
+  Component: any; // Your component
+  props: any; // Props for component
+  key: string; // Unique key for React
+}
+```
+
+### Utility Methods
+
+#### `getBleakState()`
+
+Gets current session state.
+
+```typescript
+const state = bleak.getBleakState();
+// Returns: SessionState
+```
+
+#### `resetBleakSession()`
+
+Resets session state for new conversation.
+
+```typescript
+bleak.resetBleakSession();
+```
+
+## Type Definitions
+
+### Component Props
+
+```typescript
+// For components without predefined options
+interface BleakInputProps {
+  text: string;
+  value: string;
+  onChange: (value: string) => void;
+  uniqueId?: string;
+  elementIndex?: number;
+}
+
+// For components with predefined options
+interface BleakChoiceProps extends BleakInputProps {
+  options: string[];
+}
+```
+
+### Element Configuration
+
+```typescript
+interface BleakElementConfig {
+  [elementType: string]: {
+    component: any; // Your React component
+    description: string; // Helps AI choose when to use it
+  };
+}
+```
+
+### Question Types
+
+```typescript
+interface InteractiveQuestion {
+  question: string; // Question text
+  type: string; // Element type (text, radio, etc.)
+  options?: string[]; // Available options for choice elements
+}
+```
+
+### Session State
+
+```typescript
+interface SessionState {
+  threadId?: string;
+  questions?: InteractiveQuestion[];
+  answers: Record<string, string>;
+  isLoading: boolean;
+  error?: Error;
+  isComplete: boolean;
+  result?: string;
+}
+```
 
 ## Error Handling
 
+BleakAI provides specific error types for different failure modes:
+
 ```typescript
+import {ChatError, RateLimitError, AuthenticationError} from "bleakai";
+
 try {
-  const response = await client.ask("Hello");
+  const result = await bleak.startBleakConversation("Hello");
 } catch (error) {
   if (error instanceof RateLimitError) {
     console.log(`Rate limited. Retry after: ${error.retryAfter}s`);
   } else if (error instanceof AuthenticationError) {
-    console.log("Check your API keys");
+    console.log("Check your API key");
+  } else if (error instanceof ChatError) {
+    console.log(`Chat error: ${error.message}`);
   }
 }
 ```
+
+## Complete Example
+
+See the [Getting Started](getting-started) guide for a complete working example that demonstrates all these APIs in action.

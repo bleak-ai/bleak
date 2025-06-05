@@ -1,92 +1,409 @@
-# Create Custom Components
+# Component Guide
 
-Map component types to your existing components. BleakAI will use these mappings to render the right component for each question type.
+Build UI components that BleakAI will use to render intelligent forms.
 
-## Component Example
+## Overview
 
-Here's how to create a component that works with BleakAI:
+BleakAI converts AI-generated questions into your UI components. You provide the components, BleakAI provides the intelligence.
+
+**Key Concept**: Your components receive `text`, `value`, `onChange`, and sometimes `options`. That's it.
+
+## Required Component Types
+
+You need at least these two types:
+
+### Text Input Component
+
+For free-form text entry.
 
 ```typescript
-import React from "react";
+import {type BleakInputProps} from "bleakai";
 
-interface RadioComponentProps {
-  text: string;
-  options: string[];
-  value?: string;
-  onChange: (value: string) => void;
-}
+const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => (
+  <div className="form-group">
+    <label>{text}</label>
+    <input
+      type="text"
+      value={value || ""}
+      onChange={(e) => onChange(e.target.value)}
+      className="form-control"
+    />
+  </div>
+);
+```
 
-const RadioComponent: React.FC<RadioComponentProps> = ({
+### Radio Group Component
+
+For single choice selection.
+
+```typescript
+import {type BleakChoiceProps} from "bleakai";
+
+const RadioGroup: React.FC<BleakChoiceProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => (
+  <div className="form-group">
+    <label>{text}</label>
+    <div className="radio-options">
+      {options?.map((option, i) => (
+        <label key={i} className="radio-label">
+          <input
+            type="radio"
+            name={text.replace(/\s+/g, "_")}
+            checked={value === option}
+            onChange={() => onChange(option)}
+          />
+          {option}
+        </label>
+      ))}
+    </div>
+  </div>
+);
+```
+
+## Configuration
+
+Tell BleakAI about your components:
+
+```typescript
+// components/index.ts
+export {TextInput} from "./TextInput";
+export {RadioGroup} from "./RadioGroup";
+
+// app.ts
+import {TextInput, RadioGroup} from "./components";
+
+const elementsConfig = {
+  text: {
+    component: TextInput,
+    description: "For text responses"
+  },
+  radio: {
+    component: RadioGroup,
+    description: "For single choice"
+  }
+};
+
+const bleak = new BleakSession({
+  apiKey: "your-api-key",
+  elements: elementsConfig
+});
+```
+
+## Optional: Multi-Select Component
+
+For multiple choice selection:
+
+```typescript
+const MultiSelect: React.FC<BleakChoiceProps> = ({
   text,
   options,
   value,
   onChange
 }) => {
+  const selected = value ? value.split(", ") : [];
+
+  const toggleOption = (option: string) => {
+    const newSelected = selected.includes(option)
+      ? selected.filter((item) => item !== option)
+      : [...selected, option];
+    onChange(newSelected.join(", "));
+  };
+
   return (
-    <div className="space-y-3">
-      <label className="text-sm font-medium text-gray-700">{text}</label>
-      <div className="space-y-2">
-        {options.map((option, index) => (
-          <label key={index} className="flex items-center space-x-2">
+    <div className="form-group">
+      <label>{text}</label>
+      <div className="checkbox-options">
+        {options?.map((option, i) => (
+          <label key={i} className="checkbox-label">
             <input
-              type="radio"
-              name={text}
-              value={option}
-              checked={value === option}
-              onChange={(e) => onChange(e.target.value)}
-              className="text-blue-600 focus:ring-blue-500"
+              type="checkbox"
+              checked={selected.includes(option)}
+              onChange={() => toggleOption(option)}
             />
-            <span className="text-sm text-gray-900">{option}</span>
+            {option}
           </label>
         ))}
       </div>
     </div>
   );
 };
+
+// Add to config
+const elementsConfig = {
+  text: {component: TextInput, description: "For text responses"},
+  radio: {component: RadioGroup, description: "For single choice"},
+  multi_select: {component: MultiSelect, description: "For multiple choice"}
+};
 ```
 
-## Component Configuration
+## Props Reference
 
-Create a resolver that maps question types to your components:
+All components receive these props automatically:
 
 ```typescript
-import {createResolverFromConfig} from "bleakai";
+interface BleakInputProps {
+  text: string; // Question text
+  value: string; // Current answer
+  onChange: (value: string) => void; // Update function
+  uniqueId?: string; // Optional ID
+  elementIndex?: number; // Optional position
+}
 
-const config = {
-  text: {component: YourTextInput, description: "Text input"},
-  radio: {component: RadioComponent, description: "Single choice"},
-  multiSelect: {component: YourMultiSelect, description: "Multiple choice"},
-  slider: {component: YourSlider, description: "Numeric range"}
-};
-
-const {resolve} = createResolverFromConfig(config);
+interface BleakChoiceProps extends BleakInputProps {
+  options: string[]; // Available choices
+}
 ```
 
-## Key Benefits
+## Styling Examples
 
-- **Use Your Design System** - Works with any UI library or custom components
-- **Full Control** - You handle styling, validation, and behavior
-- **Framework Agnostic** - Compatible with React, Vue, Angular, etc.
-- **Type Safe** - Complete TypeScript support
+### With CSS Classes
 
-You can now use `resolve(questionType)` to get the appropriate component for any question type BleakAI generates.
+```typescript
+const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => (
+  <div className="bleak-form-group">
+    <label className="bleak-label">{text}</label>
+    <input
+      className="bleak-input"
+      value={value || ""}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  </div>
+);
+```
 
-## Why This Matters for BleakAI
+### With Styled Components
 
-- **Design System Integration**: Use your existing design system components
-- **Complete Control**: BleakAI provides the logic (what component to show), you provide the presentation (how it looks)
-- **Framework Agnostic**: Works with any UI framework or component library
-- **Type Safety**: Maintain TypeScript safety throughout the resolution process
-- **Extensible**: Add any custom element types your application needs
+```typescript
+import styled from "styled-components";
 
-## Popular UI Libraries
+const FormGroup = styled.div`
+  margin-bottom: 1rem;
+`;
 
-BleakAI works seamlessly with any component library:
+const Label = styled.label`
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+`;
 
-- **Material-UI**: Use `<Select>`, `<TextField>`, `<RadioGroup>` components
-- **Ant Design**: Map to `<Radio.Group>`, `<Input>`, `<Select>` components
-- **Chakra UI**: Use `<RadioGroup>`, `<Input>`, `<Select>` components
-- **Custom Components**: Your own design system components
-- **Headless UI**: Build completely custom styled components
+const Input = styled.input`
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`;
 
-The separation of concerns ensures BleakAI provides the conversational intelligence while you maintain complete control over your user interface.
+const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => (
+  <FormGroup>
+    <Label>{text}</Label>
+    <Input value={value || ""} onChange={(e) => onChange(e.target.value)} />
+  </FormGroup>
+);
+```
+
+### With Material-UI
+
+```typescript
+import {
+  TextField,
+  FormControl,
+  FormLabel,
+  RadioGroup as MUIRadioGroup,
+  FormControlLabel,
+  Radio
+} from "@mui/material";
+
+const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => (
+  <TextField
+    label={text}
+    value={value || ""}
+    onChange={(e) => onChange(e.target.value)}
+    fullWidth
+    margin="normal"
+  />
+);
+
+const RadioGroup: React.FC<BleakChoiceProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => (
+  <FormControl component="fieldset" margin="normal">
+    <FormLabel component="legend">{text}</FormLabel>
+    <MUIRadioGroup
+      value={value || ""}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      {options?.map((option) => (
+        <FormControlLabel
+          key={option}
+          value={option}
+          control={<Radio />}
+          label={option}
+        />
+      ))}
+    </MUIRadioGroup>
+  </FormControl>
+);
+```
+
+## Framework Agnostic Examples
+
+### Vue 3 Components
+
+```typescript
+// TextInput.vue
+<template>
+  <div>
+    <label>{{ text }}</label>
+    <input :value="value" @input="onChange($event.target.value)" />
+  </div>
+</template>
+
+<script setup>
+defineProps(['text', 'value', 'onChange']);
+</script>
+
+// RadioGroup.vue
+<template>
+  <div>
+    <label>{{ text }}</label>
+    <div v-for="option in options" :key="option">
+      <label>
+        <input
+          type="radio"
+          :checked="value === option"
+          @change="onChange(option)"
+        />
+        {{ option }}
+      </label>
+    </div>
+  </div>
+</template>
+
+<script setup>
+defineProps(['text', 'options', 'value', 'onChange']);
+</script>
+```
+
+### Angular Components
+
+```typescript
+// text-input.component.ts
+@Component({
+  selector: "bleak-text-input",
+  template: `
+    <div>
+      <label>{{ text }}</label>
+      <input [value]="value" (input)="onChange($event.target.value)" />
+    </div>
+  `
+})
+export class TextInputComponent {
+  @Input() text!: string;
+  @Input() value!: string;
+  @Input() onChange!: (value: string) => void;
+}
+
+// radio-group.component.ts
+@Component({
+  selector: "bleak-radio-group",
+  template: `
+    <div>
+      <label>{{ text }}</label>
+      <div *ngFor="let option of options">
+        <label>
+          <input
+            type="radio"
+            [checked]="value === option"
+            (change)="onChange(option)"
+          />
+          {{ option }}
+        </label>
+      </div>
+    </div>
+  `
+})
+export class RadioGroupComponent {
+  @Input() text!: string;
+  @Input() options!: string[];
+  @Input() value!: string;
+  @Input() onChange!: (value: string) => void;
+}
+```
+
+## Validation & Error Handling
+
+Add validation to your components:
+
+```typescript
+const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => {
+  const [error, setError] = useState("");
+
+  const handleChange = (newValue: string) => {
+    // Basic validation
+    if (
+      text.toLowerCase().includes("email") &&
+      newValue &&
+      !newValue.includes("@")
+    ) {
+      setError("Please enter a valid email");
+    } else {
+      setError("");
+    }
+    onChange(newValue);
+  };
+
+  return (
+    <div className="form-group">
+      <label>{text}</label>
+      <input
+        value={value || ""}
+        onChange={(e) => handleChange(e.target.value)}
+        className={error ? "error" : ""}
+      />
+      {error && <span className="error-text">{error}</span>}
+    </div>
+  );
+};
+```
+
+## Testing Your Components
+
+Create a simple test:
+
+```typescript
+// components/test.tsx
+import {TextInput, RadioGroup} from "./index";
+
+function ComponentTest() {
+  const [value, setValue] = useState("");
+
+  return (
+    <div>
+      <TextInput text="What's your name?" value={value} onChange={setValue} />
+
+      <RadioGroup
+        text="Pick a color"
+        options={["Red", "Blue", "Green"]}
+        value={value}
+        onChange={setValue}
+      />
+
+      <p>Current value: {value}</p>
+    </div>
+  );
+}
+```
+
+## Next Steps
+
+Now that you have components:
+
+1. **[Complete Example](dynamic-forms)** - See them in action
+2. **[API Reference](api-reference)** - Explore all BleakSession methods

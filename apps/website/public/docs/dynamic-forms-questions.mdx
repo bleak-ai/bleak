@@ -1,79 +1,461 @@
-# Ask Questions
+# Question Rendering
 
-Start a conversation and render the AI-generated questions using your own components.
+Learn how to convert AI questions into your UI components.
 
-## Making a Request
+## Basic Flow
 
-Use the `ask` method to start a conversation. BleakAI analyzes your prompt and determines what information is needed:
+1. **AI generates questions** - Based on user prompt
+2. **Convert to components** - Using `getBleakComponents()`
+3. **Render in your UI** - Display the form
+4. **Track answers** - Store user responses
 
-```typescript
-const response = await client.ask("Help me plan a vacation to Europe");
-```
+## Question Structure
 
-## Response Structure
-
-BleakAI returns structured question data that you can render with your components:
+Each AI question has this format:
 
 ```typescript
 {
-  type: "questions",
-  questions: [
-    {
-      question_id: "q1",
-      type: "radio",
-      text: "What's your budget range?",
-      options: ["$1000-2000", "$2000-5000", "$5000+"]
-    },
-    {
-      question_id: "q2",
-      type: "text",
-      text: "How many days do you plan to travel?",
-      options: null
-    }
-  ]
+  question: "What's your budget?",     // Text to display
+  type: "radio",                      // Component type
+  options: ["$100-500", "$500-1000"]  // Available choices (if any)
 }
 ```
 
-## Response Types
+## Converting Questions
 
-BleakAI can return different response types:
-
-- **`questions`** - More information needed from the user
-- **`answer`** - Final response ready to display
-- **`complete`** - Conversation finished
-
-## Rendering Questions
-
-First, create your component resolver (see [Create Custom Components](dynamic-forms-components)):
+Use `getBleakComponents()` to convert questions into renderable components:
 
 ```typescript
-import {createResolverFromConfig} from "bleakai";
+const components = bleak.getBleakComponents(
+  questions, // From AI
+  answers, // Current answers
+  handleAnswerChange // Update function
+);
 
-const config = {
-  text: {component: YourTextInput, description: "Text input"},
-  radio: {component: YourRadioComponent, description: "Single choice"},
-  multiSelect: {component: YourMultiSelect, description: "Multiple choice"}
-};
-
-const {resolve} = createResolverFromConfig(config);
+// Render them
+{
+  components.map(({Component, props, key}) => (
+    <Component key={key} {...props} />
+  ));
+}
 ```
 
-Then render questions using your components:
+## Tracking Answers
+
+Store user responses by question text:
 
 ```typescript
-if (response.type === "questions") {
-  response.questions.forEach((question) => {
-    const Component = resolve(question.type);
+const [answers, setAnswers] = useState({});
 
-    return (
-      <Component
-        text={question.text}
-        options={question.options}
-        onChange={(value) => handleAnswer(question.question_id, value)}
-      />
-    );
+const handleAnswerChange = (question, value) => {
+  setAnswers((prev) => ({...prev, [question]: value}));
+};
+
+// Result:
+// {
+//   "What's your budget?": "$500-1000",
+//   "How many people?": "4"
+// }
+```
+
+## Component Props
+
+Your components automatically receive:
+
+```typescript
+// All components get:
+{
+  text: "What's your budget?",
+  value: "$500-1000",
+  onChange: (newValue) => {...}
+}
+
+// Choice components also get:
+{
+  options: ["$100-500", "$500-1000", "$1000+"]
+}
+```
+
+## Validation
+
+Check if all questions are answered:
+
+```typescript
+const allAnswered = questions.every((q) => answers[q.question]?.trim());
+
+<button disabled={!allAnswered}>Get Answer</button>;
+```
+
+## Next Steps
+
+- **[Answer Submission](dynamic-forms-answers)** - Submit responses and get final answer
+
+# Troubleshooting & FAQ
+
+Common issues and solutions when working with BleakAI.
+
+## Installation Issues
+
+### Package not found
+
+```bash
+npm ERR! 404 'bleakai' is not in the npm registry
+```
+
+**Solution**: Check the package name and version
+
+```bash
+npm install bleakai@latest
+# or
+yarn add bleakai@latest
+```
+
+### TypeScript errors
+
+```
+Cannot find module 'bleakai' or its corresponding type declarations
+```
+
+**Solution**: Ensure TypeScript is configured properly
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  }
+}
+```
+
+## API Key Issues
+
+### Authentication failed
+
+```
+Error: Authentication failed. Check your API key.
+```
+
+**Solutions**:
+
+1. Verify API key in [dashboard](https://platform.bleak.ai)
+2. Check environment variable loading:
+
+```typescript
+console.log("API Key:", process.env.REACT_APP_BLEAK_API_KEY);
+// Should not be undefined
+```
+
+3. Ensure no extra spaces or quotes in `.env`:
+
+```bash
+# Wrong
+REACT_APP_BLEAK_API_KEY="your_key_here"
+
+# Correct
+REACT_APP_BLEAK_API_KEY=your_key_here
+```
+
+### Rate limiting
+
+```
+Error: Rate limit exceeded. Try again in 60 seconds.
+```
+
+**Solution**: Implement retry logic
+
+```typescript
+import {RateLimitError} from "bleakai";
+
+try {
+  const result = await bleak.startBleakConversation(prompt);
+} catch (error) {
+  if (error instanceof RateLimitError) {
+    const retryAfter = error.retryAfter || 60;
+    setTimeout(() => {
+      // Retry the request
+    }, retryAfter * 1000);
+  }
+}
+```
+
+## Component Issues
+
+### Components not rendering
+
+```
+TypeError: Cannot read property 'component' of undefined
+```
+
+**Solution**: Check your elements configuration
+
+```typescript
+// Make sure all referenced components are properly imported
+import {TextInput, RadioGroup} from "./components";
+
+const elementsConfig = {
+  text: {
+    component: TextInput, // Must be a valid component
+    description: "For text input"
+  },
+  radio: {
+    component: RadioGroup, // Must be a valid component
+    description: "For single choice"
+  }
+};
+```
+
+### Props not being passed correctly
+
+**Solution**: Ensure components accept the right props
+
+```typescript
+// Correct component signature
+const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => {
+  // Component implementation
+};
+
+// Check props are used correctly
+console.log("Props received:", {text, value, onChange});
+```
+
+### Multi-select values not working
+
+**Solution**: Handle comma-separated values properly
+
+```typescript
+const MultiSelect: React.FC<BleakChoiceProps> = ({value, onChange}) => {
+  // Parse comma-separated string
+  const selected = value ? value.split(", ").filter(Boolean) : [];
+
+  const toggleOption = (option: string) => {
+    const newSelected = selected.includes(option)
+      ? selected.filter((item) => item !== option)
+      : [...selected, option];
+
+    // Join back to comma-separated string
+    onChange(newSelected.join(", "));
+  };
+
+  // ... rest of component
+};
+```
+
+## Conversation Flow Issues
+
+### Questions not appearing
+
+```
+// result.needsInput is false but no answer provided
+```
+
+**Solutions**:
+
+1. Check if elements config is provided:
+
+```typescript
+const bleak = new BleakSession({
+  apiKey: "your-key",
+  elements: elementsConfig // Must be provided for questions
+});
+```
+
+2. Verify prompt complexity:
+
+```typescript
+// Too simple - might get direct answer
+"What's 2+2?";
+
+// Better - will likely generate questions
+"Help me plan a vacation";
+```
+
+### Answers not being tracked
+
+**Solution**: Ensure answer change handler is working
+
+```typescript
+const handleAnswerChange = (question: string, value: string) => {
+  console.log("Answer changed:", {question, value});
+  setAnswers((prev) => {
+    const updated = {...prev, [question]: value};
+    console.log("All answers:", updated);
+    return updated;
+  });
+};
+```
+
+### Final answer request fails
+
+```
+Error: No active conversation thread
+```
+
+**Solution**: Start conversation before submitting answers
+
+```typescript
+// Must call this first
+const result = await bleak.startBleakConversation(prompt);
+
+// Then later submit answers
+const finalAnswer = await bleak.finishBleakConversation(answers);
+```
+
+## Network Issues
+
+### Connection timeouts
+
+```
+Error: Network timeout after 30000ms
+```
+
+**Solution**: Increase timeout or check connection
+
+```typescript
+const bleak = new BleakSession({
+  apiKey: "your-key",
+  timeout: 60000, // Increase to 60 seconds
+  baseUrl: "https://api.bleak.ai" // Verify URL is correct
+});
+```
+
+### CORS errors (in browser)
+
+```
+Access to XMLHttpRequest blocked by CORS policy
+```
+
+**Solution**: This usually indicates wrong baseUrl or local development issues
+
+```typescript
+// For development
+const bleak = new BleakSession({
+  apiKey: "your-key",
+  baseUrl: "http://localhost:8008/bleak" // Local backend
+});
+
+// For production
+const bleak = new BleakSession({
+  apiKey: "your-key",
+  baseUrl: "https://api.bleak.ai" // Production API
+});
+```
+
+## Performance Issues
+
+### Session recreating on every render
+
+**Solution**: Use useMemo in React
+
+```typescript
+const bleak = useMemo(
+  () =>
+    new BleakSession({
+      apiKey: process.env.REACT_APP_BLEAK_API_KEY,
+      elements: elementsConfig
+    }),
+  [] // Empty dependency array
+);
+```
+
+### Slow question rendering
+
+**Solution**: Optimize component rendering
+
+```typescript
+// Use React.memo for components
+const TextInput = React.memo<BleakInputProps>(({text, value, onChange}) => {
+  // Component implementation
+});
+
+// Use stable keys
+{
+  components.map(({Component, props, key}) => (
+    <Component key={key} {...props} /> // Use provided key
+  ));
+}
+```
+
+## Development vs Production
+
+### Environment configuration
+
+```typescript
+// development.js
+const config = {
+  apiKey: "dev-key",
+  baseUrl: "http://localhost:8008/bleak",
+  timeout: 5000
+};
+
+// production.js
+const config = {
+  apiKey: process.env.REACT_APP_BLEAK_API_KEY,
+  baseUrl: "https://api.bleak.ai",
+  timeout: 30000
+};
+```
+
+## Debugging Tips
+
+### Enable detailed logging
+
+```typescript
+const bleak = new BleakSession({
+  apiKey: "your-key",
+  elements: elementsConfig
+});
+
+// Log conversation state
+console.log("Session state:", bleak.getBleakState());
+
+// Log component resolution
+const components = bleak.getBleakComponents(questions, answers, onChange);
+console.log("Resolved components:", components);
+```
+
+### Inspect API responses
+
+```typescript
+try {
+  const result = await bleak.startBleakConversation(prompt);
+  console.log("API Response:", result);
+} catch (error) {
+  console.error("API Error:", {
+    message: error.message,
+    status: error.status,
+    data: error.data
   });
 }
 ```
 
-The `resolve` function returns the correct component for each question type, allowing you to maintain your design system while BleakAI handles the conversational logic.
+### Check answer format
+
+```typescript
+const handleAnswerChange = (question: string, value: string) => {
+  // Validate answer format
+  if (!question || typeof value !== "string") {
+    console.warn("Invalid answer format:", {question, value});
+    return;
+  }
+
+  setAnswers((prev) => ({...prev, [question]: value}));
+};
+```
+
+## Getting Help
+
+If you're still having issues:
+
+1. **Check the [API Reference](api-reference)** for method documentation
+2. **Review the [Complete Example](dynamic-forms)** for working code
+3. **Verify your [Component Setup](dynamic-forms-components)** is correct
+4. **Test with the [Getting Started](dynamic-forms-initialize)** guide
+
+## Known Limitations
+
+- **Version 0.0.4**: API may change between versions
+- **Beta**: Not recommended for production use yet
+- **Rate Limits**: 100 requests per minute per API key
+- **Component Types**: Currently supports text, radio, multi_select

@@ -1,52 +1,892 @@
-# Dynamic Forms
+# Handling Conversations
 
-Build interactive forms using your own components with AI-powered question generation.
+Learn how conversations work and see a complete example.
 
-## Overview
+## How Conversations Work
 
-BleakAI generates smart questions based on user input and maps them to your existing components. You maintain full control over styling and behavior while BleakAI handles the conversational logic.
+1. **User asks a question** - Start with natural language
+2. **AI decides** - Either ask clarifying questions or give direct answer
+3. **User answers questions** - Fill out the dynamic form
+4. **AI provides final answer** - Get comprehensive response
 
-## Quick Start
-
-1. **[Initialize Chat Client](dynamic-forms-initialize)** - Set up the BleakAI client
-2. **[Create Custom Components](dynamic-forms-components)** - Map your components to question types
-3. **[Ask Questions](dynamic-forms-questions)** - Start conversations and render questions
-4. **[Send Answers](dynamic-forms-answers)** - Submit responses and get final results
-
-## Basic Example
+## Starting a Conversation
 
 ```typescript
-// 1. Initialize
-const client = createSimpleChatClient({
-  baseUrl: "http://localhost:8000",
-  apiKey: "your-bleakai-api-key",
-  openaiKey: "your-openai-api-key"
-});
+const result = await bleak.startBleakConversation("Help me plan a trip");
 
-// 2. Setup components
-const {resolve} = createResolverFromConfig({
-  text: {component: YourTextInput, description: "Text input"},
-  radio: {component: YourRadioGroup, description: "Single choice"}
-});
-
-// 3. Start conversation
-let response = await client.ask("Plan my vacation");
-
-// 4. Handle questions
-if (response.type === "questions") {
-  const answers = await collectUserAnswers(response.questions);
-  response = await client.answer(answers);
-}
-
-// 5. Display result
-if (response.type === "answer") {
-  displayResult(response.content);
+if (result.needsInput) {
+  // AI needs more info - show questions
+  showQuestions(result.questions);
+} else {
+  // AI has enough info - show answer
+  showAnswer(result.answer);
 }
 ```
 
-## Key Benefits
+## Rendering Questions
 
-- **Use Your Components** - Works with any UI library or custom components
-- **AI-Powered Logic** - Smart question generation based on context
-- **Full Control** - You handle styling, validation, and user experience
-- **Type Safe** - Complete TypeScript support throughout
+Convert AI questions into your UI components:
+
+```typescript
+const components = bleak.getBleakComponents(
+  questions, // From AI
+  answers, // Current user answers
+  handleAnswerChange // Function to update answers
+);
+
+// Render them
+components.map(({Component, props, key}) => <Component key={key} {...props} />);
+```
+
+## Tracking Answers
+
+Store user responses in a simple object:
+
+```typescript
+const [answers, setAnswers] = useState({});
+
+const handleAnswerChange = (question, value) => {
+  setAnswers((prev) => ({...prev, [question]: value}));
+};
+```
+
+## Getting Final Answer
+
+When all questions are answered:
+
+```typescript
+const finalAnswer = await bleak.finishBleakConversation(answers);
+```
+
+## Optional: Request More Questions
+
+For complex topics, users can request additional questions:
+
+```typescript
+const result = await bleak.requestMoreBleakQuestions(answers);
+
+if (result.questions) {
+  // More questions available
+  showQuestions(result.questions);
+} else {
+  // AI thinks we have enough info
+  const finalAnswer = await bleak.finishBleakConversation(answers);
+}
+```
+
+## Complete Example
+
+Here's a full working example that brings everything together:
+
+```typescript
+import React, {useState, useMemo} from "react";
+import {
+  BleakSession,
+  type BleakInputProps,
+  type BleakChoiceProps
+} from "bleakai";
+
+// 1. Create your components
+const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => (
+  <div style={{marginBottom: "1rem"}}>
+    <label style={{display: "block", marginBottom: "0.5rem"}}>{text}</label>
+    <input
+      type="text"
+      value={value || ""}
+      onChange={(e) => onChange(e.target.value)}
+      style={{width: "100%", padding: "0.5rem"}}
+    />
+  </div>
+);
+
+const RadioGroup: React.FC<BleakChoiceProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => (
+  <div style={{marginBottom: "1rem"}}>
+    <label style={{display: "block", marginBottom: "0.5rem"}}>{text}</label>
+    {options?.map((option, i) => (
+      <label key={i} style={{display: "block", margin: "0.25rem 0"}}>
+        <input
+          type="radio"
+          checked={value === option}
+          onChange={() => onChange(option)}
+          style={{marginRight: "0.5rem"}}
+        />
+        {option}
+      </label>
+    ))}
+  </div>
+);
+
+const MultiSelect: React.FC<BleakChoiceProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => {
+  const selected = value ? value.split(", ") : [];
+
+  const toggleOption = (option: string) => {
+    const newSelected = selected.includes(option)
+      ? selected.filter((item) => item !== option)
+      : [...selected, option];
+    onChange(newSelected.join(", "));
+  };
+
+  return (
+    <div style={{marginBottom: "1rem"}}>
+      <label style={{display: "block", marginBottom: "0.5rem"}}>{text}</label>
+      {options?.map((option, i) => (
+        <label key={i} style={{display: "block", margin: "0.25rem 0"}}>
+          <input
+            type="checkbox"
+            checked={selected.includes(option)}
+            onChange={() => toggleOption(option)}
+            style={{marginRight: "0.5rem"}}
+          />
+          {option}
+        </label>
+      ))}
+    </div>
+  );
+};
+
+// 2. Configure components
+const elementsConfig = {
+  text: {component: TextInput, description: "For text responses"},
+  radio: {component: RadioGroup, description: "For single choice"},
+  multi_select: {component: MultiSelect, description: "For multiple choice"}
+};
+
+// 3. Main App Component
+function App() {
+  const [prompt, setPrompt] = useState("");
+  const [questions, setQuestions] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [finalAnswer, setFinalAnswer] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Create BleakSession
+  const bleak = useMemo(
+    () =>
+      new BleakSession({
+        apiKey: process.env.REACT_APP_BLEAK_API_KEY,
+        elements: elementsConfig
+      }),
+    []
+  );
+
+  // Start conversation
+  const handleStart = async () => {
+    setIsLoading(true);
+    try {
+      const result = await bleak.startBleakConversation(prompt);
+
+      if (result.needsInput && result.questions) {
+        setQuestions(result.questions);
+      } else if (result.answer) {
+        setFinalAnswer(result.answer);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle answer changes
+  const handleAnswerChange = (question, value) => {
+    setAnswers((prev) => ({...prev, [question]: value}));
+  };
+
+  // Submit answers
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      const result = await bleak.finishBleakConversation(answers);
+      setFinalAnswer(result);
+      setQuestions(null);
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Request more questions
+  const handleRequestMore = async () => {
+    setIsLoading(true);
+    try {
+      const result = await bleak.requestMoreBleakQuestions(answers);
+
+      if (result.questions) {
+        setQuestions(result.questions);
+      } else {
+        const finalResult = await bleak.finishBleakConversation(answers);
+        setFinalAnswer(finalResult);
+        setQuestions(null);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Reset everything
+  const handleReset = () => {
+    bleak.resetBleakSession();
+    setPrompt("");
+    setQuestions(null);
+    setAnswers({});
+    setFinalAnswer(null);
+  };
+
+  const allQuestionsAnswered = questions?.every((q) =>
+    answers[q.question]?.trim()
+  );
+
+  return (
+    <div style={{maxWidth: "600px", margin: "2rem auto", padding: "1rem"}}>
+      <h1>AI Assistant</h1>
+
+      {/* Initial prompt input */}
+      {!questions && !finalAnswer && (
+        <div>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="What would you like help with?"
+            rows={4}
+            style={{width: "100%", padding: "0.5rem", marginBottom: "1rem"}}
+          />
+          <button
+            onClick={handleStart}
+            disabled={!prompt.trim() || isLoading}
+            style={{padding: "0.5rem 1rem", marginRight: "0.5rem"}}
+          >
+            {isLoading ? "Starting..." : "Get Started"}
+          </button>
+        </div>
+      )}
+
+      {/* Questions */}
+      {questions && (
+        <div>
+          <h2>Help me understand better</h2>
+
+          {bleak
+            .getBleakComponents(questions, answers, handleAnswerChange)
+            .map(({Component, props, key}) => (
+              <Component key={key} {...props} />
+            ))}
+
+          <button
+            onClick={handleSubmit}
+            disabled={!allQuestionsAnswered || isLoading}
+            style={{padding: "0.5rem 1rem", marginRight: "0.5rem"}}
+          >
+            {isLoading ? "Processing..." : "Get Answer"}
+          </button>
+
+          <button
+            onClick={handleRequestMore}
+            disabled={!allQuestionsAnswered || isLoading}
+            style={{padding: "0.5rem 1rem"}}
+          >
+            {isLoading ? "Processing..." : "More Details"}
+          </button>
+        </div>
+      )}
+
+      {/* Final answer */}
+      {finalAnswer && (
+        <div>
+          <h2>Here's your answer:</h2>
+          <div
+            style={{
+              padding: "1rem",
+              backgroundColor: "#f5f5f5",
+              borderRadius: "0.5rem",
+              marginBottom: "1rem"
+            }}
+          >
+            {finalAnswer}
+          </div>
+          <button onClick={handleReset} style={{padding: "0.5rem 1rem"}}>
+            Ask Another Question
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default App;
+```
+
+## Next Steps
+
+- **[API Reference](api-reference)** - Complete method documentation
+- **[Question Handling](dynamic-forms-questions)** - Deep dive into question rendering
+- **[Answer Submission](dynamic-forms-answers)** - Advanced answer handling patterns
+
+# Complete Example
+
+A full working application that demonstrates BleakAI's capabilities.
+
+## Overview
+
+This example shows how to build a trip planning assistant that:
+
+- Starts with a simple prompt
+- Asks intelligent follow-up questions
+- Provides personalized recommendations
+
+## File Structure
+
+```
+src/
+├── components/
+│   ├── TextInput.tsx
+│   ├── RadioGroup.tsx
+│   └── MultiSelect.tsx
+├── TripPlanner.tsx
+└── App.tsx
+```
+
+## 1. Create Components
+
+First, let's create the UI components:
+
+### TextInput Component
+
+```typescript
+// components/TextInput.tsx
+import React from "react";
+import {type BleakInputProps} from "bleakai";
+
+export const TextInput: React.FC<BleakInputProps> = ({
+  text,
+  value,
+  onChange
+}) => (
+  <div style={{marginBottom: "1rem"}}>
+    <label
+      style={{display: "block", marginBottom: "0.5rem", fontWeight: "500"}}
+    >
+      {text}
+    </label>
+    <input
+      type="text"
+      value={value || ""}
+      onChange={(e) => onChange(e.target.value)}
+      style={{
+        width: "100%",
+        padding: "0.75rem",
+        border: "1px solid #ddd",
+        borderRadius: "4px",
+        fontSize: "1rem"
+      }}
+    />
+  </div>
+);
+```
+
+### RadioGroup Component
+
+```typescript
+// components/RadioGroup.tsx
+import React from "react";
+import {type BleakChoiceProps} from "bleakai";
+
+export const RadioGroup: React.FC<BleakChoiceProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => (
+  <div style={{marginBottom: "1rem"}}>
+    <label
+      style={{display: "block", marginBottom: "0.5rem", fontWeight: "500"}}
+    >
+      {text}
+    </label>
+    <div>
+      {options?.map((option, i) => (
+        <label
+          key={i}
+          style={{
+            display: "block",
+            margin: "0.5rem 0",
+            cursor: "pointer"
+          }}
+        >
+          <input
+            type="radio"
+            name={text.replace(/\s+/g, "_")}
+            checked={value === option}
+            onChange={() => onChange(option)}
+            style={{marginRight: "0.5rem"}}
+          />
+          {option}
+        </label>
+      ))}
+    </div>
+  </div>
+);
+```
+
+### MultiSelect Component
+
+```typescript
+// components/MultiSelect.tsx
+import React from "react";
+import {type BleakChoiceProps} from "bleakai";
+
+export const MultiSelect: React.FC<BleakChoiceProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => {
+  const selected = value ? value.split(", ") : [];
+
+  const toggleOption = (option: string) => {
+    const newSelected = selected.includes(option)
+      ? selected.filter((item) => item !== option)
+      : [...selected, option];
+    onChange(newSelected.join(", "));
+  };
+
+  return (
+    <div style={{marginBottom: "1rem"}}>
+      <label
+        style={{display: "block", marginBottom: "0.5rem", fontWeight: "500"}}
+      >
+        {text}
+      </label>
+      <div>
+        {options?.map((option, i) => (
+          <label
+            key={i}
+            style={{
+              display: "block",
+              margin: "0.5rem 0",
+              cursor: "pointer"
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={selected.includes(option)}
+              onChange={() => toggleOption(option)}
+              style={{marginRight: "0.5rem"}}
+            />
+            {option}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+};
+```
+
+## 2. Main Application
+
+Now let's build the main trip planning component:
+
+```typescript
+// TripPlanner.tsx
+import React, {useState, useMemo} from "react";
+import {BleakSession, type InteractiveQuestion} from "bleakai";
+import {TextInput} from "./components/TextInput";
+import {RadioGroup} from "./components/RadioGroup";
+import {MultiSelect} from "./components/MultiSelect";
+
+// Configure components for BleakAI
+const elementsConfig = {
+  text: {
+    component: TextInput,
+    description: "For text responses like names, budgets, dates"
+  },
+  radio: {
+    component: RadioGroup,
+    description: "For single choice like destination type, trip duration"
+  },
+  multi_select: {
+    component: MultiSelect,
+    description: "For multiple choices like activities, interests"
+  }
+};
+
+export function TripPlanner() {
+  // State management
+  const [prompt, setPrompt] = useState("");
+  const [questions, setQuestions] = useState<InteractiveQuestion[] | null>(
+    null
+  );
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [finalAnswer, setFinalAnswer] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Initialize BleakSession
+  const bleak = useMemo(
+    () =>
+      new BleakSession({
+        apiKey: process.env.REACT_APP_BLEAK_API_KEY!,
+        elements: elementsConfig
+      }),
+    []
+  );
+
+  // Start conversation
+  const handleStart = async () => {
+    if (!prompt.trim()) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await bleak.startBleakConversation(prompt);
+
+      if (result.needsInput && result.questions) {
+        setQuestions(result.questions);
+      } else if (result.answer) {
+        setFinalAnswer(result.answer);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle answer changes
+  const handleAnswerChange = (question: string, value: string) => {
+    setAnswers((prev) => ({...prev, [question]: value}));
+  };
+
+  // Submit final answers
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await bleak.finishBleakConversation(answers);
+      setFinalAnswer(result);
+      setQuestions(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to get answer");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Request more questions
+  const handleRequestMore = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await bleak.requestMoreBleakQuestions(answers);
+
+      if (result.questions) {
+        setQuestions(result.questions);
+      } else {
+        const finalResult = await bleak.finishBleakConversation(answers);
+        setFinalAnswer(finalResult);
+        setQuestions(null);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to get more questions"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Reset everything
+  const handleReset = () => {
+    bleak.resetBleakSession();
+    setPrompt("");
+    setQuestions(null);
+    setAnswers({});
+    setFinalAnswer(null);
+    setError(null);
+  };
+
+  // Check if all questions are answered
+  const allQuestionsAnswered = questions?.every((q) =>
+    answers[q.question]?.trim()
+  );
+
+  return (
+    <div style={{maxWidth: "800px", margin: "2rem auto", padding: "2rem"}}>
+      <h1 style={{color: "#333", marginBottom: "2rem"}}>AI Trip Planner</h1>
+
+      {/* Error display */}
+      {error && (
+        <div
+          style={{
+            padding: "1rem",
+            backgroundColor: "#fee",
+            border: "1px solid #fcc",
+            borderRadius: "4px",
+            marginBottom: "1rem",
+            color: "#c33"
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      {/* Loading indicator */}
+      {isLoading && (
+        <div
+          style={{
+            padding: "1rem",
+            backgroundColor: "#f0f8ff",
+            border: "1px solid #b3d9ff",
+            borderRadius: "4px",
+            marginBottom: "1rem",
+            textAlign: "center"
+          }}
+        >
+          Processing your request...
+        </div>
+      )}
+
+      {/* Initial prompt input */}
+      {!questions && !finalAnswer && (
+        <div>
+          <h2 style={{marginBottom: "1rem"}}>Plan your perfect trip</h2>
+          <p style={{marginBottom: "1rem", color: "#666"}}>
+            Tell me about your dream vacation and I'll help you plan it!
+          </p>
+
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Examples:
+• Help me plan a romantic getaway to Europe
+• I want a family vacation under $5000
+• Plan a solo adventure trip to Asia"
+            rows={4}
+            style={{
+              width: "100%",
+              padding: "1rem",
+              border: "1px solid #ddd",
+              borderRadius: "4px",
+              fontSize: "1rem",
+              marginBottom: "1rem",
+              resize: "vertical"
+            }}
+          />
+
+          <button
+            onClick={handleStart}
+            disabled={!prompt.trim() || isLoading}
+            style={{
+              padding: "0.75rem 2rem",
+              backgroundColor: prompt.trim() ? "#007bff" : "#ccc",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              fontSize: "1rem",
+              cursor: prompt.trim() ? "pointer" : "not-allowed"
+            }}
+          >
+            {isLoading ? "Starting..." : "Plan My Trip"}
+          </button>
+        </div>
+      )}
+
+      {/* Questions section */}
+      {questions && (
+        <div>
+          <h2 style={{marginBottom: "1rem"}}>
+            Help me understand your preferences
+          </h2>
+          <p style={{marginBottom: "2rem", color: "#666"}}>
+            Please answer these questions so I can create the perfect itinerary
+            for you.
+          </p>
+
+          <div style={{marginBottom: "2rem"}}>
+            {bleak
+              .getBleakComponents(questions, answers, handleAnswerChange)
+              .map(({Component, props, key}) => (
+                <Component key={key} {...props} />
+              ))}
+          </div>
+
+          <div style={{display: "flex", gap: "1rem"}}>
+            <button
+              onClick={handleSubmit}
+              disabled={!allQuestionsAnswered || isLoading}
+              style={{
+                padding: "0.75rem 2rem",
+                backgroundColor: allQuestionsAnswered ? "#28a745" : "#ccc",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                fontSize: "1rem",
+                cursor: allQuestionsAnswered ? "pointer" : "not-allowed"
+              }}
+            >
+              {isLoading ? "Creating itinerary..." : "Get My Itinerary"}
+            </button>
+
+            <button
+              onClick={handleRequestMore}
+              disabled={!allQuestionsAnswered || isLoading}
+              style={{
+                padding: "0.75rem 2rem",
+                backgroundColor: "white",
+                color: "#007bff",
+                border: "1px solid #007bff",
+                borderRadius: "4px",
+                fontSize: "1rem",
+                cursor: allQuestionsAnswered ? "pointer" : "not-allowed"
+              }}
+            >
+              {isLoading ? "Processing..." : "I want to add more details"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Final answer section */}
+      {finalAnswer && (
+        <div>
+          <h2 style={{marginBottom: "1rem", color: "#28a745"}}>
+            Your Perfect Trip Itinerary
+          </h2>
+
+          <div
+            style={{
+              padding: "2rem",
+              backgroundColor: "#f8f9fa",
+              border: "1px solid #dee2e6",
+              borderRadius: "8px",
+              marginBottom: "2rem",
+              lineHeight: "1.6",
+              whiteSpace: "pre-wrap"
+            }}
+          >
+            {finalAnswer}
+          </div>
+
+          <button
+            onClick={handleReset}
+            style={{
+              padding: "0.75rem 2rem",
+              backgroundColor: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              fontSize: "1rem",
+              cursor: "pointer"
+            }}
+          >
+            Plan Another Trip
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+## 3. App Entry Point
+
+```typescript
+// App.tsx
+import React from "react";
+import {TripPlanner} from "./TripPlanner";
+
+function App() {
+  return (
+    <div>
+      <TripPlanner />
+    </div>
+  );
+}
+
+export default App;
+```
+
+## 4. Environment Setup
+
+Create a `.env` file:
+
+```bash
+# .env
+REACT_APP_BLEAK_API_KEY=your_api_key_here
+```
+
+## 5. Package Dependencies
+
+```json
+{
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "bleakai": "^0.0.4"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}
+```
+
+## Usage Examples
+
+Try these prompts with the trip planner:
+
+### Simple Prompts
+
+- "Plan a weekend getaway"
+- "Help me plan a family vacation"
+- "I want a romantic trip to Paris"
+
+### Detailed Prompts
+
+- "Plan a 2-week backpacking trip through Europe for under $3000"
+- "Help me plan a luxury honeymoon in the Maldives"
+- "I want a solo adventure trip to New Zealand with hiking and photography"
+
+### Business Travel
+
+- "Plan a business trip to Tokyo with some leisure time"
+- "Help me plan a conference trip to San Francisco"
+
+## Key Features Demonstrated
+
+1. **Progressive Enhancement**: Starts simple, gets more detailed
+2. **Component Reusability**: Same components work for different question types
+3. **Error Handling**: Graceful handling of API errors
+4. **Loading States**: Clear feedback during processing
+5. **Responsive Design**: Works on different screen sizes
+6. **Type Safety**: Full TypeScript support
+
+## Customization Ideas
+
+- Add more component types (date pickers, sliders, etc.)
+- Implement validation and error handling
+- Add animations and better styling
+- Integrate with your design system
+- Add persistence to save conversation state
+
+## Next Steps
+
+- **[API Reference](api-reference)** - Explore all available methods
+- **[Component Guide](dynamic-forms-components)** - Build more component types
+- **[Troubleshooting](dynamic-forms-questions)** - Common issues and solutions

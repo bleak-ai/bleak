@@ -1,33 +1,167 @@
-# Getting Started
+# BleakAI Overview
 
-Install and configure BleakAI to start building dynamic forms.
+Transform static forms into intelligent conversations that adapt to user input.
 
-## Installation
+## What BleakAI Does
+
+**Problem**: Traditional forms ask all questions upfront, even when many are irrelevant.
+
+**Solution**: BleakAI analyzes user input and dynamically generates only the questions needed, using your existing UI components.
+
+```typescript
+// Instead of this static form:
+<form>
+  <input name="budget" placeholder="Budget" />
+  <input name="destination" placeholder="Where to?" />
+  <input name="duration" placeholder="How long?" />
+  <input name="travelers" placeholder="How many people?" />
+  {/* 20 more fields... */}
+</form>
+
+// You get this intelligent conversation:
+"Help me plan a vacation"
+↓
+AI asks: "What's your budget range?"
+User: "Under $2000"
+↓
+AI asks: "Beach or mountains?"
+User: "Beach"
+↓
+AI provides personalized recommendations
+```
+
+## When to Use BleakAI
+
+✅ **Good for:**
+
+- Complex forms with conditional logic
+- User onboarding flows
+- Configuration wizards
+- Recommendation engines
+- Support ticket creation
+
+❌ **Not for:**
+
+- Simple contact forms
+- Login/signup forms
+- Static data collection
+
+## 5-Minute Quickstart
+
+### 1. Install
 
 ```bash
 npm install bleakai
 ```
 
-## API Keys
+### 2. Get API Key
 
-Get your API keys:
+Sign up at [BleakAI Platform](https://platform.bleak.ai) and copy your API key.
 
-1. **BleakAI API Key**: Log into the BleakAI platform dashboard
-2. **OpenAI API Key**: Create one at [OpenAI's website](https://platform.openai.com/)
-
-## Setup
+### 3. Hello World
 
 ```typescript
-import {createSimpleChatClient} from "bleakai";
+import {BleakSession} from "bleakai";
 
-const client = createSimpleChatClient({
-  baseUrl: "http://localhost:8000",
-  apiKey: "your-bleakai-api-key-here",
-  openaiKey: "your-openai-api-key-here"
+// Test basic functionality
+const bleak = new BleakSession({
+  apiKey: "your-api-key"
+});
+
+const result = await bleak.startBleakConversation("Help me choose a laptop");
+console.log(result.answer || "AI wants to ask questions");
+```
+
+### 4. Add Your Components
+
+```typescript
+import {type BleakInputProps, type BleakChoiceProps} from "bleakai";
+
+// Your existing components
+const TextInput = ({text, value, onChange}: BleakInputProps) => (
+  <div>
+    <label>{text}</label>
+    <input value={value || ""} onChange={(e) => onChange(e.target.value)} />
+  </div>
+);
+
+const RadioGroup = ({text, options, value, onChange}: BleakChoiceProps) => (
+  <div>
+    <label>{text}</label>
+    {options?.map((option) => (
+      <label key={option}>
+        <input
+          type="radio"
+          checked={value === option}
+          onChange={() => onChange(option)}
+        />
+        {option}
+      </label>
+    ))}
+  </div>
+);
+
+// Configure BleakAI to use them
+const bleak = new BleakSession({
+  apiKey: "your-api-key",
+  elements: {
+    text: {component: TextInput, description: "For text input"},
+    radio: {component: RadioGroup, description: "For single choice"}
+  }
 });
 ```
 
+### 5. Handle Conversations
+
+```typescript
+// Start conversation
+const result = await bleak.startBleakConversation("Help me plan a trip");
+
+if (result.needsInput) {
+  // Convert AI questions to your components
+  const components = bleak.getBleakComponents(
+    result.questions,
+    answers,
+    handleAnswerChange
+  );
+
+  // Render them
+  components.forEach(({Component, props}) => render(<Component {...props} />));
+
+  // Submit when ready
+  const finalAnswer = await bleak.finishBleakConversation(answers);
+}
+```
+
+**That's it!** You now have intelligent forms that adapt to user input.
+
+## Core Philosophy: Bring Your Own Components
+
+BleakAI provides the **intelligence** (what questions to ask), you provide the **presentation** (how they look).
+
+- ✅ Use any UI library: Material-UI, Ant Design, Chakra UI, custom CSS
+- ✅ Keep your existing design system
+- ✅ Full control over styling and behavior
+- ✅ Framework agnostic: React, Vue, Angular, vanilla JS
+
 ## Next Steps
 
-- **Dynamic Forms**: Learn how to create and use dynamic forms
-- **API Reference**: Complete method documentation
+- **[API Reference](api-reference)** - Complete method documentation
+- **[Complete Example](dynamic-forms)** - Full working application
+- **[Component Guide](dynamic-forms-components)** - Build custom components
+
+## Design Philosophy
+
+BleakAI is built on these principles:
+
+1. **Separation of Concerns**: AI handles logic, you handle presentation
+2. **Progressive Enhancement**: Works with simple prompts, gets smarter with more data
+3. **Framework Agnostic**: Not tied to any specific UI framework
+4. **Type Safe**: Full TypeScript support throughout
+5. **Minimal Lock-in**: Can be removed without major refactoring
+
+## Current Status
+
+- **Version**: 0.0.4 (Early Alpha)
+- **Stability**: API may change between versions
+- **Production Ready**: Not yet, use for prototyping

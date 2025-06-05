@@ -1,32 +1,169 @@
-# Initialize Chat Client
+# Getting Started
 
-Create a chat client to communicate with the BleakAI backend.
+Step-by-step guide to set up BleakAI in your application.
 
-## Creating the Client
+## Prerequisites
 
-The client handles all communication with BleakAI's conversational AI backend.
+- Node.js 16+
+- React 16.8+ (for React examples)
+- Your BleakAI API key ([get one here](https://platform.bleak.ai))
+
+## Installation
+
+```bash
+npm install bleakai
+```
+
+Or with yarn:
+
+```bash
+yarn add bleakai
+```
+
+## Basic Setup
+
+### 1. Create Your First Session
 
 ```typescript
-import {createSimpleChatClient} from "bleakai";
+import {BleakSession} from "bleakai";
 
-const client = createSimpleChatClient({
-  baseUrl: "http://localhost:8000",
-  apiKey: "your-bleakai-api-key",
-  openaiKey: "your-openai-api-key"
+const bleak = new BleakSession({
+  apiKey: "your-api-key"
+});
+
+// Test it works
+const result = await bleak.startBleakConversation("What's 2+2?");
+console.log(result.answer); // "2+2 equals 4"
+```
+
+### 2. Environment Variables (Recommended)
+
+Store your API key securely:
+
+```bash
+# .env file
+REACT_APP_BLEAK_API_KEY=your_api_key_here
+REACT_APP_BLEAK_BASE_URL=https://api.bleak.ai  # optional
+```
+
+```typescript
+const bleak = new BleakSession({
+  apiKey: process.env.REACT_APP_BLEAK_API_KEY!,
+  baseUrl: process.env.REACT_APP_BLEAK_BASE_URL
 });
 ```
 
 ## Configuration Options
 
-Customize client behavior with these options:
+```typescript
+const bleak = new BleakSession({
+  apiKey: "required", // Your API key
+  baseUrl: "https://api.bleak.ai", // API endpoint (optional)
+  timeout: 30000, // Request timeout (optional)
+  elements: elementsConfig // Your components (optional)
+});
+```
+
+## React Performance Optimization
+
+Wrap session creation in `useMemo` to prevent recreating on every render:
 
 ```typescript
-interface ClientConfig {
-  baseUrl: string; // BleakAI backend URL
-  apiKey: string; // Your BleakAI API key
-  openaiKey: string; // Your OpenAI API key
-  timeout?: number; // Request timeout (default: 30000ms)
+import {useMemo} from "react";
+
+function App() {
+  const bleak = useMemo(
+    () =>
+      new BleakSession({
+        apiKey: process.env.REACT_APP_BLEAK_API_KEY!
+      }),
+    []
+  );
+
+  // ... rest of your app
 }
 ```
 
-The client is now ready to handle conversations and generate dynamic questions based on user input.
+## Verification Test
+
+Create this simple test to verify everything works:
+
+```typescript
+// test-bleak.js
+import {BleakSession} from "bleakai";
+
+async function test() {
+  const bleak = new BleakSession({
+    apiKey: process.env.REACT_APP_BLEAK_API_KEY
+  });
+
+  try {
+    const result = await bleak.startBleakConversation("Hello");
+    console.log("✅ BleakAI working:", result.answer || "Got questions");
+  } catch (error) {
+    console.error("❌ BleakAI error:", error.message);
+  }
+}
+
+test();
+```
+
+Run it:
+
+```bash
+node test-bleak.js
+```
+
+## Common Issues
+
+### API Key Not Working
+
+- Verify key is correct in dashboard
+- Check environment variable is loaded
+- Ensure no extra spaces/quotes
+
+### Network Errors
+
+- Check firewall/proxy settings
+- Try different `baseUrl` if using local development
+- Verify internet connection
+
+### TypeScript Errors
+
+```typescript
+// Add to your tsconfig.json
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "esModuleInterop": true
+  }
+}
+```
+
+## Next Steps
+
+Now that BleakAI is working:
+
+1. **[Build Components](dynamic-forms-components)** - Create UI components for forms
+2. **[Complete Example](dynamic-forms)** - See full working application
+3. **[API Reference](api-reference)** - Explore all available methods
+
+## Development vs Production
+
+### Development
+
+```typescript
+const bleak = new BleakSession({
+  apiKey: "your-dev-key",
+  baseUrl: "http://localhost:8008/bleak" // Local backend
+});
+```
+
+### Production
+
+```typescript
+const bleak = new BleakSession({
+  apiKey: process.env.REACT_APP_BLEAK_API_KEY,
+  baseUrl: "https://api.bleak.ai" // Production endpoint
+});
+```

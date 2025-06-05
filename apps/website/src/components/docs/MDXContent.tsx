@@ -3,10 +3,41 @@ import {CodeBlock} from "../ui/code-block";
 
 interface MDXContentProps {
   content: string;
+  onInternalNavigation?: (sectionId: string) => void;
 }
 
-export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
-  // Enhanced markdown parser with Astro-like styling
+export const MDXContent: React.FC<MDXContentProps> = ({
+  content,
+  onInternalNavigation
+}) => {
+  // Handle internal navigation
+  const handleLinkClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string
+  ) => {
+    // Check if it's an internal documentation link
+    const internalLinks = [
+      "api-reference",
+      "getting-started",
+      "dynamic-forms",
+      "dynamic-forms-initialize",
+      "dynamic-forms-components",
+      "dynamic-forms-questions"
+    ];
+
+    if (internalLinks.includes(href) && onInternalNavigation) {
+      e.preventDefault();
+      onInternalNavigation(href);
+      return;
+    }
+
+    // External links open in new tab
+    if (href.startsWith("http")) {
+      return; // Let default behavior handle it
+    }
+  };
+
+  // Enhanced markdown parser with Silent Edge styling
   const parseContent = (text: string) => {
     const lines = text.split("\n");
     const elements: React.ReactElement[] = [];
@@ -15,12 +46,12 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
     while (i < lines.length) {
       const line = lines[i];
 
-      // Headers - Astro-like styling
+      // Headers - Silent Edge styling
       if (line.startsWith("# ")) {
         elements.push(
           <h1
             key={i}
-            className="text-4xl font-bold mb-8 mt-12 first:mt-0 text-white tracking-tight"
+            className="text-4xl font-semibold mb-8 mt-12 first:mt-0 text-foreground tracking-tight"
           >
             {line.substring(2)}
           </h1>
@@ -30,7 +61,7 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
         elements.push(
           <h2
             key={i}
-            className="text-2xl font-semibold mb-6 mt-10 text-white tracking-tight border-b border-zinc-800 pb-3"
+            className="text-2xl font-semibold mb-6 mt-10 text-foreground tracking-tight border-b border-border pb-3"
           >
             {line.substring(3)}
           </h2>
@@ -38,13 +69,13 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
         i++;
       } else if (line.startsWith("### ")) {
         elements.push(
-          <h3 key={i} className="text-xl font-medium mb-4 mt-8 text-white">
+          <h3 key={i} className="text-xl font-medium mb-4 mt-8 text-foreground">
             {line.substring(4)}
           </h3>
         );
         i++;
       }
-      // Code blocks with title support
+      // Code blocks
       else if (line.startsWith("```")) {
         const language = line.substring(3);
         i++;
@@ -76,19 +107,34 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
       }
       // Paragraphs and text
       else if (line.trim() !== "") {
-        // Handle bold text and inline code with better styling
+        // Handle bold text and inline code with Silent Edge styling
         const processedLine = line
           .replace(
             /\*\*(.*?)\*\*/g,
-            "<strong class='font-semibold text-white'>$1</strong>"
+            "<strong class='font-semibold text-foreground'>$1</strong>"
           )
-          .replace(
-            /\[([^\]]+)\]\(([^)]+)\)/g,
-            '<a href="$2" class="text-orange-400 hover:text-orange-300 underline" target="_blank" rel="noopener noreferrer">$1</a>'
-          )
+          .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, href) => {
+            const isInternal = [
+              "api-reference",
+              "getting-started",
+              "dynamic-forms",
+              "dynamic-forms-initialize",
+              "dynamic-forms-components",
+              "dynamic-forms-questions"
+            ].includes(href);
+            const isExternal = href.startsWith("http");
+
+            if (isInternal) {
+              return `<a href="#" data-internal-link="${href}" class="text-primary hover:text-primary/90 underline font-medium transition-colors">${text}</a>`;
+            } else if (isExternal) {
+              return `<a href="${href}" class="text-primary hover:text-primary/90 underline font-medium transition-colors" target="_blank" rel="noopener noreferrer">${text}</a>`;
+            } else {
+              return `<a href="${href}" class="text-primary hover:text-primary/90 underline font-medium transition-colors">${text}</a>`;
+            }
+          })
           .replace(
             /`(.*?)`/g,
-            '<code class="px-2 py-1 bg-zinc-800 text-orange-300 rounded-md font-mono text-sm border border-zinc-700">$1</code>'
+            '<code class="px-2 py-1 bg-muted text-foreground rounded font-mono text-sm border border-border">$1</code>'
           );
 
         // Check if it's a list item
@@ -104,9 +150,9 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
               {listItems.map((item, idx) => (
                 <li
                   key={idx}
-                  className="text-zinc-300 ml-6 relative leading-relaxed"
+                  className="text-muted-foreground ml-6 relative leading-relaxed"
                 >
-                  <span className="absolute -left-6 text-orange-400 font-medium">
+                  <span className="absolute -left-6 text-primary font-medium">
                     •
                   </span>
                   <span
@@ -114,15 +160,33 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
                       __html: item
                         .replace(
                           /\*\*(.*?)\*\*/g,
-                          "<strong class='font-semibold text-white'>$1</strong>"
+                          "<strong class='font-semibold text-foreground'>$1</strong>"
                         )
                         .replace(
                           /\[([^\]]+)\]\(([^)]+)\)/g,
-                          '<a href="$2" class="text-orange-400 hover:text-orange-300 underline" target="_blank" rel="noopener noreferrer">$1</a>'
+                          (match, text, href) => {
+                            const isInternal = [
+                              "api-reference",
+                              "getting-started",
+                              "dynamic-forms",
+                              "dynamic-forms-initialize",
+                              "dynamic-forms-components",
+                              "dynamic-forms-questions"
+                            ].includes(href);
+                            const isExternal = href.startsWith("http");
+
+                            if (isInternal) {
+                              return `<a href="#" data-internal-link="${href}" class="text-primary hover:text-primary/90 underline font-medium transition-colors">${text}</a>`;
+                            } else if (isExternal) {
+                              return `<a href="${href}" class="text-primary hover:text-primary/90 underline font-medium transition-colors" target="_blank" rel="noopener noreferrer">${text}</a>`;
+                            } else {
+                              return `<a href="${href}" class="text-primary hover:text-primary/90 underline font-medium transition-colors">${text}</a>`;
+                            }
+                          }
                         )
                         .replace(
                           /`(.*?)`/g,
-                          '<code class="px-2 py-1 bg-zinc-800 text-orange-300 rounded-md font-mono text-sm border border-zinc-700">$1</code>'
+                          '<code class="px-2 py-1 bg-muted text-foreground rounded font-mono text-sm border border-border">$1</code>'
                         )
                     }}
                   />
@@ -133,15 +197,25 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
           continue;
         }
 
+        // Check for emojis and special formatting
+        if (line.startsWith("✅") || line.startsWith("❌")) {
+          elements.push(
+            <div
+              key={i}
+              className="mb-4 p-4 bg-muted/50 border border-border rounded-lg"
+              dangerouslySetInnerHTML={{__html: processedLine}}
+            />
+          );
+        }
         // Parameters, Returns sections
-        if (
+        else if (
           line.startsWith("**Parameters:**") ||
           line.startsWith("**Returns:**")
         ) {
           elements.push(
             <div
               key={i}
-              className="mb-4 mt-6"
+              className="mb-4 mt-6 font-medium text-foreground"
               dangerouslySetInnerHTML={{__html: processedLine}}
             />
           );
@@ -149,7 +223,7 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
           elements.push(
             <p
               key={i}
-              className="mb-4 text-zinc-300 leading-relaxed text-base"
+              className="mb-4 text-muted-foreground leading-relaxed"
               dangerouslySetInnerHTML={{__html: processedLine}}
             />
           );
@@ -163,8 +237,25 @@ export const MDXContent: React.FC<MDXContentProps> = ({content}) => {
     return elements;
   };
 
+  // Handle clicks on internal links
+  React.useEffect(() => {
+    const handleClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "A" && target.hasAttribute("data-internal-link")) {
+        e.preventDefault();
+        const sectionId = target.getAttribute("data-internal-link");
+        if (sectionId && onInternalNavigation) {
+          onInternalNavigation(sectionId);
+        }
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [onInternalNavigation]);
+
   return (
-    <div className="prose prose-invert prose-zinc max-w-none">
+    <div className="prose prose-invert max-w-none">
       <div className="space-y-1">{parseContent(content)}</div>
     </div>
   );
