@@ -1,11 +1,11 @@
 // Documentation content loader - imports all MDX files and provides instant access
 // Import MDX files as raw text at build time
-import gettingStartedContent from "../../../public/docs/getting-started.mdx?raw";
-import dynamicFormsInitializeContent from "../../../public/docs/dynamic-forms-initialize.mdx?raw";
-import dynamicFormsComponentsContent from "../../../public/docs/dynamic-forms-components.mdx?raw";
-import dynamicFormsContent from "../../../public/docs/dynamic-forms.mdx?raw";
-import apiReferenceContent from "../../../public/docs/api-reference.mdx?raw";
-import dynamicFormsQuestionsContent from "../../../public/docs/dynamic-forms-questions.mdx?raw";
+import gettingStartedContent from "./files/getting-started.mdx?raw";
+import dynamicFormsInitializeContent from "./files/dynamic-forms-initialize.mdx?raw";
+import dynamicFormsComponentsContent from "./files/dynamic-forms-components.mdx?raw";
+import dynamicFormsContent from "./files/dynamic-forms.mdx?raw";
+import apiReferenceContent from "./files/api-reference.mdx?raw";
+import dynamicFormsQuestionsContent from "./files/dynamic-forms-questions.mdx?raw";
 
 // Pre-loaded content - available immediately since it's bundled at build time
 const docContent: Record<string, string> = {
