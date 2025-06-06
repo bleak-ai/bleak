@@ -255,9 +255,15 @@ const MultiSelect: React.FC<BleakChoiceProps> = ({value, onChange}) => {
 1. Check if elements config is provided:
 
 ```typescript
+// Define your components first
+const elementsConfig = {
+  text: {component: TextInput, description: "For text input"},
+  radio: {component: RadioGroup, description: "For single choice"}
+};
+
 const bleak = new BleakSession({
   apiKey: "your-key",
-  elements: elementsConfig // Must be provided for questions
+  elements: elementsConfig // Required for getBleakComponents()
 });
 ```
 
@@ -315,8 +321,9 @@ Error: Network timeout after 30000ms
 ```typescript
 const bleak = new BleakSession({
   apiKey: "your-key",
+  baseUrl: "https://api.bleak.ai", // Verify URL is correct
   timeout: 60000, // Increase to 60 seconds
-  baseUrl: "https://api.bleak.ai" // Verify URL is correct
+  elements: elementsConfig
 });
 ```
 
@@ -329,16 +336,24 @@ Access to XMLHttpRequest blocked by CORS policy
 **Solution**: This usually indicates wrong baseUrl or local development issues
 
 ```typescript
+// Define your elements config first
+const elementsConfig = {
+  text: {component: TextInput, description: "For text input"},
+  radio: {component: RadioGroup, description: "For single choice"}
+};
+
 // For development
 const bleak = new BleakSession({
   apiKey: "your-key",
-  baseUrl: "http://localhost:8008/bleak" // Local backend
+  baseUrl: "http://localhost:8008/bleak", // Local backend
+  elements: elementsConfig
 });
 
 // For production
 const bleak = new BleakSession({
   apiKey: "your-key",
-  baseUrl: "https://api.bleak.ai" // Production API
+  baseUrl: "https://api.bleak.ai", // Production API
+  elements: elementsConfig
 });
 ```
 
@@ -382,18 +397,26 @@ const TextInput = React.memo<BleakInputProps>(({text, value, onChange}) => {
 ### Environment configuration
 
 ```typescript
+// Define elements config
+const elementsConfig = {
+  text: {component: TextInput, description: "For text input"},
+  radio: {component: RadioGroup, description: "For single choice"}
+};
+
 // development.js
 const config = {
   apiKey: "dev-key",
   baseUrl: "http://localhost:8008/bleak",
-  timeout: 5000
+  timeout: 5000,
+  elements: elementsConfig
 };
 
 // production.js
 const config = {
   apiKey: process.env.REACT_APP_BLEAK_API_KEY,
   baseUrl: "https://api.bleak.ai",
-  timeout: 30000
+  timeout: 30000,
+  elements: elementsConfig
 };
 ```
 

@@ -22,7 +22,9 @@ yarn add bleakai
 
 ## Basic Setup
 
-### 1. Create Your First Session
+### 1. Quick Test (Text-Only Conversations)
+
+For simple text-only conversations without dynamic forms:
 
 ```typescript
 import {BleakSession} from "bleakai";
@@ -36,7 +38,55 @@ const result = await bleak.startBleakConversation("What's 2+2?");
 console.log(result.answer); // "2+2 equals 4"
 ```
 
-### 2. Environment Variables (Recommended)
+### 2. Full Setup (With Dynamic Forms)
+
+For applications that need dynamic forms with your UI components:
+
+```typescript
+import {
+  BleakSession,
+  type BleakInputProps,
+  type BleakChoiceProps
+} from "bleakai";
+
+// Define your components first
+const TextInput = ({text, value, onChange}: BleakInputProps) => (
+  <div>
+    <label>{text}</label>
+    <input value={value || ""} onChange={(e) => onChange(e.target.value)} />
+  </div>
+);
+
+const RadioGroup = ({text, options, value, onChange}: BleakChoiceProps) => (
+  <div>
+    <label>{text}</label>
+    {options?.map((option) => (
+      <label key={option}>
+        <input
+          type="radio"
+          checked={value === option}
+          onChange={() => onChange(option)}
+        />
+        {option}
+      </label>
+    ))}
+  </div>
+);
+
+// Configure elements
+const elementConfig = {
+  text: {component: TextInput, description: "For text input"},
+  radio: {component: RadioGroup, description: "For single choice"}
+};
+
+// Initialize with elements
+const bleak = new BleakSession({
+  apiKey: "your-api-key",
+  elements: elementConfig
+});
+```
+
+### 3. Environment Variables (Recommended)
 
 Store your API key securely:
 
@@ -49,7 +99,8 @@ REACT_APP_BLEAK_BASE_URL=https://api.bleak.ai  # optional
 ```typescript
 const bleak = new BleakSession({
   apiKey: process.env.REACT_APP_BLEAK_API_KEY!,
-  baseUrl: process.env.REACT_APP_BLEAK_BASE_URL
+  baseUrl: process.env.REACT_APP_BLEAK_BASE_URL,
+  elements: elementConfig // Include if using dynamic forms
 });
 ```
 
@@ -60,7 +111,7 @@ const bleak = new BleakSession({
   apiKey: "required", // Your API key
   baseUrl: "https://api.bleak.ai", // API endpoint (optional)
   timeout: 30000, // Request timeout (optional)
-  elements: elementsConfig // Your components (optional)
+  elements: elementsConfig // Your components (required for getBleakComponents)
 });
 ```
 
@@ -75,7 +126,8 @@ function App() {
   const bleak = useMemo(
     () =>
       new BleakSession({
-        apiKey: process.env.REACT_APP_BLEAK_API_KEY!
+        apiKey: process.env.REACT_APP_BLEAK_API_KEY!,
+        elements: elementConfig
       }),
     []
   );
@@ -93,6 +145,7 @@ Create this simple test to verify everything works:
 import {BleakSession} from "bleakai";
 
 async function test() {
+  // Test basic functionality (no elements needed for simple text responses)
   const bleak = new BleakSession({
     apiKey: process.env.REACT_APP_BLEAK_API_KEY
   });
@@ -128,6 +181,18 @@ node test-bleak.js
 - Try different `baseUrl` if using local development
 - Verify internet connection
 
+### Elements Configuration Error
+
+If you get an error about missing components when calling `getBleakComponents()`:
+
+```typescript
+// Make sure you include elements in your BleakSession
+const bleak = new BleakSession({
+  apiKey: "your-api-key",
+  elements: elementConfig // This is required for getBleakComponents()
+});
+```
+
 ### TypeScript Errors
 
 ```typescript
@@ -155,7 +220,8 @@ Now that BleakAI is working:
 ```typescript
 const bleak = new BleakSession({
   apiKey: "your-dev-key",
-  baseUrl: "http://localhost:8008/bleak" // Local backend
+  baseUrl: "http://localhost:8008/bleak", // Local backend
+  elements: elementConfig
 });
 ```
 
@@ -164,6 +230,7 @@ const bleak = new BleakSession({
 ```typescript
 const bleak = new BleakSession({
   apiKey: process.env.REACT_APP_BLEAK_API_KEY,
-  baseUrl: "https://api.bleak.ai" // Production endpoint
+  baseUrl: "https://api.bleak.ai", // Production endpoint
+  elements: elementConfig
 });
 ```

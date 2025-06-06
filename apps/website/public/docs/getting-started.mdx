@@ -35,24 +35,14 @@ npm install bleakai
 
 Sign up at [BleakAI Platform](https://platform.bleak.ai) and copy your API key.
 
-### 3. Hello World
+### 3. Define Your Components
 
 ```typescript
-import {BleakSession} from "bleakai";
-
-// Test basic functionality
-const bleak = new BleakSession({
-  apiKey: "your-api-key"
-});
-
-const result = await bleak.startBleakConversation("Help me choose a laptop");
-console.log(result.answer || "AI wants to ask questions");
-```
-
-### 4. Add Your Components
-
-```typescript
-import {type BleakInputProps, type BleakChoiceProps} from "bleakai";
+import {
+  BleakSession,
+  type BleakInputProps,
+  type BleakChoiceProps
+} from "bleakai";
 
 // Your existing components
 const TextInput = ({text, value, onChange}: BleakInputProps) => (
@@ -78,15 +68,24 @@ const RadioGroup = ({text, options, value, onChange}: BleakChoiceProps) => (
   </div>
 );
 
-// Configure BleakAI to use them
+// Configure element types
+const elementConfig = {
+  text: {component: TextInput, description: "For text input"},
+  radio: {component: RadioGroup, description: "For single choice"}
+};
+```
+
+### 4. Initialize BleakSession
+
+```typescript
+// Configure BleakAI with your components
 const bleak = new BleakSession({
   apiKey: "your-api-key",
-  elements: {
-    text: {component: TextInput, description: "For text input"},
-    radio: {component: RadioGroup, description: "For single choice"}
-  }
+  elements: elementConfig
 });
 ```
+
+**Note**: The `elements` configuration is required when you plan to use `getBleakComponents()` to render dynamic forms. For simple text-only conversations, you can omit it.
 
 ### 5. Handle Conversations
 
