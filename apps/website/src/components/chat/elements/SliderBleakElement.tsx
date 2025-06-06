@@ -1,14 +1,14 @@
 import {Label} from "../../ui/label";
 import {logSliderConfig, logUserAnswer} from "../../../utils/logger";
 import {useEffect, useRef} from "react";
-import type {BleakElementProps} from "bleakai";
+import type {BleakChoiceProps} from "bleakai";
 
 export const SliderBleakElement = ({
   text,
   options,
   value,
   onChange
-}: BleakElementProps) => {
+}: BleakChoiceProps) => {
   const hasLoggedConfig = useRef(false);
   const lastLoggedValue = useRef<string>("");
 

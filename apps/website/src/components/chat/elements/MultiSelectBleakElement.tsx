@@ -2,7 +2,7 @@ import {useState, useEffect, useRef} from "react";
 import {Label} from "../../ui/label";
 import {Input} from "../../ui/input";
 import {logMultiSelectState, logUserAnswer} from "../../../utils/logger";
-import type {BleakElementProps} from "bleakai";
+import type {BleakChoiceProps} from "bleakai";
 
 export const MultiSelectBleakElement = ({
   text,
@@ -10,7 +10,7 @@ export const MultiSelectBleakElement = ({
   value,
   onChange,
   elementIndex = 0
-}: BleakElementProps) => {
+}: BleakChoiceProps) => {
   const [otherValue, setOtherValue] = useState("");
   const lastLoggedValue = useRef<string>("");
 
@@ -81,7 +81,7 @@ export const MultiSelectBleakElement = ({
       <Label className="text-base font-medium text-foreground">{text}</Label>
 
       <div className="space-y-2">
-        {options.map((option, optIndex) => (
+        {options.map((option: string, optIndex: number) => (
           <div
             key={optIndex}
             className="flex items-center space-x-3 p-3 rounded-md hover:bg-muted/50 transition-colors"

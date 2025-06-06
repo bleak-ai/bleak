@@ -2,7 +2,7 @@ import {useState} from "react";
 import {Label} from "../../ui/label";
 import {RadioGroup, RadioGroupItem} from "../../ui/radio-group";
 import {Input} from "../../ui/input";
-import type {BleakElementProps} from "bleakai";
+import type {BleakChoiceProps} from "bleakai";
 
 export const RadioBleakElement = ({
   text,
@@ -10,7 +10,7 @@ export const RadioBleakElement = ({
   value,
   onChange,
   elementIndex
-}: BleakElementProps) => {
+}: BleakChoiceProps) => {
   const [otherValue, setOtherValue] = useState("");
   const isOtherSelected =
     value === "other" || (!options.includes(value) && value !== "");

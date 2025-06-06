@@ -1,5 +1,5 @@
 import {Button} from "../../ui/button";
-import type {AnsweredQuestion} from "../../../api/interactiveApi";
+import type {AnsweredQuestion} from "bleakai";
 import MarkdownPreview from "@uiw/react-markdown-preview";
 
 interface AnswerSectionProps {

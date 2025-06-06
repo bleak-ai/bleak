@@ -1,7 +1,4 @@
-import type {
-  InteractiveQuestion,
-  AnsweredQuestion
-} from "../api/interactiveApi";
+import type {InteractiveQuestion, AnsweredQuestion} from "bleakai";
 
 // Enhanced logging utility for frontend debugging
 class FrontendLogger {
