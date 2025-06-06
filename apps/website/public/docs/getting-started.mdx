@@ -4,47 +4,24 @@ Transform static forms into intelligent conversations that adapt to user input.
 
 ## What BleakAI Does
 
-**Problem**: Traditional forms ask all questions upfront, even when many are irrelevant.
+**Problem**: AI agents may ask a question when context is not clear.
 
 **Solution**: BleakAI analyzes user input and dynamically generates only the questions needed, using your existing UI components.
-
-```typescript
-// Instead of this static form:
-<form>
-  <input name="budget" placeholder="Budget" />
-  <input name="destination" placeholder="Where to?" />
-  <input name="duration" placeholder="How long?" />
-  <input name="travelers" placeholder="How many people?" />
-  {/* 20 more fields... */}
-</form>
-
-// You get this intelligent conversation:
-"Help me plan a vacation"
-↓
-AI asks: "What's your budget range?"
-User: "Under $2000"
-↓
-AI asks: "Beach or mountains?"
-User: "Beach"
-↓
-AI provides personalized recommendations
-```
 
 ## When to Use BleakAI
 
 ✅ **Good for:**
 
 - Complex forms with conditional logic
-- User onboarding flows
-- Configuration wizards
 - Recommendation engines
 - Support ticket creation
+- ...
 
 ❌ **Not for:**
 
 - Simple contact forms
 - Login/signup forms
-- Static data collection
+- Quick AI Answers
 
 ## 5-Minute Quickstart
 
