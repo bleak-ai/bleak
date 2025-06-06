@@ -1,13 +1,13 @@
 import "./App.css";
 import "./styles/animations.css";
 import {useState, useEffect} from "react";
-import {Landing, ChatPage} from "./components/pages";
+import {Landing, ChatPage, NotFoundPage} from "./components/pages";
 import {Header, Footer} from "./components/layout";
 // import {DynamicDemo} from "./components/chat/interactive";
 import {AuthWrapper} from "./components/auth/AuthWrapper";
 import {AuthPageWrapper} from "./components/auth/AuthPageWrapper";
 import DashboardPage from "./components/dashboard/UserDashboard";
-import DocsPage from "./components/docs/DocsPage";
+import DocsPage from "./components/pages/DocsPage";
 import {canHandleRoute} from "supertokens-auth-react/ui";
 import {PasswordlessPreBuiltUI} from "supertokens-auth-react/recipe/passwordless/prebuiltui";
 
@@ -50,8 +50,16 @@ function App() {
         return <DashboardPage />;
       case "docs":
         return <DocsPage />;
-      default:
+      case "demo":
+        // Redirect old demo route to docs
+        window.history.replaceState({}, "", "/docs");
+        return <DocsPage />;
+      case "":
+      case "home":
         return <Landing />;
+      default:
+        // 404 handler - show a not found page
+        return <NotFoundPage />;
     }
   };
 

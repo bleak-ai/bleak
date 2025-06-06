@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useMemo} from "react";
 import {Button} from "../ui/button";
-import {MDXContent} from "./MDXContent";
-import {getDocContent} from "./docContent";
+import {MDXContent} from "../docs/MDXContent";
+import {getDocContent} from "../docs/docContent";
 import {
   BookOpen,
   Code,
