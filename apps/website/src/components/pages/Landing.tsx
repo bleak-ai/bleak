@@ -2,10 +2,11 @@ import {Button} from "../ui/button";
 import {ArrowRight, Github} from "lucide-react";
 import {CodeBlock} from "../ui/code-block";
 import {BleakShowcase} from "../demo/BleakShowcase";
+import {DeviceMockupFlow} from "../flow";
 
 export default function Landing() {
   return (
-    <div className="bg-background text-foreground">
+    <div className="bg-background text-foreground mt-16">
       {/* Hero Section - Silent Edge: Confident, minimal, purposeful */}
       <section className="min-h-screen flex items-center justify-center">
         <div className="container-max text-center">
@@ -119,6 +120,28 @@ export default function Landing() {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works - Visual Flow Section */}
+      <section className="py-32 px-4 lg:px-16 bg-muted/20">
+        <div className="container-max space-y-16">
+          <div className="text-center space-y-6">
+            <h2 className="font-light tracking-tight text-foreground">
+              What is Bleak AI?
+            </h2>
+            <p className="text-xl text-muted-foreground leading-relaxed text-max">
+              It helps you convert a normal AI helper into a smart form
+              generator.
+            </p>
+          </div>
+
+          {/* Flow Type Selector */}
+          <div className="flex justify-center">
+            <div className="inline-flex rounded-lg border border-border bg-card p-1">
+              <DeviceMockupFlow />
             </div>
           </div>
         </div>

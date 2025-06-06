@@ -59,7 +59,7 @@ function App() {
     <AuthWrapper>
       <div className="min-h-screen">
         <Header />
-        <main className="min-h-screen">{renderPage()}</main>
+        <main className="min-h-screen px-2 md:px-4">{renderPage()}</main>
         <Footer />
       </div>
     </AuthWrapper>

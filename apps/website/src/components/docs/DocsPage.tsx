@@ -9,8 +9,6 @@ import {
   FileText,
   Menu,
   X,
-  ChevronRight,
-  ChevronDown,
   HelpCircle
 } from "lucide-react";
 
@@ -144,7 +142,7 @@ const DocsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-left">
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
@@ -216,7 +214,7 @@ const DocsPage: React.FC = () => {
           </header>
 
           {/* Content */}
-          <div className="px-8 py-12 max-w-4xl mx-auto">
+          <div className="md:px-8 py-12 max-w-4xl mx-auto">
             {currentSection?.content ? (
               <div className="prose prose-invert max-w-none">
                 <MDXContent
