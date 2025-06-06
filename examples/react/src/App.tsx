@@ -362,8 +362,8 @@ function App() {
    * 3. Update UI state accordingly
    *
    * RESPONSE TYPES:
-   * - needsInput: true = questions generated, show form
-   * - needsInput: false = direct answer available
+   * - questions present: questions generated, show form
+   * - answer present: direct answer available
    */
   const handleStartConversation = async () => {
     if (!prompt.trim()) return;
@@ -376,7 +376,7 @@ function App() {
       // The magic starts here! Send prompt to BleakAI
       const result = await bleak.startBleakConversation(prompt);
 
-      if (result.needsInput && result.questions) {
+      if (result.questions && result.questions.length > 0) {
         // AI needs more information - show questions
         setQuestions(result.questions);
       } else if (result.answer) {

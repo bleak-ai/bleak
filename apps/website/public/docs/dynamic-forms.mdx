@@ -14,7 +14,7 @@ Learn how conversations work and see a complete example.
 ```typescript
 const result = await bleak.startBleakConversation("Help me plan a trip");
 
-if (result.needsInput) {
+if (result.questions && result.questions.length > 0) {
   // AI needs more info - show questions
   showQuestions(result.questions);
 } else {
@@ -185,7 +185,7 @@ function App() {
     try {
       const result = await bleak.startBleakConversation(prompt);
 
-      if (result.needsInput && result.questions) {
+      if (result.questions && result.questions.length > 0) {
         setQuestions(result.questions);
       } else if (result.answer) {
         setFinalAnswer(result.answer);
@@ -553,7 +553,7 @@ export function TripPlanner() {
     try {
       const result = await bleak.startBleakConversation(prompt);
 
-      if (result.needsInput && result.questions) {
+      if (result.questions && result.questions.length > 0) {
         setQuestions(result.questions);
       } else if (result.answer) {
         setFinalAnswer(result.answer);

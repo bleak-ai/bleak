@@ -42,7 +42,7 @@ export const Chat = ({
     try {
       const result = await bleak.startBleakConversation(prompt);
 
-      if (result.needsInput && result.questions) {
+      if (result.questions && result.questions.length > 0) {
         setQuestions(result.questions);
       } else if (result.answer) {
         setFinalAnswer(result.answer);

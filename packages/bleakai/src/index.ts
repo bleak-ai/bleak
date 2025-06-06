@@ -56,7 +56,7 @@ export {ChatError, RateLimitError, AuthenticationError} from "./chat/Bleak";
  * // Start a conversation (single call, no double await!)
  * const result = await bleak.startBleakConversation("Help me plan a trip");
  *
- * if (result.needsInput && result.questions) {
+ * if (result.questions && result.questions.length > 0) {
  *   // Convert questions to your components
  *   const components = bleak.getBleakComponents(result.questions, answers, onChange);
  *

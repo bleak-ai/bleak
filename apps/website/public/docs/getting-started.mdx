@@ -93,7 +93,7 @@ const bleak = new BleakSession({
 // Start conversation
 const result = await bleak.startBleakConversation("Help me plan a trip");
 
-if (result.needsInput) {
+if (result.questions && result.questions.length > 0) {
   // Convert AI questions to your components
   const components = bleak.getBleakComponents(
     result.questions,

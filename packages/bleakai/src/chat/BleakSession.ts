@@ -105,7 +105,6 @@ export class BleakSession {
    * Returns questions immediately if the AI needs input, or a direct answer
    */
   async startBleakConversation(prompt: string): Promise<{
-    needsInput: boolean;
     questions?: InteractiveQuestion[];
     answer?: string;
     getState: () => SessionState;
@@ -125,17 +124,13 @@ export class BleakSession {
       const response = await this.makeInitialRequest(prompt, {bleakElements});
       this.updateStateFromResponse(response);
 
-      const needsInput = Boolean(
-        !response.is_complete &&
-          response.type === "questions" &&
-          response.questions &&
-          response.questions.length > 0
+      const hasQuestions = Boolean(
+        response.questions && response.questions.length > 0
       );
 
       return {
-        needsInput,
-        questions: needsInput ? this.state.questions : undefined,
-        answer: !needsInput ? response.content : undefined,
+        questions: hasQuestions ? this.state.questions : undefined,
+        answer: !hasQuestions ? response.content : undefined,
         getState: () => ({...this.state})
       };
     } catch (error) {
@@ -232,7 +227,7 @@ export class BleakSession {
   async quickBleakAsk(prompt: string): Promise<string> {
     const result = await this.startBleakConversation(prompt);
 
-    if (result.needsInput) {
+    if (result.questions && result.questions.length > 0) {
       // For quick ask, we'll try to complete without questions
       return this.finishBleakConversation({});
     } else {

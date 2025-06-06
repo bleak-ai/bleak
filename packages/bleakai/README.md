@@ -44,7 +44,7 @@ const result = await bleak.startBleakConversation(
   "Help me plan a trip to Japan"
 );
 
-if (result.needsInput && result.questions) {
+if (result.questions && result.questions.length > 0) {
   // AI wants form input - questions are immediately available
 
   // 4. Convert questions to your components
@@ -166,7 +166,7 @@ function App() {
     // Single call - clean and simple!
     const result = await bleak.startBleakConversation(prompt);
 
-    if (result.needsInput && result.questions) {
+    if (result.questions && result.questions.length > 0) {
       // Questions are immediately available
       const components = bleak.getBleakComponents(
         result.questions,
@@ -220,7 +220,7 @@ Start a new conversation. Returns questions immediately if needed, or a direct a
 ```typescript
 const result = await bleak.startBleakConversation("Help me plan an event");
 
-if (result.needsInput && result.questions) {
+if (result.questions && result.questions.length > 0) {
   // AI needs form input - questions are immediately available
   const components = bleak.getBleakComponents(
     result.questions,

@@ -35,7 +35,6 @@ const result = await bleak.startBleakConversation("Help me plan a trip");
 
 // Returns:
 {
-  needsInput: boolean;        // true if AI needs more info
   questions?: InteractiveQuestion[]; // Questions to ask user
   answer?: string;            // Direct answer if available
   getState: () => SessionState;

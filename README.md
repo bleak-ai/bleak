@@ -41,7 +41,7 @@ const bleak = new BleakSession({
 // 3. Start AI-powered conversations
 const result = await bleak.startBleakConversation("Help me plan a vacation");
 
-if (result.needsInput && result.questions) {
+if (result.questions && result.questions.length > 0) {
   // AI generated smart form questions - render them!
   const components = bleak.getBleakComponents(
     result.questions,
