@@ -48,7 +48,7 @@
   --radius: 0.5rem;
 
   /* Deep blacks with high contrast whites - Silent Edge Core Palette */
-  --background: oklch(0.1 0 0); /* Deep black background */
+  --background: oklch(0.18 0 0); /* Deep black background */
   --foreground: oklch(0.98 0 0); /* Pure white text */
 
   /* Cards and surfaces */

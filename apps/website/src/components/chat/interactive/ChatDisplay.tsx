@@ -1,5 +1,6 @@
 import React from "react";
 import type {InteractiveQuestion} from "bleakai";
+import MarkdownPreview from "@uiw/react-markdown-preview";
 
 interface ChatDisplayProps {
   questions: InteractiveQuestion[];
@@ -95,11 +96,10 @@ const Answer = ({answer, onReset}: {answer: string; onReset: () => void}) => (
       <h2 className="text-2xl font-light text-foreground mb-6">Answer</h2>
       <div className="bg-card border border-border rounded-lg p-6">
         <div className="prose prose-neutral max-w-none text-foreground">
-          {answer.split("\n").map((line, index) => (
-            <p key={index} className="mb-4 last:mb-0">
-              {line}
-            </p>
-          ))}
+          <MarkdownPreview
+            source={answer}
+            style={{padding: 8, background: "transparent"}}
+          />
         </div>
       </div>
     </div>

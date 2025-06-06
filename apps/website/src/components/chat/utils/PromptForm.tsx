@@ -14,7 +14,6 @@ export const PromptForm = ({
   prefilledPrompt = ""
 }: PromptFormProps) => {
   const [prompt, setPrompt] = useState(prefilledPrompt || "");
-  console.log("prefilledPrompt", prefilledPrompt);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
