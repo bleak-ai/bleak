@@ -12,7 +12,7 @@ export interface BleakUISessionConfig extends BleakCoreSessionConfig {
 
 /**
  * BleakUISession extends BleakCoreSession with UI component resolution
- * This class provides the getBleakComponents method for UI frameworks
+ * This class provides the resolveComponents method for UI frameworks
  */
 export class BleakUISession extends BleakCoreSession {
   private elementConfig?: BleakElementConfig;
@@ -30,18 +30,21 @@ export class BleakUISession extends BleakCoreSession {
   }
 
   /**
-   * Convert Bleak questions into renderable components with proper props
-   * This makes it easy to integrate with any UI framework
+   * Resolve questions to components with static configuration
+   * Returns components and their static props, leaving state management to the consumer
+   *
+   * @param questions - The questions to resolve
+   * @returns Array of component configurations with static props
    */
-  getBleakComponents(
-    questions: InteractiveQuestion[],
-    answers: Record<string, string> = {},
-    onAnswerChange?: (question: string, value: string) => void
-  ): Array<{
-    question: InteractiveQuestion;
+  resolveComponents(questions: InteractiveQuestion[]): Array<{
     Component: any;
-    props: any;
-    key: string;
+    staticProps: {
+      text: string;
+      options?: string[] | null;
+      uniqueId: string;
+      elementIndex: number;
+    };
+    question: InteractiveQuestion;
   }> {
     if (!this.resolver) {
       throw new Error(
@@ -56,18 +59,25 @@ export class BleakUISession extends BleakCoreSession {
           text: question.question,
           options: question.options || null
         },
-        answers[question.question] || "",
-        onAnswerChange
-          ? (value: string) => onAnswerChange(question.question, value)
-          : () => {},
+        "", // Empty value - state management is handled by consumer
+        () => {}, // Empty onChange - state management is handled by consumer
         index
       );
+
       const Component = this.elementConfig![resolution.componentKey].component;
+
+      // Extract only static props (no value or onChange)
+      const staticProps = {
+        text: resolution.props.text,
+        options: resolution.props.options,
+        uniqueId: resolution.props.uniqueId,
+        elementIndex: resolution.props.elementIndex
+      };
+
       return {
-        question,
         Component,
-        props: resolution.props,
-        key: `bleak-question-${index}-${question.question.replace(/\s+/g, "-")}`
+        staticProps,
+        question
       };
     });
   }

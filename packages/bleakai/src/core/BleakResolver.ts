@@ -5,12 +5,6 @@ import type {
   ResolverOptions,
   BleakElementConfig
 } from "../types/core";
-import type {
-  ComponentMapping,
-  FormQuestion,
-  ResolvedComponent,
-  ComponentProps
-} from "../types/components";
 
 // Internal counter for generating unique IDs
 let globalElementCounter = 0;
@@ -94,7 +88,7 @@ export class BleakResolver {
 
 /**
  * Create a resolver from a BleakElementConfig object
- * This is the smooth integration function that works with the user's config
+ * This is the main function used by BleakUISession for component resolution
  */
 export function createResolverFromConfig<T extends BleakElementConfig>(
   config: T,
@@ -140,128 +134,5 @@ export function createResolverFromConfig<T extends BleakElementConfig>(
     resolver,
     components: componentMap,
     resolve
-  };
-}
-
-// Keep existing simple functions for backwards compatibility
-export function createResolver(
-  components: ComponentRegistry,
-  options: ResolverOptions = {}
-) {
-  return new BleakResolver(components, options);
-}
-
-export function resolveElement(
-  element: BleakElement,
-  value: string,
-  onChange: (value: string) => void,
-  componentMap: ComponentRegistry,
-  elementIndex?: number
-): ComponentResolution {
-  const resolver = new BleakResolver(componentMap);
-  return resolver.resolve(element, value, onChange, elementIndex);
-}
-
-export function resolveElements(
-  elements: BleakElement[],
-  values: Record<string, string>,
-  onChange: (elementText: string, value: string) => void,
-  componentMap: ComponentRegistry
-): ComponentResolution[] {
-  const resolver = new BleakResolver(componentMap);
-
-  return elements.map((element, index) =>
-    resolver.resolve(
-      element,
-      values[element.text] || "",
-      (value) => onChange(element.text, value),
-      index
-    )
-  );
-}
-
-/**
- * Create a simple, intuitive component resolver from your component mapping
- * This is the new, preferred way to resolve components
- *
- * @example
- * ```typescript
- * const resolver = createComponentResolver({
- *   text: { component: MyTextInput, description: "For text input" },
- *   radio: { component: MyRadioGroup, description: "For single choice" }
- * });
- *
- * const resolved = resolver.resolve(question, value, onChange);
- * // resolved.Component is your actual component
- * // resolved.props contains the props to pass
- * ```
- */
-export function createComponentResolver<TComponent = any>(
-  componentMapping: ComponentMapping<TComponent>
-): {
-  /** Resolve a single question to a component */
-  resolve(
-    question: FormQuestion,
-    value: string,
-    onChange: (value: string) => void
-  ): ResolvedComponent<TComponent>;
-  /** Resolve multiple questions to components */
-  resolveAll(
-    questions: FormQuestion[],
-    answers: Record<string, string>
-  ): ResolvedComponent<TComponent>[];
-  /** Get the component for a specific type */
-  getComponent(type: string): TComponent | undefined;
-} {
-  return {
-    resolve(
-      question: FormQuestion,
-      value: string,
-      onChange: (value: string) => void
-    ): ResolvedComponent<TComponent> {
-      const config = componentMapping[question.type];
-
-      if (!config) {
-        throw new Error(
-          `No component configured for type: ${
-            question.type
-          }. Available types: ${Object.keys(componentMapping).join(", ")}`
-        );
-      }
-
-      const props: ComponentProps = {
-        question: question.question,
-        value,
-        onChange,
-        options: question.options,
-        id: `bleak-${question.type}-${Date.now()}-${Math.random()
-          .toString(36)
-          .substr(2, 9)}`
-      };
-
-      return {
-        Component: config.component,
-        props,
-        question
-      };
-    },
-
-    resolveAll(
-      questions: FormQuestion[],
-      answers: Record<string, string>
-    ): ResolvedComponent<TComponent>[] {
-      return questions.map((question) => {
-        const value = answers[question.question] || "";
-        const onChange = (newValue: string) => {
-          answers[question.question] = newValue;
-        };
-
-        return this.resolve(question, value, onChange);
-      });
-    },
-
-    getComponent(type: string): TComponent | undefined {
-      return componentMapping[type]?.component;
-    }
   };
 }

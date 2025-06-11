@@ -176,17 +176,25 @@ const QuestionsSection = ({
     answers[q.question]?.trim()
   );
 
+  // Resolve components with static configuration only
+  const componentConfigs = bleak.resolveComponents(questions);
+
   return (
     <div className="questions-section">
       <h2>Help me understand better</h2>
       <p>Please answer these questions so I can provide the best assistance:</p>
 
       <div className="questions-list">
-        {bleak
-          .getBleakComponents(questions, answers, onAnswerChange)
-          .map(({Component, props, key}) => (
-            <Component key={key} {...props} />
-          ))}
+        {componentConfigs.map(({Component, staticProps, question}) => (
+          <Component
+            key={question.question} // Use question text as key
+            {...staticProps} // Static props: text, options, uniqueId, elementIndex
+            value={answers[question.question] || ""} // Dynamic: current value
+            onChange={(value: string) =>
+              onAnswerChange(question.question, value)
+            } // Dynamic: change handler
+          />
+        ))}
       </div>
 
       <div className="action-buttons">
