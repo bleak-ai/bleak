@@ -1,96 +1,32 @@
 import React, {useState, useMemo} from "react";
 import {
-  BleakSession,
+  BleakUISession,
   type InteractiveQuestion,
   type BleakInputProps,
   type BleakChoiceProps
 } from "bleakai";
 
-/**
- * =============================================================================
- * SHARED ELEMENT CONFIGURATION
- * =============================================================================
- *
- * This configuration can be shared between different session instances.
- * The key insight: separate the descriptions from the components for reusability.
- */
-
-// Define the element descriptions separately for reuse
+// Shared element descriptions for reusability
 export const ELEMENT_DESCRIPTIONS = {
   text: "Free-form text input for detailed responses",
   radio: "Single choice selection from predefined options",
   multi_select: "Multiple choice selection from available options"
 } as const;
 
-/**
- * =============================================================================
- * CREATING SESSIONS FOR DIFFERENT USE CASES
- * =============================================================================
- *
- * NEW ARCHITECTURE PATTERN:
- *
- * 1. For UI applications (current BleakSession with components):
- * ```typescript
- * const uiSession = new BleakSession({
- *   baseUrl: "/api/bleak",
- *   elements: elementConfig  // Full component mapping
- * });
- * // Has getBleakComponents() method
- * ```
- *
- * 2. For backend/API-only usage (BleakSession without components):
- * ```typescript
- * const coreSession = new BleakSession({
- *   baseUrl: "/api/bleak",
- *   apiKey: "your-key"
- *   // No elements config = behaves like BleakCoreSession
- * });
- * // Can use all conversation methods except getBleakComponents()
- * ```
- *
- * 3. When upgraded to new architecture:
- * ```typescript
- * import { BleakUISession, BleakCoreSession } from "bleakai";
- *
- * const uiSession = new BleakUISession({ elements: config });
- * const coreSession = new BleakCoreSession({ apiKey: "key" });
- * ```
- *
- * =============================================================================
- */
-
-/**
- * =============================================================================
- * BLEAK COMPONENT DEFINITIONS
- * =============================================================================
- *
- * These are your custom UI components that BleakAI will use to render questions.
- * The key principle: "Bring Your Own Components" - BleakAI provides the intelligence
- * to decide what type of input is needed, while you control how it looks.
- *
- * IMPORTANT TYPING:
- * - Use BleakInputProps for components that don't need predefined options
- * - Use BleakChoiceProps for components that work with predefined options
- * - All components receive: text, value, onChange (+ options for choice components)
- * - uniqueId and elementIndex are optional but useful for accessibility/tracking
- */
-
-// TEXT INPUT COMPONENT - for free-form text entry
+// Custom UI Components
 const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => (
   <div className="question-group">
-    {/* Always provide clear labels for accessibility */}
     <label className="question-label">{text}</label>
     <input
       type="text"
-      value={value || ""} // Handle undefined/null values gracefully
-      onChange={(e) => onChange(e.target.value)} // Call onChange with new value
-      placeholder={`Enter ${text.toLowerCase()}`} // Dynamic placeholder
+      value={value || ""}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={`Enter ${text.toLowerCase()}`}
       className="text-input"
     />
   </div>
 );
 
-// RADIO GROUP COMPONENT - for single choice selection
 const RadioGroup: React.FC<BleakChoiceProps> = ({
   text,
   options,
@@ -100,14 +36,13 @@ const RadioGroup: React.FC<BleakChoiceProps> = ({
   <div className="question-group">
     <label className="question-label">{text}</label>
     <div className="radio-options">
-      {/* Map through the options array provided by BleakAI */}
       {options?.map((option: string, i: number) => (
         <label key={i} className="radio-option">
           <input
             type="radio"
-            name={text.replace(/\s+/g, "_")} // Unique name for radio group
-            checked={value === option} // Check if this option is selected
-            onChange={() => onChange(option)} // Set this option as selected
+            name={text.replace(/\s+/g, "_")}
+            checked={value === option}
+            onChange={() => onChange(option)}
           />
           <span>{option}</span>
         </label>
@@ -116,14 +51,12 @@ const RadioGroup: React.FC<BleakChoiceProps> = ({
   </div>
 );
 
-// MULTI-SELECT COMPONENT - for multiple choice selection
 const MultiSelect: React.FC<BleakChoiceProps> = ({
   text,
   options,
   value,
   onChange
 }) => {
-  // Parse the comma-separated value string into an array
   const selected = Array.isArray(value) ? value : value ? [value] : [];
 
   return (
@@ -136,11 +69,9 @@ const MultiSelect: React.FC<BleakChoiceProps> = ({
               type="checkbox"
               checked={selected.includes(option)}
               onChange={() => {
-                // Toggle selection: add if not selected, remove if selected
                 const newSelected = selected.includes(option)
                   ? selected.filter((v) => v !== option)
                   : [...selected, option];
-                // Convert back to comma-separated string format
                 onChange(newSelected.join(", "));
               }}
             />
@@ -152,24 +83,7 @@ const MultiSelect: React.FC<BleakChoiceProps> = ({
   );
 };
 
-/**
- * =============================================================================
- * BLEAK ELEMENT CONFIGURATION
- * =============================================================================
- *
- * This configuration object maps BleakAI element types to your components.
- * The AI will decide which type to use based on the context of the conversation.
- *
- * STRUCTURE:
- * - Key: element type name (used by AI to identify component)
- * - component: Your React component (or any framework component)
- * - description: Helps the AI understand when to use this component type
- *
- * BEST PRACTICES:
- * - Keep descriptions clear and specific
- * - Include examples in descriptions when helpful
- * - Use semantic type names (text, radio, multi_select, date, etc.)
- */
+// Element configuration mapping
 const elementConfig = {
   text: {
     component: TextInput,
@@ -185,20 +99,7 @@ const elementConfig = {
   }
 };
 
-/**
- * =============================================================================
- * UI HELPER COMPONENTS
- * =============================================================================
- *
- * These components handle different states of the BleakAI flow:
- * - Loading states during API calls
- * - Error handling and display
- * - Initial prompt input
- * - Question rendering
- * - Final answer display
- */
-
-// LOADING COMPONENT - shown during API calls
+// UI Helper Components
 const LoadingSpinner = () => (
   <div className="loading">
     <div className="spinner"></div>
@@ -206,7 +107,6 @@ const LoadingSpinner = () => (
   </div>
 );
 
-// ERROR COMPONENT - handles error states gracefully
 const ErrorMessage = ({
   error,
   onDismiss
@@ -223,7 +123,6 @@ const ErrorMessage = ({
   </div>
 );
 
-// PROMPT INPUT COMPONENT - the starting point of any BleakAI conversation
 const PromptInput = ({
   prompt,
   setPrompt,
@@ -244,12 +143,11 @@ const PromptInput = ({
       rows={4}
       placeholder={placeholder}
       className="prompt-textarea"
-      disabled={isLoading} // Disable during loading
+      disabled={isLoading}
     />
-
     <button
       onClick={onSubmit}
-      disabled={isLoading || !prompt.trim()} // Disable if loading or empty
+      disabled={isLoading || !prompt.trim()}
       className="btn btn-primary"
     >
       {isLoading ? "Getting started..." : "Get Started"}
@@ -257,7 +155,6 @@ const PromptInput = ({
   </div>
 );
 
-// QUESTIONS SECTION - renders the dynamically generated questions
 const QuestionsSection = ({
   questions,
   answers,
@@ -273,9 +170,8 @@ const QuestionsSection = ({
   onSubmit: () => void;
   onRequestMore: () => void;
   isLoading: boolean;
-  bleak: BleakSession;
+  bleak: BleakUISession;
 }) => {
-  // Check if all questions have been answered
   const allQuestionsAnswered = questions.every((q) =>
     answers[q.question]?.trim()
   );
@@ -286,11 +182,6 @@ const QuestionsSection = ({
       <p>Please answer these questions so I can provide the best assistance:</p>
 
       <div className="questions-list">
-        {/*
-          COMPONENT RESOLUTION MAGIC HAPPENS HERE!
-          getBleakComponents() converts InteractiveQuestion[] into renderable components
-          by matching question types to your configured components
-        */}
         {bleak
           .getBleakComponents(questions, answers, onAnswerChange)
           .map(({Component, props, key}) => (
@@ -299,7 +190,6 @@ const QuestionsSection = ({
       </div>
 
       <div className="action-buttons">
-        {/* PRIMARY ACTION: Get final answer */}
         <button
           onClick={onSubmit}
           disabled={!allQuestionsAnswered || isLoading}
@@ -308,7 +198,6 @@ const QuestionsSection = ({
           {isLoading ? "Processing..." : "Get My Answer"}
         </button>
 
-        {/* SECONDARY ACTION: Request more questions for refinement */}
         <button
           onClick={onRequestMore}
           disabled={!allQuestionsAnswered || isLoading}
@@ -321,7 +210,6 @@ const QuestionsSection = ({
   );
 };
 
-// ANSWER SECTION - displays the final result
 const AnswerSection = ({
   answer,
   onReset
@@ -338,25 +226,9 @@ const AnswerSection = ({
   </div>
 );
 
-/**
- * =============================================================================
- * MAIN APP COMPONENT - THE COMPLETE BLEAKAI ARCHITECTURE DEMO
- * =============================================================================
- *
- * This demonstrates both UI and backend usage patterns:
- * 1. UI Demo: Complete conversation flow with forms (BleakSession with elements)
- * 2. Backend Demo: Quick answers without UI (BleakSession without elements)
- *
- * When upgraded to new architecture, these would become:
- * 1. BleakUISession for UI applications
- * 2. BleakCoreSession for backend applications
- */
+// Main App Component
 function App() {
-  /**
-   * UI DEMO STATE MANAGEMENT
-   * ========================
-   * For the full UI experience with form components
-   */
+  // State management
   const [prompt, setPrompt] = useState("");
   const [questions, setQuestions] = useState<InteractiveQuestion[] | null>(
     null
@@ -366,38 +238,18 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  /**
-   * BLEAK SESSION INITIALIZATION (UI VERSION)
-   * =========================================
-   * This session includes full element configuration for UI components.
-   *
-   * CURRENT APPROACH: BleakSession with elements
-   * FUTURE APPROACH: BleakUISession with elements
-   *
-   * SECURE CONFIGURATION:
-   * - No apiKey needed in frontend (handled by proxy)
-   * - baseUrl points to your backend proxy
-   * - Backend proxy adds API key securely
-   * - timeout: Request timeout in milliseconds (default: 30000)
-   * - elements: Your component configuration (maps types to components)
-   *
-   * WHY useMemo?
-   * - Prevents recreation on every render
-   * - Session manages internal state and HTTP client
-   * - Only recreate if dependencies change
-   */
+  // Initialize BleakUISession with element configuration
   const uiSession = useMemo(
     () =>
-      new BleakSession({
-        // No API key in frontend! Proxy handles it securely
-        baseUrl: "http://localhost:8009/bleak", // Your Hono proxy endpoint
-        timeout: 30000, // 30 second timeout
-        elements: elementConfig // Your component mapping
+      new BleakUISession({
+        baseUrl: "http://localhost:8008/bleak",
+        timeout: 30000,
+        elements: elementConfig
       }),
-    [] // Empty dependency array - create once
+    []
   );
 
-  // UI Demo handlers (same as before)
+  // Event handlers
   const handleStartConversation = async () => {
     if (!prompt.trim()) return;
 
@@ -486,79 +338,44 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>BleakAI Architecture Demo</h1>
-        <p>Testing both UI and Backend usage patterns with the same library</p>
+        <h1>BleakAI Demo</h1>
+        <p>Interactive AI conversations with dynamic forms</p>
       </header>
 
       <main className="app-main">
-        <>
-          <div className="ui-demo">
-            <h2>🎨 UI Demo (BleakSession with Components)</h2>
-            <p>
-              Complete conversation flow with dynamic forms and component
-              resolution
-            </p>
+        <div className="ui-demo">
+          {error && <ErrorMessage error={error} onDismiss={dismissError} />}
 
-            {/* ERROR STATE: Always show errors first */}
-            {error && <ErrorMessage error={error} onDismiss={dismissError} />}
+          {isLoading && <LoadingSpinner />}
 
-            {/* LOADING STATE: Show during API calls */}
-            {isLoading && <LoadingSpinner />}
+          {!questions && !finalAnswer && !isLoading && (
+            <PromptInput
+              prompt={prompt}
+              setPrompt={setPrompt}
+              onSubmit={handleStartConversation}
+              isLoading={isLoading}
+            />
+          )}
 
-            {/* INITIAL STATE: Show prompt input when starting fresh */}
-            {!questions && !finalAnswer && !isLoading && (
-              <PromptInput
-                prompt={prompt}
-                setPrompt={setPrompt}
-                onSubmit={handleStartConversation}
-                isLoading={isLoading}
-              />
-            )}
+          {questions && !isLoading && (
+            <QuestionsSection
+              questions={questions}
+              answers={answers}
+              onAnswerChange={handleAnswerChange}
+              onSubmit={handleSubmitAnswers}
+              onRequestMore={handleRequestMoreQuestions}
+              isLoading={isLoading}
+              bleak={uiSession}
+            />
+          )}
 
-            {/* QUESTIONS STATE: Show when AI needs more information */}
-            {questions && !isLoading && (
-              <QuestionsSection
-                questions={questions}
-                answers={answers}
-                onAnswerChange={handleAnswerChange}
-                onSubmit={handleSubmitAnswers}
-                onRequestMore={handleRequestMoreQuestions}
-                isLoading={isLoading}
-                bleak={uiSession} // Pass session for component resolution
-              />
-            )}
-
-            {/* FINAL STATE: Show answer when conversation complete */}
-            {finalAnswer && !isLoading && (
-              <AnswerSection answer={finalAnswer} onReset={resetAll} />
-            )}
-          </div>
-        </>
+          {finalAnswer && !isLoading && (
+            <AnswerSection answer={finalAnswer} onReset={resetAll} />
+          )}
+        </div>
       </main>
     </div>
   );
 }
 
 export default App;
-
-/**
- * =============================================================================
- * KEY BLEAKAI ARCHITECTURE CONCEPTS SUMMARY
- * =============================================================================
- *
- * 1. **Split Architecture**: Core logic vs UI logic (coming in new version)
- * 2. **Configuration Patterns**: With/without elements for different use cases
- * 3. **Shared Descriptions**: Element descriptions can be reused across sessions
- * 4. **UI vs Backend**: Same library, different configuration approaches
- * 5. **Type Safety**: Use BleakInputProps/BleakChoiceProps for proper typing
- * 6. **Element Configuration**: Map component types to your React components
- * 7. **Conversation Flow**: prompt → questions → answers → final result
- * 8. **Iterative Refinement**: Users can request more questions for detail
- * 9. **State Management**: Track prompt, questions, answers, loading, errors
- * 10. **Component Resolution**: getBleakComponents() handles the magic
- * 11. **Error Handling**: Always handle API errors gracefully
- * 12. **Accessibility**: Use proper labels, IDs, and semantic HTML
- * 13. **Performance**: useMemo for sessions, efficient re-renders
- * 14. **Flexible Usage**: Same session class, different configuration patterns
-
- */
