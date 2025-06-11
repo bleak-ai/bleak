@@ -1,0 +1,21 @@
+{
+  "name": "bleakai-hono-proxy",
+  "version": "1.0.0",
+  "description": "Hono-based proxy server for BleakAI requests",
+  "type": "module",
+  "main": "proxy-server-hono.js",
+  "scripts": {
+    "start": "node proxy-server-hono.js",
+    "dev": "node --watch proxy-server-hono.js"
+  },
+  "dependencies": {
+    "hono": "^4.6.3",
+    "@hono/node-server": "^1.13.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["hono", "proxy", "bleakai", "api"],
+  "author": "Your Name",
+  "license": "MIT"
+}

@@ -8,8 +8,19 @@
 
 // === Primary Bleak API ===
 // The main, intuitive way to use BleakAI
+
+// New architecture - recommended for new projects
+export {BleakCoreSession} from "./chat/BleakCoreSession";
+export type {BleakCoreSessionConfig} from "./chat/BleakCoreSession";
+export {BleakUISession} from "./chat/BleakUISession";
+export type {BleakUISessionConfig} from "./chat/BleakUISession";
+
+// Interface and shared types
+export type {IBleakSession, SessionState} from "./chat/IBleakSession";
+
+// Backward compatibility - use BleakUISession for new projects
 export {BleakSession} from "./chat/BleakSession";
-export type {BleakSessionConfig, SessionState} from "./chat/BleakSession";
+export type {BleakSessionConfig} from "./chat/BleakSession";
 
 // === Component System ===
 // Framework-agnostic component resolution
@@ -39,13 +50,13 @@ export type {AnsweredQuestion, InteractiveQuestion} from "./chat/types";
 export {ChatError, RateLimitError, AuthenticationError} from "./chat/Bleak";
 
 /**
- * Quick Start with Bleak API:
+ * Quick Start with New Architecture:
  *
  * ```typescript
- * import { BleakSession } from 'bleakai';
+ * import { BleakUISession } from 'bleakai';
  *
- * // Create a session with your components
- * const bleak = new BleakSession({
+ * // For UI applications - includes getBleakComponents
+ * const bleak = new BleakUISession({
  *   apiKey: "your-key",
  *   elements: {
  *     text: { component: YourTextInput, description: "For text input" },
@@ -53,26 +64,27 @@ export {ChatError, RateLimitError, AuthenticationError} from "./chat/Bleak";
  *   }
  * });
  *
- * // Start a conversation (single call, no double await!)
+ * // Start a conversation
  * const result = await bleak.startBleakConversation("Help me plan a trip");
  *
  * if (result.questions && result.questions.length > 0) {
  *   // Convert questions to your components
  *   const components = bleak.getBleakComponents(result.questions, answers, onChange);
- *
- *   // Render components...
- *
- *   // Optional: Request more questions for refinement
- *   const moreResult = await bleak.requestMoreBleakQuestions(answers);
- *   if (moreResult.questions) {
- *     // Handle additional questions...
- *   }
- *
- *   // Finish the conversation
- *   const finalAnswer = await bleak.finishBleakConversation(answers);
- * } else if (result.answer) {
- *   // Direct answer available
- *   console.log(result.answer);
+ *   // ... render components
  * }
+ * ```
+ *
+ * For backend/CLI usage without UI:
+ *
+ * ```typescript
+ * import { BleakCoreSession } from 'bleakai';
+ *
+ * // For backend/CLI - no UI dependencies
+ * const bleak = new BleakCoreSession({
+ *   apiKey: "your-key"
+ * });
+ *
+ * // Use all conversation methods except getBleakComponents
+ * const answer = await bleak.quickBleakAsk("What's the weather like?");
  * ```
  */

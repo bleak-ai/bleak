@@ -8,6 +8,59 @@ import {
 
 /**
  * =============================================================================
+ * SHARED ELEMENT CONFIGURATION
+ * =============================================================================
+ *
+ * This configuration can be shared between different session instances.
+ * The key insight: separate the descriptions from the components for reusability.
+ */
+
+// Define the element descriptions separately for reuse
+export const ELEMENT_DESCRIPTIONS = {
+  text: "Free-form text input for detailed responses",
+  radio: "Single choice selection from predefined options",
+  multi_select: "Multiple choice selection from available options"
+} as const;
+
+/**
+ * =============================================================================
+ * CREATING SESSIONS FOR DIFFERENT USE CASES
+ * =============================================================================
+ *
+ * NEW ARCHITECTURE PATTERN:
+ *
+ * 1. For UI applications (current BleakSession with components):
+ * ```typescript
+ * const uiSession = new BleakSession({
+ *   baseUrl: "/api/bleak",
+ *   elements: elementConfig  // Full component mapping
+ * });
+ * // Has getBleakComponents() method
+ * ```
+ *
+ * 2. For backend/API-only usage (BleakSession without components):
+ * ```typescript
+ * const coreSession = new BleakSession({
+ *   baseUrl: "/api/bleak",
+ *   apiKey: "your-key"
+ *   // No elements config = behaves like BleakCoreSession
+ * });
+ * // Can use all conversation methods except getBleakComponents()
+ * ```
+ *
+ * 3. When upgraded to new architecture:
+ * ```typescript
+ * import { BleakUISession, BleakCoreSession } from "bleakai";
+ *
+ * const uiSession = new BleakUISession({ elements: config });
+ * const coreSession = new BleakCoreSession({ apiKey: "key" });
+ * ```
+ *
+ * =============================================================================
+ */
+
+/**
+ * =============================================================================
  * BLEAK COMPONENT DEFINITIONS
  * =============================================================================
  *
@@ -120,15 +173,15 @@ const MultiSelect: React.FC<BleakChoiceProps> = ({
 const elementConfig = {
   text: {
     component: TextInput,
-    description: "Free-form text input for detailed responses"
+    description: ELEMENT_DESCRIPTIONS.text
   },
   radio: {
     component: RadioGroup,
-    description: "Single choice selection from predefined options"
+    description: ELEMENT_DESCRIPTIONS.radio
   },
   multi_select: {
     component: MultiSelect,
-    description: "Multiple choice selection from available options"
+    description: ELEMENT_DESCRIPTIONS.multi_select
   }
 };
 
@@ -175,19 +228,21 @@ const PromptInput = ({
   prompt,
   setPrompt,
   onSubmit,
-  isLoading
+  isLoading,
+  placeholder = "What would you like help with today?"
 }: {
   prompt: string;
   setPrompt: (value: string) => void;
   onSubmit: () => void;
   isLoading: boolean;
+  placeholder?: string;
 }) => (
   <div className="prompt-section">
     <textarea
       value={prompt}
       onChange={(e) => setPrompt(e.target.value)}
       rows={4}
-      placeholder="What would you like help with today?"
+      placeholder={placeholder}
       className="prompt-textarea"
       disabled={isLoading} // Disable during loading
     />
@@ -231,7 +286,7 @@ const QuestionsSection = ({
       <p>Please answer these questions so I can provide the best assistance:</p>
 
       <div className="questions-list">
-        {/* 
+        {/*
           COMPONENT RESOLUTION MAGIC HAPPENS HERE!
           getBleakComponents() converts InteractiveQuestion[] into renderable components
           by matching question types to your configured components
@@ -285,27 +340,22 @@ const AnswerSection = ({
 
 /**
  * =============================================================================
- * MAIN APP COMPONENT - THE COMPLETE BLEAKAI FLOW
+ * MAIN APP COMPONENT - THE COMPLETE BLEAKAI ARCHITECTURE DEMO
  * =============================================================================
  *
- * This demonstrates a complete BleakAI conversation flow:
- * 1. Initialize BleakSession with your components
- * 2. Start conversation with a prompt
- * 3. Handle questions/answers iteratively
- * 4. Get final answer
- * 5. Reset for new conversation
+ * This demonstrates both UI and backend usage patterns:
+ * 1. UI Demo: Complete conversation flow with forms (BleakSession with elements)
+ * 2. Backend Demo: Quick answers without UI (BleakSession without elements)
+ *
+ * When upgraded to new architecture, these would become:
+ * 1. BleakUISession for UI applications
+ * 2. BleakCoreSession for backend applications
  */
 function App() {
   /**
-   * STATE MANAGEMENT
-   * ===============
-   * BleakAI conversations are stateful - you need to track:
-   * - Current prompt
-   * - Generated questions
-   * - User answers
-   * - Final answer
-   * - Loading states
-   * - Error states
+   * UI DEMO STATE MANAGEMENT
+   * ========================
+   * For the full UI experience with form components
    */
   const [prompt, setPrompt] = useState("");
   const [questions, setQuestions] = useState<InteractiveQuestion[] | null>(
@@ -317,91 +367,59 @@ function App() {
   const [error, setError] = useState<Error | null>(null);
 
   /**
-   * BLEAK SESSION INITIALIZATION
-   * ============================
-   * The BleakSession is the main API for interacting with BleakAI.
+   * BLEAK SESSION INITIALIZATION (UI VERSION)
+   * =========================================
+   * This session includes full element configuration for UI components.
    *
-   * CONFIGURATION OPTIONS:
-   * - apiKey: Your BleakAI API key (required for production)
-   * - baseUrl: API endpoint (defaults to production, override for local dev)
+   * CURRENT APPROACH: BleakSession with elements
+   * FUTURE APPROACH: BleakUISession with elements
+   *
+   * SECURE CONFIGURATION:
+   * - No apiKey needed in frontend (handled by proxy)
+   * - baseUrl points to your backend proxy
+   * - Backend proxy adds API key securely
    * - timeout: Request timeout in milliseconds (default: 30000)
    * - elements: Your component configuration (maps types to components)
    *
    * WHY useMemo?
    * - Prevents recreation on every render
-   * - BleakSession manages internal state and HTTP client
+   * - Session manages internal state and HTTP client
    * - Only recreate if dependencies change
    */
-  const bleak = useMemo(
+  const uiSession = useMemo(
     () =>
       new BleakSession({
-        apiKey: "your-api-key", // TODO: Replace with actual API key
-        baseUrl: "http://localhost:8008/bleak", // Local development endpoint
+        // No API key in frontend! Proxy handles it securely
+        baseUrl: "http://localhost:8009/bleak", // Your Hono proxy endpoint
         timeout: 30000, // 30 second timeout
         elements: elementConfig // Your component mapping
       }),
     [] // Empty dependency array - create once
   );
 
-  /**
-   * CONVERSATION FLOW HANDLERS
-   * ==========================
-   * These functions handle the different stages of a BleakAI conversation
-   */
-
-  /**
-   * STEP 1: START CONVERSATION
-   * =========================
-   * This is the entry point of any BleakAI conversation.
-   *
-   * WHAT HAPPENS:
-   * 1. Send initial prompt to BleakAI
-   * 2. AI analyzes prompt and decides:
-   *    - Return immediate answer (if prompt is straightforward)
-   *    - Generate questions (if more info needed)
-   * 3. Update UI state accordingly
-   *
-   * RESPONSE TYPES:
-   * - questions present: questions generated, show form
-   * - answer present: direct answer available
-   */
+  // UI Demo handlers (same as before)
   const handleStartConversation = async () => {
     if (!prompt.trim()) return;
 
     setIsLoading(true);
     setError(null);
-    resetState(); // Clear previous conversation state
+    resetState();
 
     try {
-      // The magic starts here! Send prompt to BleakAI
-      const result = await bleak.startBleakConversation(prompt);
+      const result = await uiSession.startBleakConversation(prompt);
 
       if (result.questions && result.questions.length > 0) {
-        // AI needs more information - show questions
         setQuestions(result.questions);
       } else if (result.answer) {
-        // AI has enough info - show direct answer
         setFinalAnswer(result.answer);
       }
     } catch (err) {
-      // Handle API errors gracefully
       setError(err as Error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  /**
-   * STEP 2A: SUBMIT ANSWERS (COMPLETE CONVERSATION)
-   * ===============================================
-   * When user has answered questions and wants the final answer.
-   *
-   * WHAT HAPPENS:
-   * 1. Send all collected answers to BleakAI
-   * 2. AI processes answers with original prompt context
-   * 3. Generate comprehensive final answer
-   * 4. Conversation is complete
-   */
   const handleSubmitAnswers = async () => {
     if (!questions) return;
 
@@ -409,10 +427,9 @@ function App() {
     setError(null);
 
     try {
-      // Send answers and get final result
-      const result = await bleak.finishBleakConversation(answers);
+      const result = await uiSession.finishBleakConversation(answers);
       setFinalAnswer(result);
-      setQuestions(null); // Hide questions, show answer
+      setQuestions(null);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -420,23 +437,6 @@ function App() {
     }
   };
 
-  /**
-   * STEP 2B: REQUEST MORE QUESTIONS (ITERATIVE REFINEMENT)
-   * =====================================================
-   * When user wants to provide even more details before getting answer.
-   * This enables iterative conversation refinement.
-   *
-   * WHAT HAPPENS:
-   * 1. Send current answers to BleakAI
-   * 2. AI analyzes answers and generates follow-up questions
-   * 3. User can provide additional context
-   * 4. Process repeats until user is satisfied
-   *
-   * USE CASES:
-   * - Complex requirements that need multiple rounds of clarification
-   * - User realizes they want to add more context
-   * - Building detailed specifications iteratively
-   */
   const handleRequestMoreQuestions = async () => {
     if (!questions) return;
 
@@ -444,15 +444,12 @@ function App() {
     setError(null);
 
     try {
-      // Request additional questions based on current answers
-      const result = await bleak.requestMoreBleakQuestions(answers);
+      const result = await uiSession.requestMoreBleakQuestions(answers);
 
       if (result.questions) {
-        // More questions generated - continue conversation
         setQuestions(result.questions);
       } else if (result.isComplete) {
-        // AI decided no more questions needed - finish conversation
-        const finalResult = await bleak.finishBleakConversation(answers);
+        const finalResult = await uiSession.finishBleakConversation(answers);
         setFinalAnswer(finalResult);
         setQuestions(null);
       }
@@ -463,26 +460,10 @@ function App() {
     }
   };
 
-  /**
-   * ANSWER CHANGE HANDLER
-   * ====================
-   * Updates the answers state when user interacts with form components.
-   * This is passed to all components via getBleakComponents().
-   *
-   * IMPORTANT:
-   * - Keep answers in sync with component state
-   * - Use question text as key (BleakAI's internal identifier)
-   * - Preserve existing answers when updating
-   */
   const handleAnswerChange = (question: string, value: string) => {
     setAnswers((prev) => ({...prev, [question]: value}));
   };
 
-  /**
-   * STATE RESET HELPERS
-   * ===================
-   * Clean up state for new conversations
-   */
   const resetState = () => {
     setQuestions(null);
     setAnswers({});
@@ -490,8 +471,8 @@ function App() {
   };
 
   const resetAll = () => {
-    bleak.resetBleakSession(); // Reset BleakAI internal state
-    resetState(); // Reset component state
+    uiSession.resetBleakSession();
+    resetState();
     setError(null);
     setIsLoading(false);
     setPrompt("");
@@ -502,62 +483,57 @@ function App() {
     setIsLoading(false);
   };
 
-  /**
-   * RENDER LOGIC
-   * ============
-   * The UI flow follows this priority:
-   * 1. Show errors (if any)
-   * 2. Show loading spinner (during API calls)
-   * 3. Show prompt input (initial state)
-   * 4. Show questions (when AI needs input)
-   * 5. Show final answer (conversation complete)
-   *
-   * CONDITIONAL RENDERING STRATEGY:
-   * - Only one main section visible at a time
-   * - Clear visual feedback for each state
-   * - Consistent loading states across sections
-   */
   return (
     <div className="app">
       <header className="app-header">
-        <h1>AI Assistant</h1>
-        <p>Get personalized help with step-by-step guidance</p>
+        <h1>BleakAI Architecture Demo</h1>
+        <p>Testing both UI and Backend usage patterns with the same library</p>
       </header>
 
       <main className="app-main">
-        {/* ERROR STATE: Always show errors first */}
-        {error && <ErrorMessage error={error} onDismiss={dismissError} />}
+        <>
+          <div className="ui-demo">
+            <h2>🎨 UI Demo (BleakSession with Components)</h2>
+            <p>
+              Complete conversation flow with dynamic forms and component
+              resolution
+            </p>
 
-        {/* LOADING STATE: Show during API calls */}
-        {isLoading && <LoadingSpinner />}
+            {/* ERROR STATE: Always show errors first */}
+            {error && <ErrorMessage error={error} onDismiss={dismissError} />}
 
-        {/* INITIAL STATE: Show prompt input when starting fresh */}
-        {!questions && !finalAnswer && !isLoading && (
-          <PromptInput
-            prompt={prompt}
-            setPrompt={setPrompt}
-            onSubmit={handleStartConversation}
-            isLoading={isLoading}
-          />
-        )}
+            {/* LOADING STATE: Show during API calls */}
+            {isLoading && <LoadingSpinner />}
 
-        {/* QUESTIONS STATE: Show when AI needs more information */}
-        {questions && !isLoading && (
-          <QuestionsSection
-            questions={questions}
-            answers={answers}
-            onAnswerChange={handleAnswerChange}
-            onSubmit={handleSubmitAnswers}
-            onRequestMore={handleRequestMoreQuestions}
-            isLoading={isLoading}
-            bleak={bleak} // Pass session for component resolution
-          />
-        )}
+            {/* INITIAL STATE: Show prompt input when starting fresh */}
+            {!questions && !finalAnswer && !isLoading && (
+              <PromptInput
+                prompt={prompt}
+                setPrompt={setPrompt}
+                onSubmit={handleStartConversation}
+                isLoading={isLoading}
+              />
+            )}
 
-        {/* FINAL STATE: Show answer when conversation complete */}
-        {finalAnswer && !isLoading && (
-          <AnswerSection answer={finalAnswer} onReset={resetAll} />
-        )}
+            {/* QUESTIONS STATE: Show when AI needs more information */}
+            {questions && !isLoading && (
+              <QuestionsSection
+                questions={questions}
+                answers={answers}
+                onAnswerChange={handleAnswerChange}
+                onSubmit={handleSubmitAnswers}
+                onRequestMore={handleRequestMoreQuestions}
+                isLoading={isLoading}
+                bleak={uiSession} // Pass session for component resolution
+              />
+            )}
+
+            {/* FINAL STATE: Show answer when conversation complete */}
+            {finalAnswer && !isLoading && (
+              <AnswerSection answer={finalAnswer} onReset={resetAll} />
+            )}
+          </div>
+        </>
       </main>
     </div>
   );
@@ -567,32 +543,22 @@ export default App;
 
 /**
  * =============================================================================
- * KEY BLEAKAI CONCEPTS SUMMARY
+ * KEY BLEAKAI ARCHITECTURE CONCEPTS SUMMARY
  * =============================================================================
  *
- * 1. **Bring Your Own Components**: BleakAI provides intelligence, you provide UI
- * 2. **Type Safety**: Use BleakInputProps/BleakChoiceProps for proper typing
- * 3. **Element Configuration**: Map component types to your React components
- * 4. **Conversation Flow**: prompt → questions → answers → final result
- * 5. **Iterative Refinement**: Users can request more questions for detail
- * 6. **State Management**: Track prompt, questions, answers, loading, errors
- * 7. **Component Resolution**: getBleakComponents() handles the magic
- * 8. **Error Handling**: Always handle API errors gracefully
- * 9. **Accessibility**: Use proper labels, IDs, and semantic HTML
- * 10. **Performance**: useMemo for BleakSession, efficient re-renders
- *
- * =============================================================================
- * NEXT STEPS FOR IMPLEMENTATION
- * =============================================================================
- *
- * 1. Replace "your-api-key" with actual API key
- * 2. Update baseUrl for your environment (production/staging/local)
- * 3. Add your custom CSS styles for the component classes
- * 4. Extend elementConfig with more component types as needed
- * 5. Add error logging/analytics for production monitoring
- * 6. Consider adding progress indicators for long conversations
- * 7. Implement conversation history/persistence if needed
- * 8. Add unit tests for critical conversation flows
- * 9. Consider accessibility improvements (ARIA labels, keyboard nav)
- * 10. Add loading states for better UX during slow connections
+ * 1. **Split Architecture**: Core logic vs UI logic (coming in new version)
+ * 2. **Configuration Patterns**: With/without elements for different use cases
+ * 3. **Shared Descriptions**: Element descriptions can be reused across sessions
+ * 4. **UI vs Backend**: Same library, different configuration approaches
+ * 5. **Type Safety**: Use BleakInputProps/BleakChoiceProps for proper typing
+ * 6. **Element Configuration**: Map component types to your React components
+ * 7. **Conversation Flow**: prompt → questions → answers → final result
+ * 8. **Iterative Refinement**: Users can request more questions for detail
+ * 9. **State Management**: Track prompt, questions, answers, loading, errors
+ * 10. **Component Resolution**: getBleakComponents() handles the magic
+ * 11. **Error Handling**: Always handle API errors gracefully
+ * 12. **Accessibility**: Use proper labels, IDs, and semantic HTML
+ * 13. **Performance**: useMemo for sessions, efficient re-renders
+ * 14. **Flexible Usage**: Same session class, different configuration patterns
+
  */
