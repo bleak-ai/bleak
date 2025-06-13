@@ -1,6 +1,6 @@
 import React, {useState, useMemo} from "react";
 import {
-  BleakUISession,
+  BleakSession,
   type InteractiveQuestion,
   type BleakInputProps,
   type BleakChoiceProps
@@ -170,7 +170,7 @@ const QuestionsSection = ({
   onSubmit: () => void;
   onRequestMore: () => void;
   isLoading: boolean;
-  bleak: BleakUISession;
+  bleak: BleakSession;
 }) => {
   const allQuestionsAnswered = questions.every((q) =>
     answers[q.question]?.trim()
@@ -246,13 +246,18 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Initialize BleakUISession with element configuration
+  // Initialize BleakSession with element configuration
   const uiSession = useMemo(
     () =>
-      new BleakUISession({
+      new BleakSession({
         baseUrl: "http://localhost:8008/bleak",
         timeout: 30000,
-        elements: elementConfig
+        elements: elementConfig,
+        task_specification: {
+          output_type: "tweet",
+          target_length: "short (under 140 characters)",
+          description: "helpful content based on the user's request"
+        }
       }),
     []
   );

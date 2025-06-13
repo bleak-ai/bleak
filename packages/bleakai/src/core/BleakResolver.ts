@@ -87,8 +87,8 @@ export class BleakResolver {
 }
 
 /**
- * Create a resolver from a BleakElementConfig object
- * This is the main function used by BleakUISession for component resolution
+ * Create a resolver from configuration
+ * This is the main function used by BleakSession for component resolution
  */
 export function createResolverFromConfig<T extends BleakElementConfig>(
   config: T,

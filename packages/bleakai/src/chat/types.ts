@@ -22,11 +22,18 @@ export interface InteractiveQuestion {
   options?: string[];
 }
 
+export interface TaskSpecification {
+  output_type?: string; // "linkedin_post", "long_article", "tutorial", "documentation", etc. Default: "article"
+  target_length?: string; // "short", "medium", "long". Default: "medium"
+  description?: string; // User-defined context. Default: "helpful content based on the user's request"
+}
+
 // Chat Request types (mirroring backend Union type)
 export interface InitialChatRequest {
   type: "start";
   prompt: string;
   bleak_elements?: BleakElement[];
+  task_specification?: TaskSpecification;
 }
 
 export interface ContinuationChatRequest {

@@ -7,20 +7,21 @@
  */
 
 // === Primary Bleak API ===
-// The main, intuitive way to use BleakAI
+// The main, unified way to use BleakAI - use this for new projects
 
-// New architecture - recommended for new projects
+// Unified session - combines all functionality
+export {BleakSession} from "./chat/BleakSession";
+export type {BleakSessionConfig} from "./chat/BleakSession";
+
+// === Advanced/Legacy APIs ===
+// Use these only if you need specific functionality
+
+// Core-only session (backend/CLI usage, no UI components)
 export {BleakCoreSession} from "./chat/BleakCoreSession";
 export type {BleakCoreSessionConfig} from "./chat/BleakCoreSession";
-export {BleakUISession} from "./chat/BleakUISession";
-export type {BleakUISessionConfig} from "./chat/BleakUISession";
 
 // Interface and shared types
 export type {IBleakSession, SessionState} from "./chat/IBleakSession";
-
-// Backward compatibility - use BleakUISession for new projects
-export {BleakSession} from "./chat/BleakSession";
-export type {BleakSessionConfig} from "./chat/BleakSession";
 
 // === Component System ===
 // Framework-agnostic component resolution
@@ -43,24 +44,33 @@ export {
 
 // === Conversation Types ===
 // Types for handling conversations and questions
-export type {AnsweredQuestion, InteractiveQuestion} from "./chat/types";
+export type {
+  AnsweredQuestion,
+  InteractiveQuestion,
+  TaskSpecification
+} from "./chat/types";
 
 // === Error Types ===
 // Error classes for proper error handling
 export {ChatError, RateLimitError, AuthenticationError} from "./chat/Bleak";
 
 /**
- * Quick Start with New Architecture:
+ * Quick Start (RECOMMENDED):
  *
  * ```typescript
- * import { BleakUISession } from 'bleakai';
+ * import {BleakSession} from "bleakai";
  *
- * // For UI applications - includes getBleakComponents
- * const bleak = new BleakUISession({
+ * // One unified session for everything
+ * const bleak = new BleakSession({
  *   apiKey: "your-key",
  *   elements: {
- *     text: { component: YourTextInput, description: "For text input" },
- *     radio: { component: YourRadioGroup, description: "For single choice" }
+ *     text: {component: YourTextInput, description: "For text input"},
+ *     radio: {component: YourRadioGroup, description: "For single choice"}
+ *   },
+ *   task_specification: {
+ *     output_type: "travel_plan",
+ *     target_length: "detailed",
+ *     description: "A comprehensive travel itinerary"
  *   }
  * });
  *
@@ -69,7 +79,7 @@ export {ChatError, RateLimitError, AuthenticationError} from "./chat/Bleak";
  *
  * if (result.questions && result.questions.length > 0) {
  *   // Convert questions to your components
- *   const components = bleak.getBleakComponents(result.questions, answers, onChange);
+ *   const components = bleak.resolveComponents(result.questions);
  *   // ... render components
  * }
  * ```
@@ -77,14 +87,13 @@ export {ChatError, RateLimitError, AuthenticationError} from "./chat/Bleak";
  * For backend/CLI usage without UI:
  *
  * ```typescript
- * import { BleakCoreSession } from 'bleakai';
+ * import {BleakCoreSession} from "bleakai";
  *
  * // For backend/CLI - no UI dependencies
  * const bleak = new BleakCoreSession({
  *   apiKey: "your-key"
  * });
  *
- * // Use all conversation methods except getBleakComponents
  * const answer = await bleak.quickBleakAsk("What's the weather like?");
  * ```
  */

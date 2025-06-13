@@ -1,6 +1,6 @@
 import React, {useMemo, useState} from "react";
 import {
-  BleakUISession,
+  BleakSession,
   type InteractiveQuestion,
   type BleakInputProps,
   type BleakChoiceProps
@@ -63,7 +63,7 @@ const elementsConfig = {
   }
 };
 
-const uiSession = new BleakUISession({
+const uiSession = new BleakSession({
   elements: elementsConfig,
   // baseUrl: "http://localhost:6006/bleak" // TODO: Uncomment this to use proxy
   baseUrl: "http://localhost:8008/bleak" // TODO: Uncomment this to use without proxu

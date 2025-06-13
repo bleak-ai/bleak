@@ -12,7 +12,7 @@ export interface SessionState {
 
 /**
  * Core interface for Bleak session functionality
- * Both BleakCoreSession and BleakUISession implement this interface
+ * Both BleakCoreSession and BleakSession implement this interface
  */
 export interface IBleakSession {
   /**

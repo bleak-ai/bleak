@@ -5,7 +5,8 @@ import type {
   ChatResponse,
   BleakElement,
   InitialChatRequest,
-  ContinuationChatRequest
+  ContinuationChatRequest,
+  TaskSpecification
 } from "./types";
 import {ChatError, RateLimitError, AuthenticationError} from "./Bleak";
 import type {IBleakSession, SessionState} from "./IBleakSession";
@@ -92,9 +93,12 @@ export class BleakCoreSession implements IBleakSession {
     this.state.error = undefined;
 
     try {
-      // Start conversation - subclasses can override getBleakElements()
       const bleakElements = this.getBleakElements();
-      const response = await this.makeInitialRequest(prompt, {bleakElements});
+      const taskSpecification = this.getTaskSpecification();
+      const response = await this.makeInitialRequest(prompt, {
+        bleakElements,
+        taskSpecification
+      });
       this.updateStateFromResponse(response);
 
       const hasQuestions = Boolean(
@@ -234,14 +238,22 @@ export class BleakCoreSession implements IBleakSession {
     return undefined;
   }
 
+  protected getTaskSpecification(): TaskSpecification | undefined {
+    return undefined;
+  }
+
   protected async makeInitialRequest(
     prompt: string,
-    options: {bleakElements?: BleakElement[]} = {}
+    options: {
+      bleakElements?: BleakElement[];
+      taskSpecification?: TaskSpecification;
+    } = {}
   ): Promise<ChatResponse> {
     const request: InitialChatRequest = {
       type: "start",
       prompt,
-      bleak_elements: options.bleakElements
+      bleak_elements: options.bleakElements,
+      task_specification: options.taskSpecification
     };
 
     const response = await this.client.post<ChatResponse>("/chat", request, {
