@@ -57,9 +57,11 @@ export class BleakSession implements IBleakSession {
         process.env.VITE_API_BASE_URL ||
         "https://api.bleak.ai",
       apiKey: config.apiKey || "",
-      timeout: config.timeout || 30000,
+      timeout: config.timeout || 200000,
       retries: config.retries || 3
     };
+
+    console.log("config", this.config);
 
     // Initialize axios client
     this.client = axios.create({
