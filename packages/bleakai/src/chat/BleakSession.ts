@@ -6,7 +6,8 @@ import type {
   BleakElement,
   InitialChatRequest,
   ContinuationChatRequest,
-  TaskSpecification
+  TaskSpecification,
+  CompletionChatRequest
 } from "./types";
 import type {BleakElementConfig} from "../types/core";
 import {createResolverFromConfig} from "../core/BleakResolver";
@@ -167,10 +168,7 @@ export class BleakSession implements IBleakSession {
 
     try {
       const standardAnswers = this.convertAnswers(answers);
-      const response = await this.makeContinuationRequest(
-        standardAnswers,
-        false
-      );
+      const response = await this.makeCompletionRequest(standardAnswers);
       this.updateStateFromResponse(response);
 
       if (response.is_complete) {
@@ -407,6 +405,28 @@ export class BleakSession implements IBleakSession {
       thread_id: this.state.threadId,
       answers,
       want_more_questions: wantMoreQuestions
+    };
+
+    const response = await this.client.post<ChatResponse>("/chat", request, {
+      headers: {
+        Authorization: `Bearer ${this.config.apiKey}`
+      }
+    });
+
+    return response.data;
+  }
+
+  protected async makeCompletionRequest(
+    answers: AnsweredQuestion[]
+  ): Promise<ChatResponse> {
+    if (!this.state.threadId) {
+      throw new Error("No active conversation thread");
+    }
+
+    const request: CompletionChatRequest = {
+      type: "complete",
+      thread_id: this.state.threadId,
+      answers
     };
 
     const response = await this.client.post<ChatResponse>("/chat", request, {
