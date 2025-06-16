@@ -5,8 +5,6 @@ import {
   CompleteChatRequest,
   ChatResponse,
   Question,
-  hasQuestions,
-  isComplete,
   AnsweredQuestion,
   BleakElement
 } from "./types";

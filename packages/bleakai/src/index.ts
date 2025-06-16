@@ -22,7 +22,6 @@ export type {BleakSessionConfig} from "./chat/BleakSession";
 export type {
   AnsweredQuestion,
   Question,
-  InteractiveQuestion, // Legacy alias
   TaskSpecification,
   ChatResponse,
   ChatRequest,
