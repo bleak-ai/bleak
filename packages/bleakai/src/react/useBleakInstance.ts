@@ -1,133 +1,113 @@
-import {useState, useCallback} from "react";
-import type {Bleak} from "../chat/Bleak";
-import type {InteractiveQuestion, AnsweredQuestion} from "../chat/types";
+import {useState, useRef, useEffect} from "react";
+import {Question, AnsweredQuestion} from "../chat/types";
+import {Bleak, BleakConfig} from "../chat/Bleak";
 
-export interface UseBleakInstanceResult {
-  ask: (prompt: string) => Promise<void>;
-  continue: (
-    answers: AnsweredQuestion[] | Record<string, string>
-  ) => Promise<void>;
-  finish: (answers?: AnsweredQuestion[]) => Promise<void>;
-  reset: () => void;
-
-  // State
-  questions: InteractiveQuestion[] | null;
-  answer: string | null;
+export interface UseBleakInstanceReturn {
+  bleak: Bleak | null;
   isLoading: boolean;
-  error: Error | null;
-
-  // Helpers
-  renderQuestions: (questions: InteractiveQuestion[]) => any[];
+  error: string | null;
+  questions: Question[];
+  answers: Record<string, string>;
+  finalAnswer: string | null;
+  isComplete: boolean;
+  ask: (prompt: string) => Promise<void>;
+  answerQuestion: (question: string, answer: string) => void;
+  submitAnswers: () => Promise<void>;
+  getComponents: () => any[];
+  reset: () => void;
 }
 
-export function useBleakInstance(bleakInstance: Bleak): UseBleakInstanceResult {
-  const [questions, setQuestions] = useState<InteractiveQuestion[] | null>(
-    null
-  );
-  const [answer, setAnswer] = useState<string | null>(null);
+/**
+ * React hook for using Bleak with automatic state management
+ */
+export function useBleakInstance(config: BleakConfig): UseBleakInstanceReturn {
+  const bleakRef = useRef<Bleak | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [finalAnswer, setFinalAnswer] = useState<string | null>(null);
+  const [isComplete, setIsComplete] = useState(false);
 
-  const ask = useCallback(
-    async (prompt: string) => {
-      setIsLoading(true);
-      setError(null);
-      setQuestions(null);
-      setAnswer(null);
+  // Initialize Bleak instance
+  useEffect(() => {
+    bleakRef.current = new Bleak(config);
+  }, [config]);
 
-      try {
-        const result = await bleakInstance.ask(prompt, {
-          onQuestions: async (questions) => {
-            setQuestions(questions);
-            setIsLoading(false);
+  const ask = async (prompt: string) => {
+    if (!bleakRef.current) return;
 
-            // Return a promise that resolves when user submits answers
-            return new Promise((resolve) => {
-              // This will be resolved by the continue function
-              (window as any).__bleakResolveAnswers = resolve;
-            });
-          }
-        });
+    setIsLoading(true);
+    setError(null);
+    setFinalAnswer(null);
+    setIsComplete(false);
+    setAnswers({});
 
-        setAnswer(result);
-        setQuestions(null);
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setIsLoading(false);
+    try {
+      const result = await bleakRef.current.start(prompt);
+
+      if (result.questions && result.questions.length > 0) {
+        setQuestions(result.questions);
+      } else if (result.answer) {
+        setFinalAnswer(result.answer);
+        setIsComplete(true);
       }
-    },
-    [bleakInstance]
-  );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const continueConversation = useCallback(
-    async (answers: AnsweredQuestion[] | Record<string, string>) => {
-      setIsLoading(true);
-      setError(null);
+  const answerQuestion = (question: string, answer: string) => {
+    setAnswers((prev) => ({...prev, [question]: answer}));
+  };
 
-      try {
-        // Resolve the pending promise from ask()
-        if ((window as any).__bleakResolveAnswers) {
-          (window as any).__bleakResolveAnswers(
-            Array.isArray(answers)
-              ? answers
-              : Object.entries(answers).map(([question, answer]) => ({
-                  question,
-                  answer
-                }))
-          );
-          delete (window as any).__bleakResolveAnswers;
-        }
-      } catch (err) {
-        setError(err as Error);
-        setIsLoading(false);
-      }
-    },
-    []
-  );
+  const submitAnswers = async () => {
+    if (!bleakRef.current) return;
 
-  const finish = useCallback(
-    async (finalAnswers: AnsweredQuestion[] = []) => {
-      setIsLoading(true);
-      setError(null);
+    setIsLoading(true);
+    setError(null);
 
-      try {
-        const result = await bleakInstance.finish(finalAnswers);
-        setAnswer(result);
-        setQuestions(null);
-      } catch (err) {
-        setError(err as Error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [bleakInstance]
-  );
+    try {
+      const result = await bleakRef.current.complete(answers);
+      setFinalAnswer(result);
+      setIsComplete(true);
+      setQuestions([]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const reset = useCallback(() => {
-    bleakInstance.reset();
-    setQuestions(null);
-    setAnswer(null);
+  const getComponents = () => {
+    if (!bleakRef.current || questions.length === 0) return [];
+    return bleakRef.current.getComponents(questions);
+  };
+
+  const reset = () => {
+    bleakRef.current?.reset();
+    setQuestions([]);
+    setAnswers({});
+    setFinalAnswer(null);
+    setIsComplete(false);
     setError(null);
     setIsLoading(false);
-  }, [bleakInstance]);
-
-  const renderQuestions = useCallback(
-    (questions: InteractiveQuestion[]) => {
-      return bleakInstance.renderQuestions(questions);
-    },
-    [bleakInstance]
-  );
+  };
 
   return {
-    ask,
-    continue: continueConversation,
-    finish,
-    reset,
-    questions,
-    answer,
+    bleak: bleakRef.current,
     isLoading,
     error,
-    renderQuestions
+    questions,
+    answers,
+    finalAnswer,
+    isComplete,
+    ask,
+    answerQuestion,
+    submitAnswers,
+    getComponents,
+    reset
   };
 }

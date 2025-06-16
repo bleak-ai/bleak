@@ -33,39 +33,39 @@ export interface TaskSpecification {
 }
 
 // Chat Request types (mirroring backend Union type)
-export interface InitialChatRequest {
+export interface StartChatRequest {
   type: "start";
   prompt: string;
   bleak_elements?: BleakElement[];
   task_specification?: TaskSpecification;
 }
 
-export interface ContinuationChatRequest {
+export interface ContinueChatRequest {
   type: "continue";
   thread_id: string;
   answers: AnsweredQuestion[];
-  want_more_questions?: boolean;
+  user_choice?: "more_questions" | "final_answer";
 }
 
-export interface CompletionChatRequest {
+export interface CompleteChatRequest {
   type: "complete";
   thread_id: string;
   answers: AnsweredQuestion[];
 }
 
 export type ChatRequest =
-  | InitialChatRequest
-  | ContinuationChatRequest
-  | CompletionChatRequest;
+  | StartChatRequest
+  | ContinueChatRequest
+  | CompleteChatRequest;
 
-// Simplified ChatResponse (cleaned up, mirroring backend)
+// Simplified ChatResponse (removed clarification type)
 export interface ChatResponse {
   /** Unique conversation identifier */
   thread_id: string;
   /** Response type determining how to handle the response */
-  type: "questions" | "answer" | "clarification";
-  /** Main response content - answer text or instructional message */
-  content: string;
+  type: "questions" | "answer";
+  /** Main response message - answer text or instructional message */
+  message: string;
   /** Interactive questions for the user (only present when type="questions") */
   questions?: Question[];
   /** Whether this conversation has reached completion */
@@ -123,32 +123,26 @@ export function isAnswer(
   return response.type === "answer";
 }
 
-export function isClarification(
-  response: ChatResponse
-): response is ChatResponse & {type: "clarification"} {
-  return response.type === "clarification";
-}
-
 export function isComplete(response: ChatResponse): boolean {
   return response.is_complete === true;
 }
 
 // Type guards for chat requests
-export function isInitialRequest(
+export function isStartRequest(
   request: ChatRequest
-): request is InitialChatRequest {
+): request is StartChatRequest {
   return request.type === "start";
 }
 
-export function isContinuationRequest(
+export function isContinueRequest(
   request: ChatRequest
-): request is ContinuationChatRequest {
+): request is ContinueChatRequest {
   return request.type === "continue";
 }
 
-export function isCompletionRequest(
+export function isCompleteRequest(
   request: ChatRequest
-): request is CompletionChatRequest {
+): request is CompleteChatRequest {
   return request.type === "complete";
 }
 

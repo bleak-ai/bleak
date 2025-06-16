@@ -1,2 +1,2 @@
 export {useBleakInstance} from "./useBleakInstance";
-export type {UseBleakInstanceResult} from "./useBleakInstance";
+export type {UseBleakInstanceReturn} from "./useBleakInstance";

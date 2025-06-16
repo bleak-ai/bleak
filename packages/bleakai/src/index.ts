@@ -7,15 +7,15 @@
  */
 
 // === Primary Bleak API ===
-// The main, unified way to use BleakAI - use this for new projects
-
-// Unified session - combines all functionality
+// Main classes
+export {Bleak} from "./chat/Bleak";
 export {BleakSession} from "./chat/BleakSession";
+
+// Configuration interfaces
+export type {BleakConfig} from "./chat/Bleak";
 export type {BleakSessionConfig} from "./chat/BleakSession";
 
 // === Advanced/Legacy APIs ===
-// Use these only if you need specific functionality
-
 // Core-only session (backend/CLI usage, no UI components)
 export {BleakCoreSession} from "./chat/BleakCoreSession";
 export type {BleakCoreSessionConfig} from "./chat/BleakCoreSession";
@@ -46,13 +46,23 @@ export {
 // Types for handling conversations and questions
 export type {
   AnsweredQuestion,
+  Question,
   InteractiveQuestion,
-  TaskSpecification
+  TaskSpecification,
+  ChatResponse,
+  ChatRequest,
+  StartChatRequest,
+  ContinueChatRequest,
+  CompleteChatRequest,
+  BleakElement
 } from "./chat/types";
 
 // === Error Types ===
 // Error classes for proper error handling
-export {ChatError, RateLimitError, AuthenticationError} from "./chat/Bleak";
+export {BleakError} from "./chat/Bleak";
+
+// === React Integration ===
+export {useBleakInstance} from "./react/useBleakInstance";
 
 /**
  * Quick Start (RECOMMENDED):

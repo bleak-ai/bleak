@@ -1,17 +1,23 @@
 import axios, {AxiosInstance, AxiosError} from "axios";
-import type {
+import {
   AnsweredQuestion,
-  InteractiveQuestion,
+  Question,
   ChatResponse,
   BleakElement,
-  InitialChatRequest,
-  ContinuationChatRequest,
+  StartChatRequest,
+  ContinueChatRequest,
+  CompleteChatRequest,
   TaskSpecification,
-  CompletionChatRequest
+  hasQuestions,
+  isAnswer,
+  isComplete,
+  ChatClientConfig,
+  ChatError,
+  RateLimitError,
+  AuthenticationError
 } from "./types";
 import type {BleakElementConfig} from "../types/core";
 import {createResolverFromConfig} from "../core/BleakResolver";
-import {ChatError, RateLimitError, AuthenticationError} from "./Bleak";
 import type {IBleakSession, SessionState} from "./IBleakSession";
 
 export interface BleakSessionConfig {
@@ -117,7 +123,7 @@ export class BleakSession implements IBleakSession {
    * Returns questions immediately if the AI needs input, or a direct answer
    */
   async startBleakConversation(prompt: string): Promise<{
-    questions?: InteractiveQuestion[];
+    questions?: Question[];
     answer?: string;
     getState: () => SessionState;
   }> {
@@ -139,7 +145,7 @@ export class BleakSession implements IBleakSession {
 
       return {
         questions: hasQuestions ? this.state.questions : undefined,
-        answer: !hasQuestions ? response.content : undefined,
+        answer: !hasQuestions ? response.message : undefined,
         getState: () => ({...this.state})
       };
     } catch (error) {
@@ -172,8 +178,8 @@ export class BleakSession implements IBleakSession {
       this.updateStateFromResponse(response);
 
       if (response.is_complete) {
-        this.state.result = response.content;
-        return response.content;
+        this.state.result = response.message;
+        return response.message;
       } else {
         throw new Error(
           "Conversation not completed - more input may be required"
@@ -192,7 +198,7 @@ export class BleakSession implements IBleakSession {
    * This allows for iterative refinement of the conversation
    */
   async requestMoreBleakQuestions(answers: Record<string, string>): Promise<{
-    questions?: InteractiveQuestion[];
+    questions?: Question[];
     isComplete: boolean;
     getState: () => SessionState;
   }> {
@@ -263,7 +269,7 @@ export class BleakSession implements IBleakSession {
    * Resolve questions to components with static configuration
    * Returns components and their static props, leaving state management to the consumer
    */
-  resolveComponents(questions: InteractiveQuestion[]): Array<{
+  resolveComponents(questions: Question[]): Array<{
     Component: any;
     staticProps: {
       text: string;
@@ -271,7 +277,7 @@ export class BleakSession implements IBleakSession {
       uniqueId: string;
       elementIndex: number;
     };
-    question: InteractiveQuestion;
+    question: Question;
   }> {
     if (!this.resolver) {
       throw new Error(
@@ -314,7 +320,7 @@ export class BleakSession implements IBleakSession {
    * Returns components ready to render with value and onChange handlers
    */
   getBleakComponents(
-    questions: InteractiveQuestion[],
+    questions: Question[],
     answers: Record<string, string>,
     onAnswerChange: (question: string, value: string) => void
   ): Array<{
@@ -376,7 +382,7 @@ export class BleakSession implements IBleakSession {
       taskSpecification?: TaskSpecification;
     } = {}
   ): Promise<ChatResponse> {
-    const request: InitialChatRequest = {
+    const request: StartChatRequest = {
       type: "start",
       prompt,
       bleak_elements: options.bleakElements,
@@ -400,11 +406,11 @@ export class BleakSession implements IBleakSession {
       throw new Error("No active conversation thread");
     }
 
-    const request: ContinuationChatRequest = {
+    const request: ContinueChatRequest = {
       type: "continue",
       thread_id: this.state.threadId,
       answers,
-      want_more_questions: wantMoreQuestions
+      user_choice: wantMoreQuestions ? "more_questions" : "final_answer"
     };
 
     const response = await this.client.post<ChatResponse>("/chat", request, {
@@ -423,7 +429,7 @@ export class BleakSession implements IBleakSession {
       throw new Error("No active conversation thread");
     }
 
-    const request: CompletionChatRequest = {
+    const request: CompleteChatRequest = {
       type: "complete",
       thread_id: this.state.threadId,
       answers
@@ -449,7 +455,7 @@ export class BleakSession implements IBleakSession {
     }
 
     if (response.is_complete) {
-      this.state.result = response.content;
+      this.state.result = response.message;
     }
   }
 

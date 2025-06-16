@@ -1,359 +1,249 @@
 import axios, {AxiosInstance, AxiosError} from "axios";
-import type {
-  AnsweredQuestion,
-  InteractiveQuestion,
+import {
+  StartChatRequest,
+  ContinueChatRequest,
+  CompleteChatRequest,
   ChatResponse,
-  BleakElement as ChatBleakElement,
-  InitialChatRequest,
-  ContinuationChatRequest,
-  CompletionChatRequest,
-  ConversationContext
+  Question,
+  hasQuestions,
+  isComplete,
+  AnsweredQuestion,
+  BleakElement
 } from "./types";
-import type {
-  BleakElementConfig,
-  BleakElement as CoreBleakElement
-} from "../types/core";
-import {createResolverFromConfig} from "../core/BleakResolver";
 
-// Client configuration interface
-export interface ChatClientConfig {
+// Essential configuration
+export interface BleakConfig {
   baseUrl?: string;
   apiKey?: string;
   timeout?: number;
-  retries?: number;
+  // Component configuration - this is what makes Bleak special
+  elements?: Record<
+    string,
+    {
+      component: any;
+      description: string;
+    }
+  >;
 }
 
-export interface BleakConfig extends ChatClientConfig {
-  elements?: BleakElementConfig;
+// Essential conversation state
+interface ConversationState {
+  threadId?: string;
+  isActive: boolean;
+  currentQuestions?: Question[];
 }
 
-export interface BleakAskOptions {
-  onQuestions?: (
-    questions: InteractiveQuestion[]
-  ) => Promise<AnsweredQuestion[] | Record<string, string>>;
-  onStream?: (chunk: string) => void;
-  onComplete?: (answer: string) => void;
-  onError?: (error: Error) => void;
-}
-
-// Error classes
-export class ChatError extends Error {
-  constructor(
-    message: string,
-    public statusCode?: number,
-    public response?: any
-  ) {
+// Custom errors
+export class BleakError extends Error {
+  constructor(message: string, public statusCode?: number) {
     super(message);
-    this.name = "ChatError";
+    this.name = "BleakError";
   }
 }
 
-export class RateLimitError extends ChatError {
-  constructor(message: string, public retryAfter?: number) {
-    super(message, 429);
-    this.name = "RateLimitError";
-  }
-}
-
-export class AuthenticationError extends ChatError {
-  constructor(message: string) {
-    super(message, 401);
-    this.name = "AuthenticationError";
-  }
-}
-
+/**
+ * Bleak - Essential BleakAI functionality
+ *
+ * Core responsibilities:
+ * 1. API communication with /chat endpoint (start, continue, complete)
+ * 2. Component matching for questions
+ * 3. Basic conversation state management
+ */
 export class Bleak {
   private client: AxiosInstance;
-  private elementConfig?: BleakElementConfig;
-  private resolver?: ReturnType<typeof createResolverFromConfig>;
-  private context: ConversationContext = {
-    threadId: undefined,
-    state: "starting",
-    questionsAsked: 0,
-    questionsAnswered: 0,
-    currentQuestions: undefined,
-    allAnswers: []
+  private elements?: BleakConfig["elements"];
+  private state: ConversationState = {
+    isActive: false
   };
-  private config: Required<ChatClientConfig>;
 
   constructor(config: BleakConfig) {
-    // Set default configuration
-    this.config = {
-      baseUrl:
-        config.baseUrl ||
-        process.env.VITE_API_BASE_URL ||
-        "https://api.bleak.ai",
-      apiKey: config.apiKey || "",
-      timeout: config.timeout || 30000,
-      retries: config.retries || 3
-    };
-
-    // Initialize axios client
+    // Initialize API client
     this.client = axios.create({
-      baseURL: this.config.baseUrl,
-      timeout: this.config.timeout,
+      baseURL: config.baseUrl || "https://api.bleak.ai",
+      timeout: config.timeout || 30000,
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        ...(config.apiKey && {"X-OpenAI-API-Key": config.apiKey})
       }
     });
 
-    // Add response interceptor for error handling
+    // Store component configuration
+    this.elements = config.elements;
+
+    // Error handling
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
-        if (error.response?.status === 429) {
-          const retryAfter = error.response.headers["retry-after"];
-          const errorData = error.response.data as any;
-          throw new RateLimitError(
-            errorData?.detail || "Rate limit exceeded",
-            retryAfter ? parseInt(retryAfter) : undefined
-          );
-        } else if (error.response?.status === 401) {
-          const errorData = error.response.data as any;
-          throw new AuthenticationError(
-            errorData?.detail || "Authentication failed"
-          );
-        } else {
-          const errorData = error.response?.data as any;
-          throw new ChatError(
-            errorData?.detail || error.message,
-            error.response?.status,
-            error.response?.data
-          );
-        }
+        const status = error.response?.status;
+        const message = (error.response?.data as any)?.detail || error.message;
+        throw new BleakError(message, status);
       }
     );
-
-    // Set up elements if provided
-    if (config.elements) {
-      this.elementConfig = config.elements;
-      this.resolver = createResolverFromConfig(config.elements);
-    }
   }
 
   /**
-   * Ask a question and handle the complete conversation flow
+   * ESSENTIAL FUNCTION 1: Start conversation
+   * Calls /chat with type="start"
    */
-  async ask(prompt: string, options: BleakAskOptions = {}): Promise<string> {
-    try {
-      // Reset context for new conversation
-      this.resetContext();
-      this.context.state = "starting";
-
-      // Start conversation
-      const bleakElements: ChatBleakElement[] | undefined = this.elementConfig
-        ? Object.entries(this.elementConfig).map(([name, config]) => ({
-            name,
-            description: config.description
-          }))
-        : undefined;
-
-      let response = await this.makeInitialRequest(prompt, {bleakElements});
-
-      // Handle conversation flow
-      while (!response.is_complete) {
-        if (
-          response.type === "questions" &&
-          response.questions &&
-          options.onQuestions
-        ) {
-          // Get answers from user
-          const answers = await options.onQuestions(response.questions);
-
-          // Convert to standard format if needed
-          const standardAnswers = this.normalizeAnswers(
-            answers,
-            response.questions
-          );
-
-          // Continue conversation
-          response = await this.makeContinuationRequest(standardAnswers);
-        } else {
-          // Try to finish if no questions handler
-          response = await this.makeCompletionRequest([]);
-        }
-      }
-
-      const finalAnswer = response.content;
-
-      if (options.onComplete) {
-        options.onComplete(finalAnswer);
-      }
-
-      return finalAnswer;
-    } catch (error) {
-      if (options.onError) {
-        options.onError(error as Error);
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * Render questions using configured components
-   */
-  renderQuestions(questions: InteractiveQuestion[]): Array<{
-    question: InteractiveQuestion;
-    Component: any;
-    props: any;
+  async start(prompt: string): Promise<{
+    questions?: Question[];
+    answer?: string;
   }> {
-    if (!this.resolver) {
-      throw new Error("No elements configured. Pass elements in constructor.");
+    const request: StartChatRequest = {
+      type: "start",
+      prompt,
+      bleak_elements: this.elements ? this.getBleakElementsForAPI() : undefined
+    };
+
+    const response = await this.client.post<ChatResponse>("/chat", request);
+    const chatResponse = response.data;
+
+    // Update state
+    this.state.threadId = chatResponse.thread_id;
+    this.state.isActive = !chatResponse.is_complete;
+    this.state.currentQuestions = chatResponse.questions;
+
+    return {
+      questions: chatResponse.questions,
+      answer: chatResponse.type === "answer" ? chatResponse.message : undefined
+    };
+  }
+
+  /**
+   * ESSENTIAL FUNCTION 2: Continue conversation
+   * Calls /chat with type="continue"
+   */
+  async continue(
+    answers: Record<string, string>,
+    wantMoreQuestions = false
+  ): Promise<{
+    questions?: Question[];
+    answer?: string;
+  }> {
+    if (!this.state.threadId) {
+      throw new BleakError("No active conversation. Call start() first.");
+    }
+
+    const answeredQuestions: AnsweredQuestion[] = Object.entries(answers).map(
+      ([question, answer]) => ({
+        question,
+        answer
+      })
+    );
+
+    const request: ContinueChatRequest = {
+      type: "continue",
+      thread_id: this.state.threadId,
+      answers: answeredQuestions,
+      user_choice: wantMoreQuestions ? "more_questions" : "final_answer"
+    };
+
+    const response = await this.client.post<ChatResponse>("/chat", request);
+    const chatResponse = response.data;
+
+    // Update state
+    this.state.isActive = !chatResponse.is_complete;
+    this.state.currentQuestions = chatResponse.questions;
+
+    return {
+      questions: chatResponse.questions,
+      answer: chatResponse.type === "answer" ? chatResponse.message : undefined
+    };
+  }
+
+  /**
+   * ESSENTIAL FUNCTION 3: Complete conversation
+   * Calls /chat with type="complete"
+   */
+  async complete(answers: Record<string, string> = {}): Promise<string> {
+    if (!this.state.threadId) {
+      throw new BleakError("No active conversation. Call start() first.");
+    }
+
+    const answeredQuestions: AnsweredQuestion[] = Object.entries(answers).map(
+      ([question, answer]) => ({
+        question,
+        answer
+      })
+    );
+
+    const request: CompleteChatRequest = {
+      type: "complete",
+      thread_id: this.state.threadId,
+      answers: answeredQuestions
+    };
+
+    const response = await this.client.post<ChatResponse>("/chat", request);
+    const chatResponse = response.data;
+
+    // Reset state - conversation is done
+    this.state.isActive = false;
+    this.state.currentQuestions = undefined;
+
+    return chatResponse.message;
+  }
+
+  /**
+   * ESSENTIAL FUNCTION 4: Component matching
+   * Matches questions to configured components
+   */
+  getComponents(questions: Question[]): Array<{
+    question: Question;
+    Component: any;
+    props: {
+      text: string;
+      options?: string[];
+      uniqueId: string;
+    };
+  }> {
+    if (!this.elements) {
+      throw new BleakError(
+        "No components configured. Pass 'elements' in constructor."
+      );
     }
 
     return questions.map((question, index) => {
-      const element: CoreBleakElement = {
-        type: question.type,
-        text: question.question,
-        options: question.options
-      };
+      const elementConfig = this.elements![question.type];
 
-      const resolution = this.resolver!.resolve(element, "", () => {}, index);
+      if (!elementConfig) {
+        throw new BleakError(
+          `No component configured for type: ${question.type}`
+        );
+      }
 
       return {
         question,
-        Component: resolution.Component,
-        props: resolution.props
+        Component: elementConfig.component,
+        props: {
+          text: question.question,
+          options: question.options,
+          uniqueId: `bleak-${question.type}-${index}`
+        }
       };
     });
   }
 
   /**
-   * Continue conversation with specific answers
+   * Get current conversation state
    */
-  async continue(
-    answers: AnsweredQuestion[] | Record<string, string>
-  ): Promise<ChatResponse> {
-    const standardAnswers = this.normalizeAnswers(answers, []);
-    return await this.makeContinuationRequest(standardAnswers);
-  }
-
-  /**
-   * Finish conversation and get final answer
-   */
-  async finish(finalAnswers: AnsweredQuestion[] = []): Promise<string> {
-    const response = await this.makeCompletionRequest(finalAnswers);
-    return response.content;
-  }
-
-  /**
-   * Get current conversation context
-   */
-  getContext() {
-    return {...this.context};
+  getState() {
+    return {...this.state};
   }
 
   /**
    * Reset conversation
    */
-  reset(): void {
-    this.resetContext();
+  reset() {
+    this.state = {isActive: false};
   }
 
-  // Private methods
+  // Helper: Convert elements config to API format
+  private getBleakElementsForAPI(): BleakElement[] {
+    if (!this.elements) return [];
 
-  private resetContext(): void {
-    this.context = {
-      threadId: undefined,
-      state: "starting",
-      questionsAsked: 0,
-      questionsAnswered: 0,
-      currentQuestions: undefined,
-      allAnswers: []
-    };
-  }
-
-  private async makeInitialRequest(
-    prompt: string,
-    options: {bleakElements?: ChatBleakElement[]} = {}
-  ): Promise<ChatResponse> {
-    const request: InitialChatRequest = {
-      type: "start",
-      prompt,
-      bleak_elements: options.bleakElements
-    };
-
-    const response = await this.client.post("/bleak/chat", request);
-    const chatResponse: ChatResponse = response.data;
-    this.updateContextFromResponse(chatResponse);
-    return chatResponse;
-  }
-
-  private async makeContinuationRequest(
-    answers: AnsweredQuestion[]
-  ): Promise<ChatResponse> {
-    if (!this.context.threadId) {
-      throw new ChatError("No active conversation. Call ask() first.");
-    }
-
-    this.context.state = "answering";
-    this.context.allAnswers.push(...answers);
-    this.context.questionsAnswered += answers.length;
-
-    const request: ContinuationChatRequest = {
-      type: "continue",
-      thread_id: this.context.threadId,
-      answers: this.context.allAnswers
-    };
-
-    const response = await this.client.post("/bleak/chat", request);
-    const chatResponse: ChatResponse = response.data;
-    this.updateContextFromResponse(chatResponse);
-    return chatResponse;
-  }
-
-  private async makeCompletionRequest(
-    finalAnswers: AnsweredQuestion[] = []
-  ): Promise<ChatResponse> {
-    if (!this.context.threadId) {
-      throw new ChatError("No active conversation. Call ask() first.");
-    }
-
-    this.context.state = "completing";
-
-    if (finalAnswers.length > 0) {
-      this.context.allAnswers.push(...finalAnswers);
-      this.context.questionsAnswered += finalAnswers.length;
-    }
-
-    const request: CompletionChatRequest = {
-      type: "complete",
-      thread_id: this.context.threadId,
-      answers: this.context.allAnswers
-    };
-
-    const response = await this.client.post("/bleak/chat", request);
-    const chatResponse: ChatResponse = response.data;
-    this.updateContextFromResponse(chatResponse);
-    return chatResponse;
-  }
-
-  private updateContextFromResponse(response: ChatResponse): void {
-    // Update thread ID
-    this.context.threadId = response.thread_id;
-
-    // Update state based on response
-    if (response.is_complete) {
-      this.context.state = "complete";
-    } else if (response.type === "questions" && response.questions) {
-      this.context.state = "asking";
-      this.context.currentQuestions = response.questions;
-      this.context.questionsAsked += response.questions.length;
-    }
-  }
-
-  private normalizeAnswers(
-    answers: AnsweredQuestion[] | Record<string, string>,
-    questions: InteractiveQuestion[]
-  ): AnsweredQuestion[] {
-    if (Array.isArray(answers)) {
-      return answers;
-    }
-
-    // Convert object to AnsweredQuestion array
-    return Object.entries(answers).map(([questionText, answer]) => ({
-      question: questionText,
-      answer
+    return Object.entries(this.elements).map(([name, config]) => ({
+      name,
+      description: config.description
     }));
   }
 }
