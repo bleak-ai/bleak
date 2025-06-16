@@ -16,11 +16,15 @@ export interface BleakElement {
   description: string;
 }
 
-export interface InteractiveQuestion {
+// Unified question interface (matches backend DynamicQuestion)
+export interface Question {
   type: string;
   question: string;
   options?: string[];
 }
+
+// Legacy alias for backward compatibility
+export interface InteractiveQuestion extends Question {}
 
 export interface TaskSpecification {
   output_type?: string; // "linkedin_post", "long_article", "tutorial", "documentation", etc. Default: "article"
@@ -54,26 +58,18 @@ export type ChatRequest =
   | ContinuationChatRequest
   | CompletionChatRequest;
 
-// Chat Response type (mirroring backend)
+// Simplified ChatResponse (cleaned up, mirroring backend)
 export interface ChatResponse {
+  /** Unique conversation identifier */
   thread_id: string;
+  /** Response type determining how to handle the response */
   type: "questions" | "answer" | "clarification";
+  /** Main response content - answer text or instructional message */
   content: string;
-  questions?: InteractiveQuestion[];
-  actions?: string[];
+  /** Interactive questions for the user (only present when type="questions") */
+  questions?: Question[];
+  /** Whether this conversation has reached completion */
   is_complete: boolean;
-  progress?: {
-    questions_asked?: number;
-    questions_answered?: number;
-    additional_questions?: number;
-    phase?:
-      | "initial"
-      | "clarifying"
-      | "follow_up"
-      | "completed"
-      | "force_completed";
-    [key: string]: any;
-  };
 }
 
 // SDK Configuration
@@ -113,7 +109,7 @@ export class AuthenticationError extends ChatError {
 // Type guards for chat responses
 export function hasQuestions(
   response: ChatResponse
-): response is ChatResponse & {questions: InteractiveQuestion[]} {
+): response is ChatResponse & {questions: Question[]} {
   return (
     response.type === "questions" &&
     Array.isArray(response.questions) &&
@@ -169,7 +165,7 @@ export interface ConversationContext {
   state: ConversationState;
   questionsAsked: number;
   questionsAnswered: number;
-  currentQuestions?: InteractiveQuestion[];
+  currentQuestions?: Question[];
   allAnswers: AnsweredQuestion[];
 }
 
