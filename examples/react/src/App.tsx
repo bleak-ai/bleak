@@ -1,8 +1,8 @@
 import React, {useState, useMemo} from "react";
 import {
   BleakSession,
-  type InteractiveQuestion,
-  type BleakInputProps,
+  type BleakQuestion,
+  type BleakComponentProps,
   type BleakChoiceProps
 } from "bleakai";
 
@@ -14,7 +14,7 @@ export const ELEMENT_DESCRIPTIONS = {
 } as const;
 
 // Custom UI Components
-const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => (
+const TextInput: React.FC<BleakComponentProps> = ({text, value, onChange}) => (
   <div className="question-group">
     <label className="question-label">{text}</label>
     <input
@@ -164,7 +164,7 @@ const QuestionsSection = ({
   isLoading,
   bleak
 }: {
-  questions: InteractiveQuestion[];
+  questions: BleakQuestion[];
   answers: Record<string, string>;
   onAnswerChange: (question: string, value: string) => void;
   onSubmit: () => void;
@@ -238,9 +238,7 @@ const AnswerSection = ({
 function App() {
   // State management
   const [prompt, setPrompt] = useState("");
-  const [questions, setQuestions] = useState<InteractiveQuestion[] | null>(
-    null
-  );
+  const [questions, setQuestions] = useState<BleakQuestion[] | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [finalAnswer, setFinalAnswer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);

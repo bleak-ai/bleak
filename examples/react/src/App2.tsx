@@ -1,8 +1,8 @@
-import React, {useMemo, useState} from "react";
+import React, {useState} from "react";
 import {
   BleakSession,
-  type InteractiveQuestion,
-  type BleakInputProps,
+  type BleakQuestion,
+  type BleakComponentProps,
   type BleakChoiceProps
 } from "bleakai";
 
@@ -12,7 +12,7 @@ export const ELEMENT_DESCRIPTIONS = {
 } as const;
 
 // TEXT INPUT COMPONENT - for free-form text entry
-const TextInput: React.FC<BleakInputProps> = ({text, value, onChange}) => (
+const TextInput: React.FC<BleakComponentProps> = ({text, value, onChange}) => (
   <div className="question-group">
     {/* Always provide clear labels for accessibility */}
     <label className="question-label">{text}</label>
@@ -71,7 +71,7 @@ const uiSession = new BleakSession({
 
 export const ArticleCreator = () => {
   const [initialPrompt, setInitialPrompt] = useState("");
-  const [questions, setQuestions] = useState<InteractiveQuestion[]>([]);
+  const [questions, setQuestions] = useState<BleakQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
 
   const [finalAnswer, setFinalAnswer] = useState<string>("");

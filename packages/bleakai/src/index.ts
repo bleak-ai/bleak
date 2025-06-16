@@ -10,46 +10,60 @@
  * 2. Component matching for questions
  */
 
-// === Main Classes ===
-export {Bleak} from "./chat/Bleak";
+// === Main Class ===
 export {BleakSession} from "./chat/BleakSession";
 
 // === Configuration ===
-export type {BleakConfig} from "./chat/Bleak";
 export type {BleakSessionConfig} from "./chat/BleakSession";
 
 // === Essential Types ===
 export type {
   AnsweredQuestion,
-  Question,
+  BleakQuestion,
   TaskSpecification,
   ChatResponse,
   ChatRequest,
   StartChatRequest,
   ContinueChatRequest,
   CompleteChatRequest,
-  BleakElement
+  BleakElement,
+  // Component Props
+  BleakComponentProps,
+  BleakChoiceProps
 } from "./chat/types";
-
-// === Error Handling ===
-export {BleakError} from "./chat/Bleak";
 
 /**
  * Quick Start:
  *
  * ```typescript
- * import {BleakSession} from "bleakai";
+ * import {BleakSession, BleakComponentProps, BleakChoiceProps} from "bleakai";
+ *
+ * // Your components (using the new clear prop names)
+ * const TextInput: React.FC<BleakComponentProps> = ({text, value, onChange}) => (
+ *   <input value={value} onChange={e => onChange(e.target.value)} />
+ * );
+ *
+ * const RadioGroup: React.FC<BleakChoiceProps> = ({text, options, value, onChange}) => (
+ *   <div>
+ *     {options.map(option => (
+ *       <label key={option}>
+ *         <input type="radio" checked={value === option} onChange={() => onChange(option)} />
+ *         {option}
+ *       </label>
+ *     ))}
+ *   </div>
+ * );
  *
  * const bleak = new BleakSession({
  *   apiKey: "your-key",
  *   baseUrl: "http://localhost:8008/bleak",
  *   elements: {
  *     text: {
- *       component: YourTextInput,
+ *       component: TextInput,
  *       description: "For text input"
  *     },
  *     radio: {
- *       component: YourRadioGroup,
+ *       component: RadioGroup,
  *       description: "For single choice"
  *     }
  *   }

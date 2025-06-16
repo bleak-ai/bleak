@@ -1,7 +1,7 @@
 import axios, {AxiosInstance, AxiosError} from "axios";
 import {
   AnsweredQuestion,
-  Question,
+  BleakQuestion,
   ChatResponse,
   BleakElement,
   StartChatRequest,
@@ -28,13 +28,12 @@ export interface BleakSessionConfig {
 // Simple state - just what we need
 interface SessionState {
   threadId?: string;
-  questions?: Question[];
+  questions?: BleakQuestion[];
 }
 
 /**
- * BleakSession - Simplified version focused on App.tsx usage
  *
- * Essential methods that App.tsx uses:
+ * Essential methods:
  * - startBleakConversation()
  * - finishBleakConversation()
  * - requestMoreBleakQuestions()
@@ -74,10 +73,9 @@ export class BleakSession {
 
   /**
    * Start conversation - returns questions or direct answer
-   * Used by App.tsx in handleStartConversation()
    */
   async startBleakConversation(prompt: string): Promise<{
-    questions?: Question[];
+    questions?: BleakQuestion[];
     answer?: string;
   }> {
     const request: StartChatRequest = {
@@ -102,7 +100,6 @@ export class BleakSession {
 
   /**
    * Get final answer by completing conversation
-   * Used by App.tsx in handleSubmitAnswers()
    */
   async finishBleakConversation(
     answers: Record<string, string>
@@ -125,10 +122,9 @@ export class BleakSession {
 
   /**
    * Request more questions after answering current ones
-   * Used by App.tsx in handleRequestMoreQuestions()
    */
   async requestMoreBleakQuestions(answers: Record<string, string>): Promise<{
-    questions?: Question[];
+    questions?: BleakQuestion[];
     isComplete: boolean;
   }> {
     if (!this.state.threadId) {
@@ -156,9 +152,8 @@ export class BleakSession {
 
   /**
    * Resolve questions to components for rendering
-   * Used by App.tsx: bleak.resolveComponents(questions)
    */
-  resolveComponents(questions: Question[]): Array<{
+  resolveComponents(questions: BleakQuestion[]): Array<{
     Component: any;
     staticProps: {
       text: string;
@@ -166,7 +161,7 @@ export class BleakSession {
       uniqueId: string;
       elementIndex: number;
     };
-    question: Question;
+    question: BleakQuestion;
   }> {
     if (!this.elements) {
       throw new Error("No elements configured");
@@ -194,7 +189,6 @@ export class BleakSession {
 
   /**
    * Reset session
-   * Used by App.tsx in resetAll()
    */
   resetBleakSession(): void {
     this.state = {};

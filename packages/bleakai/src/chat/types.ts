@@ -17,7 +17,7 @@ export interface BleakElement {
 }
 
 // Unified question interface (matches backend DynamicQuestion)
-export interface Question {
+export interface BleakQuestion {
   type: string;
   question: string;
   options?: string[];
@@ -64,7 +64,30 @@ export interface ChatResponse {
   /** Main response message - answer text or instructional message */
   message: string;
   /** Interactive questions for the user (only present when type="questions") */
-  questions?: Question[];
+  questions?: BleakQuestion[];
   /** Whether this conversation has reached completion */
   is_complete: boolean;
+}
+
+// === COMPONENT PROP TYPES ===
+// These define the props that BleakAI will pass to your React components
+
+/**
+ * Props for text input components (no predefined options)
+ * Used for: text areas, input fields, sliders, etc.
+ */
+export interface BleakComponentProps {
+  text: string; // The question text to display
+  value: string; // Current answer value
+  onChange: (value: string) => void; // Function to call when value changes
+  uniqueId?: string; // Optional unique identifier
+  elementIndex?: number; // Optional position in question list
+}
+
+/**
+ * Props for choice-based components (with predefined options)
+ * Used for: radio buttons, checkboxes, dropdowns, etc.
+ */
+export interface BleakChoiceProps extends BleakComponentProps {
+  options: string[]; // Array of available choices
 }
