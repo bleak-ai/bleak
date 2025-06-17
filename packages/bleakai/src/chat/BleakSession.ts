@@ -22,7 +22,7 @@ export interface BleakSessionConfig {
       description: string;
     }
   >;
-  task_specification?: TaskSpecification;
+  taskSpecification?: TaskSpecification;
 }
 
 // Simple state - just what we need
@@ -59,7 +59,7 @@ export class BleakSession {
 
     // Store config
     this.elements = config.elements;
-    this.taskSpec = config.task_specification;
+    this.taskSpec = config.taskSpecification;
 
     // Simple error handling
     this.client.interceptors.response.use(

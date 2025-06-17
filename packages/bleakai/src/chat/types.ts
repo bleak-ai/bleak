@@ -23,10 +23,10 @@ export interface BleakQuestion {
   options?: string[];
 }
 
+// Task specification for the prompt
 export interface TaskSpecification {
-  output_type?: string; // "linkedin_post", "long_article", "tutorial", "documentation", etc. Default: "article"
-  target_length?: string; // "short", "medium", "long". Default: "medium"
   description?: string; // User-defined context. Default: "helpful content based on the user's request"
+  length?: string; // "short", "medium", "long". Default: "medium"
 }
 
 // Chat Request types (mirroring backend Union type)

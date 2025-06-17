@@ -251,9 +251,8 @@ function App() {
         baseUrl: "http://localhost:8008/bleak",
         timeout: 30000,
         elements: elementConfig,
-        task_specification: {
-          output_type: "tweet",
-          target_length: "short (under 140 characters)",
+        taskSpecification: {
+          length: "short (under 140 characters)",
           description: "helpful content based on the user's request"
         }
       }),
