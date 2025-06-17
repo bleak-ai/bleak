@@ -4,7 +4,6 @@ import {
   Code,
   Rocket,
   FileText,
-  HelpCircle,
   Play,
   ArrowRight,
   CheckCircle
