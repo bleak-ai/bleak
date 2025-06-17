@@ -1,0 +1,71 @@
+# Define Your Components
+
+Learn how to create UI components that work seamlessly with BleakAI. Your components maintain full control over styling and behavior while implementing a simple interface for data exchange.
+
+## Component Requirements
+
+All BleakAI components must implement the `BleakComponentProps` interface:
+
+```typescript
+interface BleakComponentProps {
+  text: string; // The question text to display
+  value: string; // Current value of the component
+  onChange: (value: string) => void; // Callback when value changes
+  uniqueId?: string; // Optional unique identifier
+  elementIndex?: number; // Optional element index
+}
+```
+
+For components with choices (radio buttons, dropdowns, etc.), extend `BleakChoiceProps`:
+
+```typescript
+interface BleakChoiceProps extends BleakComponentProps {
+  options: string[]; // Array of available options
+}
+```
+
+## Element Configuration Object
+
+When creating a BleakSession, you define your components using the `elements` object:
+
+```typescript
+const elements = {
+  text: {
+    component: TextInput,
+    description: "Text input field for open-ended responses"
+  },
+  radio: {
+    component: RadioGroup,
+    description: "Single choice selection from multiple options"
+  },
+  number: {
+    component: NumberInput,
+    description: "Numeric input for quantities and measurements"
+  }
+};
+```
+
+## Component Description Importance
+
+The `description` field is crucial for BleakAI's backend to properly understand and select components:
+
+- **Be specific**: "Single choice radio button" vs "Radio button"
+- **Include context**: "Date picker for appointment scheduling"
+- **Mention constraints**: "Number input accepting values 1-100"
+
+Good descriptions help the AI choose the most appropriate component for each question.
+
+## Best Practices
+
+1. **Keep it simple**: Components should focus on data collection
+2. **Handle edge cases**: Always validate the `value` prop
+3. **Use clear descriptions**: Help the AI understand when to use each component
+4. **Maintain consistency**: Follow the same patterns across all components
+5. **Test thoroughly**: Ensure components work with various question types
+
+## Next Steps
+
+Now that you understand component definition:
+
+1. **[Create a Bleak Session](create-session)** - Configure your BleakSession with your components
+2. **[Start a Conversation](start-conversation)** - Begin using your components in conversations

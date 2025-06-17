@@ -1,0 +1,75 @@
+# Create a Bleak Session
+
+The `BleakSession` is the main class that manages your conversations with BleakAI. It handles API communication, component resolution, and maintains conversation state.
+
+## Basic Session Creation
+
+```typescript
+import {BleakSession} from "bleakai";
+
+const bleak = new BleakSession({
+  baseUrl: "https://api.bleakai.com/bleak",
+  apiKey: process.env.BLEAK_API_KEY,
+  elements: {
+    text: {component: TextInput, description: "Text input field"},
+    radio: {component: RadioGroup, description: "Single choice selection"}
+  }
+});
+```
+
+## Configuration Options
+
+The `BleakSession` constructor accepts a configuration object with these required properties:
+
+```typescript
+interface BleakSessionConfig {
+  baseUrl: string; // BleakAI API endpoint
+  apiKey: string; // Your API key from bleakai.com
+  elements: ElementConfig; // Your component configuration
+}
+```
+
+### baseUrl
+
+The API endpoint for BleakAI services:
+
+- **Production**: `"https://api.bleakai.com/bleak"`
+
+### apiKey
+
+Your authentication key from [bleakai.com](https://bleakai.com). Store this securely in environment variables.
+
+### elements
+
+An object mapping component types to their configurations:
+
+```typescript
+interface ElementConfig {
+  [componentType: string]: {
+    component: React.ComponentType<any>;
+    description: string;
+  };
+}
+```
+
+## Component Type Guidelines
+
+When defining component types, use clear naming conventions:
+
+- **Text components**: `text`, `textarea`, `email`
+- **Choice components**: `radio`, `multi_select`, `dropdown`
+- **Specialized components**: `number`, `date`, `rating`
+
+## Best Practices
+
+1. **Use descriptive component descriptions** - Help the AI understand when to use each component
+2. **Store API keys securely** - Always use environment variables
+3. **Keep element names simple** - Use lowercase with underscores
+4. **Validate components** - Ensure all components implement the required interfaces
+
+## Next Steps
+
+Now that you have a session configured:
+
+1. **[Start a Conversation](start-conversation)** - Initiate conversations with BleakAI
+2. **[Continue a Conversation](continue-conversation)** - Learn about conversation flow management

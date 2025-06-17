@@ -1,0 +1,83 @@
+# Start a Conversation
+
+Learn how to initiate intelligent conversations with BleakAI using the `startBleakConversation` method. This is the entry point for all BleakAI interactions.
+
+## Basic Usage
+
+```typescript
+const result = await bleak.startBleakConversation("Help me plan a vacation");
+
+if (result.questions) {
+  // BleakAI generated questions for the user
+  const configs = bleak.resolveComponents(result.questions);
+  // Render the questions using your components
+} else if (result.answer) {
+  // BleakAI provided a direct answer without questions
+  console.log("Direct answer:", result.answer);
+}
+```
+
+## Method Signature
+
+```typescript
+startBleakConversation(prompt: string): Promise<BleakStartResult>
+```
+
+### Parameters
+
+- **prompt** (`string`): The initial prompt or goal for the conversation
+
+### Return Type
+
+```typescript
+interface BleakStartResult {
+  questions?: BleakQuestion[]; // Generated questions (if any)
+  answer?: string; // Direct answer (if no questions needed)
+  conversationId?: string; // Unique conversation identifier
+}
+```
+
+## Prompt Best Practices
+
+The quality of your prompt significantly affects the AI's response:
+
+### Good Prompts
+
+- **Specific and goal-oriented**: "Help me find a restaurant for my anniversary dinner"
+- **Clear context**: "Create a workout plan for a beginner who wants to lose weight"
+- **Actionable requests**: "Help me choose the right health insurance plan"
+
+### Avoid These Prompts
+
+- **Too vague**: "Help me"
+- **Too broad**: "Tell me everything about cars"
+- **Already complete**: "What is 2 + 2?"
+
+## Response Types
+
+### Questions Response
+
+When BleakAI needs to gather information, it returns questions that you can render using your components.
+
+### Direct Answer Response
+
+For simple requests, BleakAI might provide an immediate answer without requiring additional questions.
+
+## Error Handling
+
+```typescript
+try {
+  const result = await bleak.startBleakConversation(prompt);
+  // Handle result
+} catch (error) {
+  console.error("Failed to start conversation:", error);
+  // Handle error appropriately
+}
+```
+
+## Next Steps
+
+After starting a conversation:
+
+1. **[Continue a Conversation](continue-conversation)** - Learn how to handle follow-up questions
+2. **[Finish a Conversation](finish-conversation)** - Complete the conversation and get final answers

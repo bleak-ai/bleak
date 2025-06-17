@@ -1,143 +1,80 @@
-# BleakAI Overview
+# Getting Started
 
-Transform static forms into intelligent conversations that adapt to user input.
+Get up and running with BleakAI in just a few minutes. This guide will walk you through installation, API key setup, and basic configuration.
 
-## What BleakAI Does
+## Installation
 
-**Problem**: AI agents may ask a question when context is not clear.
-
-**Solution**: BleakAI analyzes user input and dynamically generates only the questions needed, using your existing UI components.
-
-## When to Use BleakAI
-
-✅ **Good for:**
-
-- Complex forms with conditional logic
-- Recommendation engines
-- Support ticket creation
-- ...
-
-❌ **Not for:**
-
-- Simple contact forms
-- Login/signup forms
-- Quick AI Answers
-
-## 5-Minute Quickstart
-
-### 1. Install
+Install the BleakAI library using your preferred package manager:
 
 ```bash
+# Using npm
 npm install bleakai
+
+# Using yarn
+yarn add bleakai
+
+# Using pnpm
+pnpm add bleakai
 ```
 
-### 2. Get API Key
+## Get Your API Key
 
-Sign up at [BleakAI Platform](https://platform.bleak.ai) and copy your API key.
+To use BleakAI, you need an API key from [bleakai.com](https://bleakai.com):
 
-### 3. Define Your Components
+1. **Visit [bleakai.com](https://bleakai.com)** and create an account
+2. **Navigate to your dashboard** and generate a new API key
+3. **Copy your API key** - you'll need it for configuration
 
-```typescript
-import {
-  BleakSession,
-  type BleakInputProps,
-  type BleakChoiceProps
-} from "bleakai";
+### Why do I need an API key?
 
-// Your existing components
-const TextInput = ({text, value, onChange}: BleakInputProps) => (
-  <div>
-    <label>{text}</label>
-    <input value={value || ""} onChange={(e) => onChange(e.target.value)} />
-  </div>
-);
+The API key authenticates your application with the BleakAI backend service. This allows:
 
-const RadioGroup = ({text, options, value, onChange}: BleakChoiceProps) => (
-  <div>
-    <label>{text}</label>
-    {options?.map((option) => (
-      <label key={option}>
-        <input
-          type="radio"
-          checked={value === option}
-          onChange={() => onChange(option)}
-        />
-        {option}
-      </label>
-    ))}
-  </div>
-);
+- **Secure access** to the AI question generation service
+- **Usage tracking** and billing management
+- **Rate limiting** and abuse prevention
+- **Personalized AI models** tailored to your use case
 
-// Configure element types
-const elementConfig = {
-  text: {component: TextInput, description: "For text input"},
-  radio: {component: RadioGroup, description: "For single choice"}
-};
+> **Security Note**: Keep your API key private. Never expose it in client-side code or public repositories. Use environment variables in production.
+
+## Environment Setup
+
+For security, store your API key in environment variables:
+
+### `.env.local` (for Next.js)
+
+```bash
+BLEAK_API_KEY=your_api_key_here
 ```
 
-### 4. Initialize BleakSession
+### `.env` (for other frameworks)
 
-```typescript
-// Configure BleakAI with your components
-const bleak = new BleakSession({
-  apiKey: "your-api-key",
-  elements: elementConfig
-});
+```bash
+REACT_APP_BLEAK_API_KEY=your_api_key_here
+# or
+VITE_BLEAK_API_KEY=your_api_key_here
 ```
 
-**Note**: The `elements` configuration is required when you plan to use `getBleakComponents()` to render dynamic forms. For simple text-only conversations, you can omit it.
+## Supported Frameworks
 
-### 5. Handle Conversations
+BleakAI works with any JavaScript framework that supports React-style components:
 
-```typescript
-// Start conversation
-const result = await bleak.startBleakConversation("Help me plan a trip");
-
-if (result.questions && result.questions.length > 0) {
-  // Convert AI questions to your components
-  const components = bleak.getBleakComponents(
-    result.questions,
-    answers,
-    handleAnswerChange
-  );
-
-  // Render them
-  components.forEach(({Component, props}) => render(<Component {...props} />));
-
-  // Submit when ready
-  const finalAnswer = await bleak.finishBleakConversation(answers);
-}
-```
-
-**That's it!** You now have intelligent forms that adapt to user input.
-
-## Core Philosophy: Bring Your Own Components
-
-BleakAI provides the **intelligence** (what questions to ask), you provide the **presentation** (how they look).
-
-- ✅ Use any UI library: Material-UI, Ant Design, Chakra UI, custom CSS
-- ✅ Keep your existing design system
-- ✅ Full control over styling and behavior
-- ✅ Framework agnostic: React, Vue, Angular, vanilla JS
+- ✅ **React** (16.8+)
+- ✅ **Next.js** (10+)
+- ✅ **Vue** (3+) with JSX
+- ✅ **Angular** (12+) with React compatibility
+- ✅ **Svelte** (with React adapter)
 
 ## Next Steps
 
-- **[API Reference](api-reference)** - Complete method documentation
-- **[Complete Example](dynamic-forms)** - Full working application
-- **[Component Guide](dynamic-forms-components)** - Build custom components
+Now that you have BleakAI installed and configured:
 
-## Design Philosophy
+1. **[Define Your Components](define-components)** - Learn how to create compatible UI components
+2. **[Create a Bleak Session](create-session)** - Understand session configuration options
+3. **[Start a Conversation](start-conversation)** - Begin your first intelligent conversation
 
-BleakAI is built on these principles:
+## Need Help?
 
-1. **Separation of Concerns**: AI handles logic, you handle presentation
-2. **Progressive Enhancement**: Works with simple prompts, gets smarter with more data
-3. **Framework Agnostic**: Not tied to any specific UI framework
-4. **Type Safe**: Full TypeScript support throughout
-5. **Minimal Lock-in**: Can be removed without major refactoring
-
-## Current Status
-
-- **Version**: 0.0.4 (Early Alpha)
-- **Stability**: API may change between versions
-- **Production Ready**: Not yet, use for prototyping
+- 📖 **Documentation**: Continue with the next sections
+- 💬 **Community**: Join our Discord server
+- 🐛 **Issues**: Report bugs on GitHub
+- 📧 **Support**: Contact support@bleakai.com

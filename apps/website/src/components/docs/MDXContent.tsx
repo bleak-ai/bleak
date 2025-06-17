@@ -1,5 +1,6 @@
 import React from "react";
 import {CodeBlock} from "../ui/code-block";
+import {getAllDocumentIds} from "./documentConfig";
 
 interface MDXContentProps {
   content: string;
@@ -10,32 +11,8 @@ export const MDXContent: React.FC<MDXContentProps> = ({
   content,
   onInternalNavigation
 }) => {
-  // Handle internal navigation
-  const handleLinkClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    href: string
-  ) => {
-    // Check if it's an internal documentation link
-    const internalLinks = [
-      "api-reference",
-      "getting-started",
-      "dynamic-forms",
-      "dynamic-forms-initialize",
-      "dynamic-forms-components",
-      "dynamic-forms-questions"
-    ];
-
-    if (internalLinks.includes(href) && onInternalNavigation) {
-      e.preventDefault();
-      onInternalNavigation(href);
-      return;
-    }
-
-    // External links open in new tab
-    if (href.startsWith("http")) {
-      return; // Let default behavior handle it
-    }
-  };
+  // Get valid document IDs from centralized config
+  const validDocumentIds = getAllDocumentIds();
 
   // Enhanced markdown parser with Silent Edge styling
   const parseContent = (text: string) => {
@@ -114,14 +91,7 @@ export const MDXContent: React.FC<MDXContentProps> = ({
             "<strong class='font-semibold text-foreground'>$1</strong>"
           )
           .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, href) => {
-            const isInternal = [
-              "api-reference",
-              "getting-started",
-              "dynamic-forms",
-              "dynamic-forms-initialize",
-              "dynamic-forms-components",
-              "dynamic-forms-questions"
-            ].includes(href);
+            const isInternal = validDocumentIds.includes(href);
             const isExternal = href.startsWith("http");
 
             if (isInternal) {
@@ -165,14 +135,7 @@ export const MDXContent: React.FC<MDXContentProps> = ({
                         .replace(
                           /\[([^\]]+)\]\(([^)]+)\)/g,
                           (match, text, href) => {
-                            const isInternal = [
-                              "api-reference",
-                              "getting-started",
-                              "dynamic-forms",
-                              "dynamic-forms-initialize",
-                              "dynamic-forms-components",
-                              "dynamic-forms-questions"
-                            ].includes(href);
+                            const isInternal = validDocumentIds.includes(href);
                             const isExternal = href.startsWith("http");
 
                             if (isInternal) {

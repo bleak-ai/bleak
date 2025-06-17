@@ -1,0 +1,60 @@
+# Bleak Overview
+
+BleakAI is an intelligent form generation system that creates dynamic, conversational user interfaces. Instead of static forms, BleakAI generates context-aware questions that adapt based on user responses, creating a more engaging and efficient user experience.
+
+## What is BleakAI?
+
+BleakAI transforms the traditional form-filling experience by using artificial intelligence to:
+
+- **Generate intelligent questions** based on your initial prompt
+- **Adapt dynamically** to user responses
+- **Use your existing UI components** for consistent design
+- **Provide personalized final answers** based on collected data
+
+Perfect for complex onboarding flows, surveys, recommendation systems, and any scenario where you need to collect user information intelligently.
+
+## Architecture Components
+
+BleakAI consists of three main components that work together seamlessly:
+
+### 1. Your Frontend Application
+
+This is your custom React, Vue, or Angular application where you:
+
+- Design and implement your own UI components
+- Control the visual styling and user experience
+- Handle the overall application logic and routing
+
+### 2. bleakai NPM Library
+
+The open-source library that connects your frontend to BleakAI:
+
+- **API Communication**: Handles all backend requests (`start`, `continue`, `finish`)
+- **Component Resolution**: Maps backend questions to your UI components
+- **Session Management**: Maintains conversation state and flow
+
+### 3. BleakAI Backend
+
+The private AI service that powers the intelligence:
+
+- **Question Generation**: Creates contextual questions based on prompts
+- **Answer Processing**: Analyzes user responses and determines next steps
+- **AI Intelligence**: Provides final personalized answers
+
+## Conversation Flow
+
+A typical BleakAI conversation works in three phases:
+
+1. **Start**: Send an initial prompt to begin the conversation
+2. **Continue**: Collect user answers and request additional questions as needed
+3. **Finish**: Process all answers and receive a personalized final response
+
+## Key Benefits
+
+- **Intelligent**: Questions adapt based on previous answers
+- **Flexible**: Use your own UI components and design
+- **Efficient**: Users only answer relevant questions
+- **Scalable**: Backend handles the AI complexity
+- **Open Source**: Frontend library is completely open
+
+Ready to get started? Check out the [Getting Started](getting-started) guide.

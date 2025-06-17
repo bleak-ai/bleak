@@ -1,0 +1,81 @@
+# Continue a Conversation
+
+Learn how to manage ongoing conversations with BleakAI using the `requestMoreBleakQuestions` method. This allows you to gather additional information when needed.
+
+## When to Continue
+
+Continue a conversation when:
+
+- **You need more specificity**: Current answers aren't detailed enough
+- **New questions arise**: User's answers reveal additional information needs
+- **Conditional logic**: Certain answers trigger follow-up questions
+- **Progressive disclosure**: Break complex forms into manageable steps
+
+## Basic Usage
+
+```typescript
+const result = await bleak.requestMoreBleakQuestions(answers);
+
+if (result.questions) {
+  // More questions to ask
+  const configs = bleak.resolveComponents(result.questions);
+  // Render additional questions
+} else if (result.isComplete) {
+  // Ready to finish - no more questions needed
+  const finalResult = await bleak.finishBleakConversation(answers);
+}
+```
+
+## Method Signature
+
+```typescript
+requestMoreBleakQuestions(answers: Record<string, string>): Promise<BleakContinueResult>
+```
+
+### Parameters
+
+- **answers** (`Record<string, string>`): Current answers collected from the user
+
+### Return Type
+
+```typescript
+interface BleakContinueResult {
+  questions?: BleakQuestion[]; // Additional questions (if any)
+  isComplete: boolean; // Whether conversation is ready to finish
+  suggestedAction?: string; // Optional guidance for next steps
+}
+```
+
+## Decision Logic
+
+BleakAI automatically determines whether to:
+
+- **Generate more questions** if additional information would be helpful
+- **Mark as complete** if enough information has been gathered
+- **Provide suggestions** for the next best action
+
+## Best Practices
+
+1. **Check `isComplete` status** - Always verify if the conversation is ready to finish
+2. **Handle both outcomes** - Be prepared for either more questions or completion
+3. **Collect quality answers** - More detailed responses lead to better results
+4. **Don't force continuation** - Trust BleakAI's completion assessment
+
+## Error Handling
+
+```typescript
+try {
+  const result = await bleak.requestMoreBleakQuestions(answers);
+  // Handle result
+} catch (error) {
+  console.error("Failed to continue conversation:", error);
+  // Handle error appropriately
+}
+```
+
+## Next Steps
+
+When continuing conversations:
+
+1. **[Finish a Conversation](finish-conversation)** - Learn how to complete conversations and get final answers
+2. **[API Reference](api-reference)** - Explore all available methods and types

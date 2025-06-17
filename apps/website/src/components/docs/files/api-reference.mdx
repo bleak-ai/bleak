@@ -1,187 +1,202 @@
 # API Reference
 
-Complete reference for BleakSession methods and types used in App.tsx.
+Complete reference for all BleakAI types, functions, and classes. This is your go-to resource for implementation details.
 
-## BleakSession Class
+## Classes
 
-The main class for managing AI conversations with automatic component resolution.
+### BleakSession
 
-### Constructor
+The main class for managing conversations with BleakAI.
 
 ```typescript
-new BleakSession(config: BleakSessionConfig)
+class BleakSession {
+  constructor(config: BleakSessionConfig);
+
+  startBleakConversation(prompt: string): Promise<BleakStartResult>;
+  requestMoreBleakQuestions(
+    answers: Record<string, string>
+  ): Promise<BleakContinueResult>;
+  finishBleakConversation(answers: Record<string, string>): Promise<string>;
+  resolveComponents(questions: BleakQuestion[]): BleakComponentConfig[];
+}
 ```
 
-#### BleakSessionConfig
+## Configuration Types
+
+### BleakSessionConfig
+
+Configuration object for creating a BleakSession.
 
 ```typescript
 interface BleakSessionConfig {
-  baseUrl?: string; // API endpoint (default: "https://api.bleak.ai")
-  apiKey?: string; // Your BleakAI API key
-  timeout?: number; // Request timeout in ms (default: 30000)
-  retries?: number; // Number of retries (default: 3)
-  elements?: BleakElementConfig; // Your component configuration
+  baseUrl: string; // API endpoint URL
+  apiKey: string; // Authentication API key
+  elements: ElementConfig; // Component configuration
+  headers?: Record<string, string>; // Optional custom headers
+  timeout?: number; // Request timeout in milliseconds (default: 30000)
+  debug?: boolean; // Enable debug logging (default: false)
 }
 ```
 
-### Core Methods
+### ElementConfig
 
-#### `startBleakConversation(prompt: string)`
-
-Starts a new conversation with the AI. Returns immediately with either questions or a direct answer.
+Maps component types to their React components and descriptions.
 
 ```typescript
-const result = await bleak.startBleakConversation("Help me plan a trip");
-
-// Returns:
-{
-  questions?: InteractiveQuestion[]; // Questions to ask user
-  answer?: string;            // Direct answer if available
-  getState: () => SessionState;
-}
-```
-
-#### `finishBleakConversation(answers: Record<string, string>)`
-
-Submits user answers and gets the final response.
-
-```typescript
-const finalAnswer = await bleak.finishBleakConversation({
-  "What's your budget?": "Under $2000",
-  "How many days?": "7 days"
-});
-// Returns: string (final answer)
-```
-
-#### `requestMoreBleakQuestions(answers: Record<string, string>)`
-
-Requests additional questions for conversation refinement.
-
-```typescript
-const result = await bleak.requestMoreBleakQuestions(answers);
-
-// Returns:
-{
-  questions?: InteractiveQuestion[]; // Additional questions
-  isComplete: boolean;               // true if no more questions needed
-  getState: () => SessionState;
-}
-```
-
-#### `getBleakComponents(questions, answers, onAnswerChange)`
-
-Converts questions into renderable components using your configuration.
-
-```typescript
-const components = bleak.getBleakComponents(
-  questions, // InteractiveQuestion[]
-  answers, // Record<string, string>
-  onAnswerChange // (question: string, value: string) => void
-);
-
-// Returns array of:
-{
-  question: InteractiveQuestion;
-  Component: any; // Your component
-  props: any; // Props for component
-  key: string; // Unique key for React
-}
-```
-
-### Utility Methods
-
-#### `getBleakState()`
-
-Gets current session state.
-
-```typescript
-const state = bleak.getBleakState();
-// Returns: SessionState
-```
-
-#### `resetBleakSession()`
-
-Resets session state for new conversation.
-
-```typescript
-bleak.resetBleakSession();
-```
-
-## Type Definitions
-
-### Component Props
-
-```typescript
-// For components without predefined options
-interface BleakInputProps {
-  text: string;
-  value: string;
-  onChange: (value: string) => void;
-  uniqueId?: string;
-  elementIndex?: number;
-}
-
-// For components with predefined options
-interface BleakChoiceProps extends BleakInputProps {
-  options: string[];
-}
-```
-
-### Element Configuration
-
-```typescript
-interface BleakElementConfig {
-  [elementType: string]: {
-    component: any; // Your React component
-    description: string; // Helps AI choose when to use it
+interface ElementConfig {
+  [componentType: string]: {
+    component: React.ComponentType<any>; // Your React component
+    description: string; // Description for AI understanding
   };
 }
 ```
 
-### Question Types
+## Component Interface Types
+
+### BleakComponentProps
+
+Base interface that all BleakAI components must implement.
 
 ```typescript
-interface InteractiveQuestion {
-  question: string; // Question text
-  type: string; // Element type (text, radio, etc.)
-  options?: string[]; // Available options for choice elements
+interface BleakComponentProps {
+  text: string; // Question text to display
+  value: string; // Current value of the component
+  onChange: (value: string) => void; // Callback when value changes
+  uniqueId?: string; // Optional unique identifier
+  elementIndex?: number; // Optional element index
 }
 ```
 
-### Session State
+### BleakChoiceProps
+
+Extended interface for components with choice options (radio, dropdown, etc.).
 
 ```typescript
-interface SessionState {
-  threadId?: string;
-  questions?: InteractiveQuestion[];
-  answers: Record<string, string>;
-  isLoading: boolean;
-  error?: Error;
-  isComplete: boolean;
-  result?: string;
+interface BleakChoiceProps extends BleakComponentProps {
+  options: string[]; // Array of available options
 }
 ```
+
+## Question Types
+
+### BleakQuestion
+
+Represents a single question generated by BleakAI.
+
+```typescript
+interface BleakQuestion {
+  question: string; // The question text
+  type: string; // Component type to use
+  options?: string[]; // Available options (for choice components)
+  required?: boolean; // Whether answer is required
+  placeholder?: string; // Placeholder text for inputs
+}
+```
+
+## Response Types
+
+### BleakStartResult
+
+Response from starting a conversation.
+
+```typescript
+interface BleakStartResult {
+  questions?: BleakQuestion[]; // Generated questions (if any)
+  answer?: string; // Direct answer (if no questions needed)
+  conversationId?: string; // Unique conversation identifier
+}
+```
+
+### BleakContinueResult
+
+Response from requesting more questions.
+
+```typescript
+interface BleakContinueResult {
+  questions?: BleakQuestion[]; // Additional questions (if any)
+  isComplete: boolean; // Whether conversation is ready to finish
+  suggestedAction?: "continue" | "finish" | "clarify"; // Suggested next action
+}
+```
+
+### BleakComponentConfig
+
+Configuration object returned by `resolveComponents`.
+
+```typescript
+interface BleakComponentConfig {
+  Component: React.ComponentType<any>; // The React component to render
+  staticProps: Record<string, any>; // Props to pass to the component
+  question: BleakQuestion; // The original question object
+  key?: string; // Unique key for React rendering
+}
+```
+
+## Method Details
+
+### startBleakConversation()
+
+Initiates a new conversation with BleakAI.
+
+```typescript
+startBleakConversation(prompt: string): Promise<BleakStartResult>
+```
+
+**Parameters:**
+
+- `prompt` (string): Initial prompt or goal for the conversation
+
+**Returns:** Promise that resolves to `BleakStartResult`
+
+### requestMoreBleakQuestions()
+
+Requests additional questions based on current answers.
+
+```typescript
+requestMoreBleakQuestions(answers: Record<string, string>): Promise<BleakContinueResult>
+```
+
+**Parameters:**
+
+- `answers` (Record< string, string>): Current answers collected from user
+
+**Returns:** Promise that resolves to `BleakContinueResult`
+
+### finishBleakConversation()
+
+Completes the conversation and returns final answer.
+
+```typescript
+finishBleakConversation(answers: Record<string, string>): Promise<string>
+```
+
+**Parameters:**
+
+- `answers` (Record< string, string>): All collected answers
+
+**Returns:** Promise that resolves to final answer string
+
+### resolveComponents()
+
+Maps questions to their corresponding UI components.
+
+```typescript
+resolveComponents(questions: BleakQuestion[]): BleakComponentConfig[]
+```
+
+**Parameters:**
+
+- `questions` (BleakQuestion[]): Array of questions to resolve
+
+**Returns:** Array of component configurations ready for rendering
 
 ## Error Handling
 
-BleakAI provides specific error types for different failure modes:
+All methods may throw errors for:
 
-```typescript
-import {ChatError, RateLimitError, AuthenticationError} from "bleakai";
+- **Network failures**: Connection issues
+- **Authentication errors**: Invalid API key
+- **Rate limiting**: Too many requests
+- **Server errors**: Backend service issues
 
-try {
-  const result = await bleak.startBleakConversation("Hello");
-} catch (error) {
-  if (error instanceof RateLimitError) {
-    console.log(`Rate limited. Retry after: ${error.retryAfter}s`);
-  } else if (error instanceof AuthenticationError) {
-    console.log("Check your API key");
-  } else if (error instanceof ChatError) {
-    console.log(`Chat error: ${error.message}`);
-  }
-}
-```
-
-## Complete Example
-
-See the [Getting Started](getting-started) guide for a complete working example that demonstrates all these APIs in action.
+Always wrap API calls in try-catch blocks for proper error handling.

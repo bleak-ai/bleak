@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useMemo} from "react";
 import {Button} from "../ui/button";
 import {MDXContent} from "../docs/MDXContent";
-import {getDocContent} from "../docs/docContent";
 import {
   BookOpen,
   Code,
@@ -11,26 +10,20 @@ import {
   X,
   HelpCircle
 } from "lucide-react";
-
-interface DocSection {
-  id: string;
-  title: string;
-  icon: React.ComponentType<any>;
-  content: string;
-}
+import {DOCUMENT_SECTIONS, getSortedDocuments} from "../docs/documentConfig";
+import type {DocumentSection} from "../docs/documentConfig";
 
 const DocsPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState("getting-started");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [docContent, setDocContent] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   // Load documentation content on mount
   useEffect(() => {
     const loadContent = async () => {
       try {
-        const content = await getDocContent();
-        setDocContent(content);
+        // Content is now pre-loaded in the centralized config
+        // No need to fetch anything
       } catch (error) {
         console.error("Failed to load documentation:", error);
       } finally {
@@ -41,44 +34,8 @@ const DocsPage: React.FC = () => {
     loadContent();
   }, []);
 
-  const sections: DocSection[] = [
-    {
-      id: "getting-started",
-      title: "BleakAI Overview",
-      icon: Rocket,
-      content: docContent["getting-started"] || ""
-    },
-    {
-      id: "dynamic-forms-initialize",
-      title: "Getting Started",
-      icon: Code,
-      content: docContent["dynamic-forms-initialize"] || ""
-    },
-    {
-      id: "dynamic-forms-components",
-      title: "Component Guide",
-      icon: FileText,
-      content: docContent["dynamic-forms-components"] || ""
-    },
-    {
-      id: "dynamic-forms",
-      title: "Complete Example",
-      icon: Code,
-      content: docContent["dynamic-forms"] || ""
-    },
-    {
-      id: "api-reference",
-      title: "API Reference",
-      icon: BookOpen,
-      content: docContent["api-reference"] || ""
-    },
-    {
-      id: "dynamic-forms-questions",
-      title: "Troubleshooting & FAQ",
-      icon: HelpCircle,
-      content: docContent["dynamic-forms-questions"] || ""
-    }
-  ];
+  // Use centralized document sections
+  const sections: DocumentSection[] = getSortedDocuments();
 
   const currentSection = sections.find((s) => s.id === activeSection);
 
@@ -109,7 +66,7 @@ const DocsPage: React.FC = () => {
     return () => window.removeEventListener("popstate", handlePopState);
   }, [sections]);
 
-  const renderSidebarSection = (section: DocSection) => {
+  const renderSidebarSection = (section: DocumentSection) => {
     const Icon = section.icon;
     const isActive = activeSection === section.id;
 
