@@ -7,7 +7,7 @@ import {
   StartChatRequest,
   ContinueChatRequest,
   CompleteChatRequest,
-  TaskSpecification
+  OutputFormat
 } from "./types";
 
 // Simple configuration
@@ -22,7 +22,7 @@ export interface BleakSessionConfig {
       description: string;
     }
   >;
-  taskSpecification?: TaskSpecification;
+  outputFormat?: OutputFormat;
 }
 
 // Simple state - just what we need
@@ -43,7 +43,7 @@ interface SessionState {
 export class BleakSession {
   private client: AxiosInstance;
   private elements?: BleakSessionConfig["elements"];
-  private taskSpec?: TaskSpecification;
+  private outputFormat?: OutputFormat;
   private state: SessionState = {};
 
   constructor(config: BleakSessionConfig) {
@@ -59,7 +59,7 @@ export class BleakSession {
 
     // Store config
     this.elements = config.elements;
-    this.taskSpec = config.taskSpecification;
+    this.outputFormat = config.outputFormat;
 
     // Simple error handling
     this.client.interceptors.response.use(
@@ -74,15 +74,15 @@ export class BleakSession {
   /**
    * Start conversation - returns questions or direct answer
    */
-  async startBleakConversation(prompt: string): Promise<{
+  async startBleakConversation(topic: string): Promise<{
     questions?: BleakQuestion[];
     answer?: string;
   }> {
     const request: StartChatRequest = {
       type: "start",
-      prompt,
+      topic,
       bleak_elements: this.getBleakElements(),
-      task_specification: this.taskSpec
+      output_format: this.outputFormat
     };
 
     const response = await this.client.post<ChatResponse>("/chat", request);

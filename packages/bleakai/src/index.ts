@@ -20,7 +20,7 @@ export type {BleakSessionConfig} from "./chat/BleakSession";
 export type {
   AnsweredQuestion,
   BleakQuestion,
-  TaskSpecification,
+  OutputFormat,
   ChatResponse,
   ChatRequest,
   StartChatRequest,

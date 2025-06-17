@@ -23,18 +23,20 @@ export interface BleakQuestion {
   options?: string[];
 }
 
-// Task specification for the prompt
-export interface TaskSpecification {
-  description?: string; // User-defined context. Default: "helpful content based on the user's request"
-  length?: string; // "short", "medium", "long". Default: "medium"
+// Output format specification for content generation
+export interface OutputFormat {
+  content_type?: string; // tweet, article, linkedin_post, email, etc.
+  length?: string; // short, medium, long
+  tone?: string; // professional, casual, friendly, formal, etc.
+  format_requirements?: string; // any specific formatting needs
 }
 
 // Chat Request types (mirroring backend Union type)
 export interface StartChatRequest {
   type: "start";
-  prompt: string;
+  topic: string;
   bleak_elements?: BleakElement[];
-  task_specification?: TaskSpecification;
+  output_format?: OutputFormat;
 }
 
 export interface ContinueChatRequest {
