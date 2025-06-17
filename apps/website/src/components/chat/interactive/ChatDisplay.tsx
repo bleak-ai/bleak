@@ -1,9 +1,9 @@
 import React from "react";
-import type {InteractiveQuestion} from "bleakai";
+import type {BleakQuestion} from "bleakai";
 import MarkdownPreview from "@uiw/react-markdown-preview";
 
 interface ChatDisplayProps {
-  questions: InteractiveQuestion[];
+  questions: BleakQuestion[];
   answers: Record<string, string>;
   finalAnswer: string | null;
   isLoading: boolean;
@@ -13,7 +13,7 @@ interface ChatDisplayProps {
   onGetAnswer: () => void;
   onReset: () => void;
   renderQuestions: (
-    questions: InteractiveQuestion[],
+    questions: BleakQuestion[],
     answers: Record<string, string>,
     onAnswerChange: (question: string, value: string) => void
   ) => React.ReactElement[];
@@ -45,13 +45,13 @@ const Questions = ({
   renderQuestions,
   allAnswered
 }: {
-  questions: InteractiveQuestion[];
+  questions: BleakQuestion[];
   answers: Record<string, string>;
   onAnswerChange: (question: string, value: string) => void;
   onMoreQuestions: () => void;
   onGetAnswer: () => void;
   renderQuestions: (
-    questions: InteractiveQuestion[],
+    questions: BleakQuestion[],
     answers: Record<string, string>,
     onAnswerChange: (question: string, value: string) => void
   ) => React.ReactElement[];

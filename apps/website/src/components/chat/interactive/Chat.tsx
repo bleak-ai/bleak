@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import {BleakSession, type InteractiveQuestion} from "bleakai";
+import {BleakSession, type BleakQuestion} from "bleakai";
 import {ChatDisplay} from "./ChatDisplay";
 import {BLEAK_ELEMENT_CONFIG} from "../../../config/bleakConfig";
 import {ChatInput} from "./ChatInput";
@@ -22,12 +22,12 @@ export const Chat = ({
       new BleakSession({
         baseUrl:
           import.meta.env.VITE_BLEAK_API_URL || "http://localhost:8008/bleak",
-        apiKey: initialApiKey || "your-api-key",
+        // apiKey: initialApiKey || "your-api-key",
         elements: BLEAK_ELEMENT_CONFIG
       })
   );
 
-  const [questions, setQuestions] = useState<InteractiveQuestion[]>([]);
+  const [questions, setQuestions] = useState<BleakQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [finalAnswer, setFinalAnswer] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -103,13 +103,20 @@ export const Chat = ({
   };
 
   const renderQuestions = (
-    questions: InteractiveQuestion[],
+    questions: BleakQuestion[],
     answers: Record<string, string>,
     onAnswerChange: (question: string, value: string) => void
   ) => {
-    return bleak
-      .getBleakComponents(questions, answers, onAnswerChange)
-      .map(({Component, props, key}) => <Component key={key} {...props} />);
+    const componentConfigs = bleak.resolveComponents(questions);
+
+    return componentConfigs.map(({Component, staticProps, question}) => (
+      <Component
+        key={question.question}
+        {...staticProps}
+        value={answers[question.question] || ""}
+        onChange={(value: string) => onAnswerChange(question.question, value)}
+      />
+    ));
   };
 
   // Show input when welcome mode or no conversation yet

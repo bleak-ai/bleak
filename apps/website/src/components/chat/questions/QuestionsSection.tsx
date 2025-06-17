@@ -1,62 +1,68 @@
 import React from "react";
 import {Loader} from "lucide-react";
 import {Button} from "../../ui/button";
-import {createResolverFromConfig} from "bleakai";
-import type {BleakElementConfig, InteractiveQuestion} from "bleakai";
+import type {BleakQuestion} from "bleakai";
 import {BLEAK_ELEMENT_CONFIG} from "../../../config/bleakConfig";
 
-// Use the proper types from bleakai
-type InteractiveQuestionType = InteractiveQuestion;
-
 interface BleakElementsSectionProps {
-  questions: InteractiveQuestionType[];
+  questions: BleakQuestion[];
   answers: Record<string, string>;
   onAnswerChange: (question: string, value: string) => void;
   onChoice: (choice: "more_questions" | "final_answer") => void;
   isLoading: boolean;
   allQuestionsAnswered: boolean; // Still needed for interface compatibility
-  customConfig?: BleakElementConfig | null;
-  bleak?: unknown; // Changed from any to unknown
+  customConfig?: typeof BLEAK_ELEMENT_CONFIG | null;
+  bleak?: {
+    resolveComponents: (questions: BleakQuestion[]) => Array<{
+      Component: React.ComponentType<any>;
+      staticProps: {
+        text: string;
+        options?: string[] | null;
+        uniqueId: string;
+        elementIndex: number;
+      };
+      question: BleakQuestion;
+    }>;
+  };
 }
 
-// Dynamic component that creates proper bleak elements based on config
-const DynamicBleakElement = ({
+// Fallback component renderer using custom config
+const FallbackBleakElement = ({
   question,
   value,
   onChange,
   questionIndex,
   config
 }: {
-  question: InteractiveQuestionType;
+  question: BleakQuestion;
   value: string;
   onChange: (value: string) => void;
   questionIndex: number;
-  config: BleakElementConfig;
+  config: typeof BLEAK_ELEMENT_CONFIG;
 }) => {
-  const {resolve} = createResolverFromConfig(config);
+  const elementConfig = config[question.type as keyof typeof config];
 
-  const elementData = {
-    type: question.type,
-    text: question.question,
-    options: question.options || []
-  };
-
-  try {
-    const {Component, props} = resolve(
-      elementData,
-      value,
-      onChange,
-      questionIndex
-    );
-    return <Component {...props} />;
-  } catch (error) {
-    console.error("Error resolving bleak element:", error);
+  if (!elementConfig) {
+    console.error(`No component configured for type: ${question.type}`);
     return (
       <div className="text-destructive text-sm">
         Error rendering question: {question.question}
       </div>
     );
   }
+
+  const Component = elementConfig.component;
+
+  return (
+    <Component
+      text={question.question}
+      options={question.options || []}
+      value={value}
+      onChange={onChange}
+      uniqueId={`bleak-${question.type}-${questionIndex}`}
+      elementIndex={questionIndex}
+    />
+  );
 };
 
 export const QuestionsSection = ({
@@ -101,34 +107,28 @@ export const QuestionsSection = ({
         </div>
 
         <div className="space-y-8">
-          {bleak && typeof bleak === "object" && "getBleakComponents" in bleak
-            ? // Use the new getBleakComponents approach from App.tsx
-              (
-                bleak as {
-                  getBleakComponents: (
-                    questions: InteractiveQuestionType[],
-                    answers: Record<string, string>,
-                    onAnswerChange: (question: string, value: string) => void
-                  ) => {
-                    Component: React.ComponentType<unknown>;
-                    props: Record<string, unknown>;
-                    key: string;
-                  }[];
-                }
-              )
-                .getBleakComponents(questions, answers, onAnswerChange)
-                .map(({Component, props, key}) => (
-                  <div key={key} className="space-y-3">
-                    <Component {...props} />
-                    {key !== `question-${questions.length - 1}` && (
+          {bleak
+            ? // Use the new resolveComponents approach from BleakSession
+              bleak
+                .resolveComponents(questions)
+                .map(({Component, staticProps, question}, index) => (
+                  <div key={question.question} className="space-y-3">
+                    <Component
+                      {...staticProps}
+                      value={answers[question.question] || ""}
+                      onChange={(value: string) =>
+                        onAnswerChange(question.question, value)
+                      }
+                    />
+                    {index < questions.length - 1 && (
                       <div className="w-full h-px bg-border"></div>
                     )}
                   </div>
                 ))
-            : // Fallback to old approach if bleak session not available
+            : // Fallback to custom config approach if bleak session not available
               questions.map((question, index) => (
                 <div key={index} className="space-y-3">
-                  <DynamicBleakElement
+                  <FallbackBleakElement
                     question={question}
                     value={answers[question.question] || ""}
                     onChange={(value: string) =>

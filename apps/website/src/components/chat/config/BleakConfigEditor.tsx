@@ -1,61 +1,56 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
+import {Card, CardContent, CardHeader, CardTitle} from "../../ui/card";
 import {Button} from "../../ui/button";
 import {Textarea} from "../../ui/textarea";
 import {BLEAK_ELEMENT_CONFIG} from "../../../config/bleakConfig";
-import type {BleakElementConfig} from "bleakai";
 
-interface BleakElementConfigEditorProps {
-  onConfigChange: (config: BleakElementConfig) => void;
-  isCollapsed?: boolean;
+interface BleakConfigEditorProps {
+  config: typeof BLEAK_ELEMENT_CONFIG | null;
+  onConfigChange: (config: typeof BLEAK_ELEMENT_CONFIG | null) => void;
+  onClose: () => void;
 }
 
-export const BleakElementConfigEditor: React.FC<
-  BleakElementConfigEditorProps
-> = ({onConfigChange, isCollapsed = false}) => {
-  const [config, setConfig] =
-    useState<BleakElementConfig>(BLEAK_ELEMENT_CONFIG);
+export const BleakElementConfigEditor: React.FC<BleakConfigEditorProps> = ({
+  config,
+  onConfigChange,
+  onClose
+}) => {
   const [enabled, setEnabled] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(
       Object.keys(BLEAK_ELEMENT_CONFIG).map((key) => [key, true])
     )
   );
 
+  // Use default config if config is null
+  const currentConfig = config || BLEAK_ELEMENT_CONFIG;
+
   const updateConfig = (
-    newConfig: BleakElementConfig,
+    newConfig: typeof BLEAK_ELEMENT_CONFIG,
     newEnabled: Record<string, boolean>
   ) => {
-    const filteredConfig: BleakElementConfig = {};
-    Object.entries(newConfig).forEach(([key, value]) => {
-      if (newEnabled[key]) filteredConfig[key] = value;
-    });
-    onConfigChange(filteredConfig);
+    onConfigChange(newConfig);
   };
 
   const handleDescriptionChange = (type: string, description: string) => {
     const newConfig = {
-      ...config,
-      [type]: {...config[type], description}
+      ...currentConfig,
+      [type]: {
+        ...currentConfig[type as keyof typeof currentConfig],
+        description
+      }
     };
-    setConfig(newConfig);
     updateConfig(newConfig, enabled);
   };
 
   const handleToggle = (type: string) => {
     const newEnabled = {...enabled, [type]: !enabled[type]};
     setEnabled(newEnabled);
-    updateConfig(config, newEnabled);
+    updateConfig(currentConfig, newEnabled);
   };
 
   const handleReset = () => {
-    setConfig(BLEAK_ELEMENT_CONFIG);
-    const resetEnabled = Object.fromEntries(
-      Object.keys(BLEAK_ELEMENT_CONFIG).map((key) => [key, true])
-    );
-    setEnabled(resetEnabled);
-    onConfigChange(BLEAK_ELEMENT_CONFIG);
+    updateConfig(BLEAK_ELEMENT_CONFIG, enabled);
   };
-
-  if (isCollapsed) return null;
 
   return (
     <div className="space-y-4">
@@ -66,7 +61,7 @@ export const BleakElementConfigEditor: React.FC<
         </Button>
       </div>
 
-      {Object.entries(config).map(([type, typeConfig]) => (
+      {Object.entries(currentConfig).map(([type, typeConfig]) => (
         <div key={type} className="border rounded p-4 space-y-3">
           <div className="flex justify-between items-center">
             <span className="font-medium capitalize">

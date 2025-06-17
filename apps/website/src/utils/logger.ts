@@ -1,4 +1,4 @@
-import type {InteractiveQuestion, AnsweredQuestion} from "bleakai";
+import type {BleakQuestion, AnsweredQuestion} from "bleakai";
 
 // Enhanced logging utility for frontend debugging
 class FrontendLogger {
@@ -60,7 +60,7 @@ class FrontendLogger {
 
   // Specific logging methods for common scenarios
 
-  logQuestionMapping(questions: InteractiveQuestion[]) {
+  logQuestionMapping(questions: BleakQuestion[]) {
     this.section("Question Mapping");
 
     const summary = questions.map(
@@ -181,7 +181,7 @@ class FrontendLogger {
 export const frontendLogger = new FrontendLogger();
 
 // Convenience functions
-export const logQuestionMapping = (questions: InteractiveQuestion[]) =>
+export const logQuestionMapping = (questions: BleakQuestion[]) =>
   frontendLogger.logQuestionMapping(questions);
 
 export const logComponentRender = (

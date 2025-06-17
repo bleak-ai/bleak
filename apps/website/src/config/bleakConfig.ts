@@ -4,7 +4,6 @@ import {
   MultiSelectBleakElement,
   SliderBleakElement
 } from "../components/chat/elements";
-import type {BleakElementConfig} from "bleakai";
 
 // This enforces the library's type structure - single source of truth
 export const BLEAK_ELEMENT_CONFIG = {
@@ -28,7 +27,7 @@ export const BLEAK_ELEMENT_CONFIG = {
     description:
       "Use slider for numeric input, ratings, scales, or range selections. Best for: satisfaction ratings (1-10), budget ranges, percentages, priority levels, quantities (e.g., 'Rate your satisfaction', 'What is your budget range?', 'How important is this feature?'). Provide options array with [min, max] values or scale labels."
   }
-} satisfies BleakElementConfig;
+};
 
 // For API: Use descriptions directly - derived from the config
 export const BLEAK_ELEMENTS = [
