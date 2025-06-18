@@ -251,6 +251,7 @@ function App() {
         baseUrl: "http://localhost:8008/bleak",
         timeout: 30000,
         elements: elementConfig,
+        apiKey: "bleak_xBnz0kWkF7sed6JMzQvW45PkjTNkfT1kE4gT9MrEta1w8Qua",
         outputFormat: {
           content_type: "tweet",
           length: "short (under 140 characters)",

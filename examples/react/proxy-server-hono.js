@@ -19,7 +19,7 @@ app.use('*', cors({
   origin: ['http://localhost:3000', 'http://localhost:5173', 'https://yourdomain.com'],
   credentials: true,
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization', 'X-OpenAI-API-Key'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-OpenAI-API-Key', 'X-BleakAI-API-Key'],
 }));
 
 // Health check endpoint
@@ -69,6 +69,12 @@ app.all('/bleak/*', async (c) => {
     const authHeader = c.req.header('Authorization');
     if (authHeader) {
       headers.set('Authorization', authHeader);
+    }
+
+    // Forward X-BleakAI-API-Key header if present
+    const bleakApiKeyHeader = c.req.header('X-BleakAI-API-Key');
+    if (bleakApiKeyHeader) {
+      headers.set('X-BleakAI-API-Key', bleakApiKeyHeader);
     }
 
     // Forward the request to the backend
