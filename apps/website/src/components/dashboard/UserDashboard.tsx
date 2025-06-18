@@ -4,7 +4,7 @@ import {Button} from "../ui/button";
 import {ProtectedRoute} from "../auth/AuthWrapper";
 import {fetchUserProfile, createApiKey, revokeApiKey} from "../../api/authApi";
 import type {ApiKey, UserProfile, CreateApiKeyRequest} from "../../api/authApi";
-import {Copy, Trash2, Plus, Key} from "lucide-react";
+import {Copy, Trash2, Plus, Key, X, CheckCircle} from "lucide-react";
 
 const ApiKeyCard: React.FC<{
   apiKey: ApiKey;
@@ -70,9 +70,112 @@ const ApiKeyCard: React.FC<{
   );
 };
 
+// New modal component for showing newly created API key
+const NewApiKeyModal: React.FC<{
+  apiKey: ApiKey | null;
+  isOpen: boolean;
+  onClose: () => void;
+}> = ({apiKey, isOpen, onClose}) => {
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  if (!isOpen || !apiKey) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-background border border-border rounded-lg shadow-lg max-w-lg w-full mx-4">
+        <div className="p-6 space-y-6">
+          {/* Header */}
+          <div className="flex justify-between items-start">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="w-6 h-6 text-green-500" />
+              <div>
+                <h2 className="text-xl font-medium text-foreground">
+                  API Key Created Successfully
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Copy your key now - it won't be shown in full again
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={onClose}
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+
+          {/* Key Details */}
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-foreground">
+                Key Name
+              </label>
+              <p className="text-foreground mt-1">{apiKey.name}</p>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-foreground">
+                API Key
+              </label>
+              <div className="flex gap-3 mt-2">
+                <div className="flex-1 p-3 bg-input rounded-lg border border-border">
+                  <code className="text-sm text-foreground break-all">
+                    {apiKey.key || apiKey.preview}
+                  </code>
+                </div>
+                <Button
+                  onClick={() => copyToClipboard(apiKey.key || apiKey.preview)}
+                  variant="outline"
+                  size="sm"
+                  className={`${
+                    copied ? "text-green-500" : ""
+                  } interactive-scale`}
+                >
+                  <Copy className="w-4 h-4 mr-1" />
+                  {copied ? "Copied!" : "Copy"}
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Warning */}
+          <div className="p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+            <p className="text-sm text-yellow-600 dark:text-yellow-400">
+              <strong>Important:</strong> This is the only time you'll see the
+              full API key. Make sure to copy and store it securely.
+            </p>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end">
+            <Button onClick={onClose} className="interactive-scale">
+              Done
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const UserDashboard: React.FC = () => {
   const [newKeyName, setNewKeyName] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newApiKey, setNewApiKey] = useState<ApiKey | null>(null);
+  const [showNewKeyModal, setShowNewKeyModal] = useState(false);
   const queryClient = useQueryClient();
 
   const {
@@ -86,10 +189,12 @@ const UserDashboard: React.FC = () => {
 
   const createMutation = useMutation({
     mutationFn: (request: CreateApiKeyRequest) => createApiKey(request),
-    onSuccess: () => {
+    onSuccess: (data: ApiKey) => {
       queryClient.invalidateQueries({queryKey: ["userProfile"]});
       setNewKeyName("");
       setShowCreateForm(false);
+      setNewApiKey(data);
+      setShowNewKeyModal(true);
     }
   });
 
@@ -104,6 +209,11 @@ const UserDashboard: React.FC = () => {
     if (newKeyName.trim()) {
       createMutation.mutate({name: newKeyName.trim()});
     }
+  };
+
+  const handleCloseNewKeyModal = () => {
+    setShowNewKeyModal(false);
+    setNewApiKey(null);
   };
 
   if (isLoading) {
@@ -241,6 +351,13 @@ const UserDashboard: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* New API Key Modal */}
+      <NewApiKeyModal
+        apiKey={newApiKey}
+        isOpen={showNewKeyModal}
+        onClose={handleCloseNewKeyModal}
+      />
     </div>
   );
 };
