@@ -11,6 +11,8 @@ export interface ApiKey {
   created_at: string;
   last_used_at?: string;
   usage_count: number;
+  monthly_limit: number;
+  monthly_usage: number;
 }
 
 export interface UserProfile {
@@ -33,6 +35,10 @@ export interface UserProfile {
 
 export interface CreateApiKeyRequest {
   name: string;
+}
+
+export interface UpdateMonthlyLimitRequest {
+  monthly_limit: number;
 }
 
 // API Functions
@@ -98,6 +104,34 @@ export const fetchUsageStats = async () => {
 
   if (response.status !== 200) {
     throw new Error("Failed to fetch usage statistics");
+  }
+
+  return response.data;
+};
+
+export const updateMonthlyLimit = async (
+  apiKeyId: string,
+  request: UpdateMonthlyLimitRequest
+): Promise<{
+  message: string;
+  api_key_id: string;
+  monthly_limit: number;
+  monthly_usage: number;
+  month: string;
+}> => {
+  const response = await axios.put(
+    `${API_BASE_URL}/api/auth/api-keys/${apiKeyId}/monthly-limit`,
+    request,
+    {
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+  );
+
+  if (response.status !== 200) {
+    throw new Error("Failed to update monthly limit");
   }
 
   return response.data;

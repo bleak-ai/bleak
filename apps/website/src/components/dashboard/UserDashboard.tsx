@@ -2,16 +2,25 @@ import React, {useState} from "react";
 import {useQuery, useMutation, useQueryClient} from "@tanstack/react-query";
 import {Button} from "../ui/button";
 import {ProtectedRoute} from "../auth/AuthWrapper";
-import {fetchUserProfile, createApiKey, revokeApiKey} from "../../api/authApi";
+import {
+  fetchUserProfile,
+  createApiKey,
+  revokeApiKey,
+  updateMonthlyLimit
+} from "../../api/authApi";
 import type {ApiKey, UserProfile, CreateApiKeyRequest} from "../../api/authApi";
-import {Copy, Trash2, Plus, Key, X, CheckCircle} from "lucide-react";
+import {Copy, Trash2, Plus, Key, X, CheckCircle, Settings} from "lucide-react";
 
 const ApiKeyCard: React.FC<{
   apiKey: ApiKey;
   onRevoke: (id: string) => void;
   isRevoking: boolean;
-}> = ({apiKey, onRevoke, isRevoking}) => {
+  onUpdateLimit: (id: string, limit: number) => void;
+  isUpdatingLimit: boolean;
+}> = ({apiKey, onRevoke, isRevoking, onUpdateLimit, isUpdatingLimit}) => {
   const [copied, setCopied] = useState(false);
+  const [editingLimit, setEditingLimit] = useState(false);
+  const [newLimit, setNewLimit] = useState(apiKey.monthly_limit);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -23,6 +32,22 @@ const ApiKeyCard: React.FC<{
     }
   };
 
+  const handleSaveLimit = () => {
+    if (
+      newLimit >= 1 &&
+      newLimit <= 100000 &&
+      newLimit !== apiKey.monthly_limit
+    ) {
+      onUpdateLimit(apiKey.id, newLimit);
+    }
+    setEditingLimit(false);
+  };
+
+  const handleCancelEdit = () => {
+    setNewLimit(apiKey.monthly_limit);
+    setEditingLimit(false);
+  };
+
   return (
     <div className="silent-card space-y-4">
       <div className="flex justify-between items-start">
@@ -32,16 +57,28 @@ const ApiKeyCard: React.FC<{
             Created {new Date(apiKey.created_at).toLocaleDateString()}
           </p>
         </div>
-        <Button
-          onClick={() => onRevoke(apiKey.id)}
-          variant="outline"
-          size="sm"
-          disabled={isRevoking}
-          className="text-destructive hover:bg-destructive/10 interactive-scale"
-        >
-          <Trash2 className="w-4 h-4 mr-1" />
-          Delete
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setEditingLimit(!editingLimit)}
+            variant="outline"
+            size="sm"
+            disabled={isUpdatingLimit}
+            className="text-muted-foreground hover:text-foreground interactive-scale"
+          >
+            <Settings className="w-4 h-4 mr-1" />
+            Limits
+          </Button>
+          <Button
+            onClick={() => onRevoke(apiKey.id)}
+            variant="outline"
+            size="sm"
+            disabled={isRevoking}
+            className="text-destructive hover:bg-destructive/10 interactive-scale"
+          >
+            <Trash2 className="w-4 h-4 mr-1" />
+            Delete
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-3">
@@ -61,10 +98,65 @@ const ApiKeyCard: React.FC<{
         </Button>
       </div>
 
+      {/* Monthly Limit Editor */}
+      {editingLimit && (
+        <div className="p-4 bg-muted/50 rounded-lg border border-border space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-medium text-foreground">
+              Monthly Request Limit
+            </h4>
+          </div>
+          <div className="flex gap-3 items-center">
+            <input
+              type="number"
+              value={newLimit}
+              onChange={(e) =>
+                setNewLimit(
+                  Math.max(1, Math.min(100000, parseInt(e.target.value) || 1))
+                )
+              }
+              min="1"
+              max="100000"
+              className="flex-1 silent-input"
+              placeholder="Enter monthly limit"
+            />
+            <Button
+              onClick={handleSaveLimit}
+              size="sm"
+              disabled={isUpdatingLimit || newLimit < 1 || newLimit > 100000}
+              className="interactive-scale"
+            >
+              {isUpdatingLimit ? "Saving..." : "Save"}
+            </Button>
+            <Button
+              onClick={handleCancelEdit}
+              variant="outline"
+              size="sm"
+              disabled={isUpdatingLimit}
+              className="interactive-scale"
+            >
+              Cancel
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Set between 1 and 100,000 requests per month. Higher limits may be
+            available with premium plans.
+          </p>
+        </div>
+      )}
+
       <div className="text-xs text-muted-foreground">
-        {apiKey.usage_count} uses
+        {apiKey.usage_count} total uses
         {apiKey.last_used_at &&
           ` • Last used ${new Date(apiKey.last_used_at).toLocaleDateString()}`}
+        <br />
+        Monthly: {apiKey.monthly_usage}/{apiKey.monthly_limit} requests
+        {apiKey.monthly_usage >= apiKey.monthly_limit && (
+          <span className="text-red-500 font-medium">
+            {" "}
+            • Rate limit reached
+          </span>
+        )}
       </div>
     </div>
   );
@@ -205,10 +297,22 @@ const UserDashboard: React.FC = () => {
     }
   });
 
+  const updateLimitMutation = useMutation({
+    mutationFn: ({apiKeyId, limit}: {apiKeyId: string; limit: number}) =>
+      updateMonthlyLimit(apiKeyId, {monthly_limit: limit}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({queryKey: ["userProfile"]});
+    }
+  });
+
   const handleCreateApiKey = () => {
     if (newKeyName.trim()) {
       createMutation.mutate({name: newKeyName.trim()});
     }
+  };
+
+  const handleUpdateLimit = (apiKeyId: string, limit: number) => {
+    updateLimitMutation.mutate({apiKeyId, limit});
   };
 
   const handleCloseNewKeyModal = () => {
@@ -332,6 +436,8 @@ const UserDashboard: React.FC = () => {
               apiKey={apiKey}
               onRevoke={revokeMutation.mutate}
               isRevoking={revokeMutation.isPending}
+              onUpdateLimit={handleUpdateLimit}
+              isUpdatingLimit={updateLimitMutation.isPending}
             />
           ))}
         </div>
