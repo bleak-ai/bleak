@@ -53,7 +53,7 @@ export class BleakSession {
       timeout: config.timeout || 30000,
       headers: {
         "Content-Type": "application/json",
-        ...(config.apiKey && {"X-OpenAI-API-Key": config.apiKey})
+        ...(config.apiKey && {"X-BleakAI-API-Key": config.apiKey})
       }
     });
 
