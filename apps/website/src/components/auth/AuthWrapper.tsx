@@ -76,7 +76,7 @@ export const AuthButton: React.FC<AuthButtonProps> = ({onProfileClick}) => {
           className="flex items-center gap-2"
         >
           <LogOut className="w-4 h-4" />
-          Sign Out
+          <span className="hidden md:block">Sign Out</span>
         </Button>
       </div>
     );
