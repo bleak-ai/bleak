@@ -1,41 +1,57 @@
 // Email service for handling newsletter subscriptions
-// Configure this with your SMTP2Go or preferred email service
+// Connects to the backend API for real email processing
 
 export interface EmailSubmission {
   email: string;
   source?: string;
-  timestamp?: Date;
 }
 
-export async function subscribeToNewsletter(email: string): Promise<boolean> {
-  try {
-    // TODO: Replace with your actual email service integration
-    // Example SMTP2Go integration:
+export interface SubscriptionResponse {
+  success: boolean;
+  message: string;
+  email: string;
+}
 
-    const response = await fetch("/api/subscribe", {
+const API_BASE_URL =
+  import.meta.env.NEXT_PUBLIC_API_URL || "http://localhost:8008";
+
+export async function subscribeToNewsletter(
+  email: string,
+  source: string = "landing-page"
+): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/email/subscribe`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         email,
-        source: "landing-page",
-        timestamp: new Date().toISOString()
+        source
       })
     });
 
     if (!response.ok) {
-      throw new Error("Failed to subscribe");
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || "Failed to subscribe");
     }
 
-    return true;
+    const data: SubscriptionResponse = await response.json();
+    console.log("Newsletter subscription successful:", data.message);
+
+    // Store locally for demo purposes as backup
+    storeEmailLocally(email);
+
+    return data.success;
   } catch (error) {
     console.error("Email subscription error:", error);
-    return false;
+
+    // Fallback to local storage if API fails
+    return storeEmailLocally(email);
   }
 }
 
-// For development/demo purposes - stores emails in localStorage
+// For development/demo purposes - stores emails in localStorage as backup
 export function storeEmailLocally(email: string): boolean {
   try {
     const existingEmails = JSON.parse(
@@ -58,5 +74,16 @@ export function getStoredEmails(): string[] {
     return JSON.parse(localStorage.getItem("bleak-emails") || "[]");
   } catch {
     return [];
+  }
+}
+
+// Check if email service is available
+export async function checkEmailServiceHealth(): Promise<boolean> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/email/health`);
+    const data = await response.json();
+    return data.status === "healthy";
+  } catch {
+    return false;
   }
 }

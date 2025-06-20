@@ -3,6 +3,7 @@ import {ArrowRight, Github} from "lucide-react";
 import {CodeBlock} from "../ui/code-block";
 import {BleakShowcase} from "../demo/BleakShowcase";
 import {DeviceMockupFlow} from "../flow";
+import {NewsletterSignup} from "../ui/newsletter-signup";
 
 export default function Landing() {
   return (
@@ -65,6 +66,31 @@ export default function Landing() {
               <Github className="w-4 h-4 mr-2" />
               View on GitHub
             </Button>
+          </div>
+
+          {/* Newsletter Signup with Counter */}
+          <div className="mb-24">
+            <div className="relative">
+              {/* Background gradient glow */}
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/5 to-primary/20 rounded-2xl blur-2xl"></div>
+              <div className="relative bg-gradient-to-br from-card via-card to-primary/5 border-2 border-primary/20 rounded-2xl p-8 shadow-2xl max-w-2xl mx-auto">
+                <div className="text-center space-y-6">
+                  <div className="inline-flex items-center gap-2 bg-primary/15 px-4 py-2 rounded-full border border-primary/30 mb-2">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                    <span className="text-sm font-semibold text-primary">
+                      Limited Early Access
+                    </span>
+                  </div>
+                  <h3 className="text-2xl sm:text-3xl font-medium text-foreground">
+                    Join the Waitlist.
+                  </h3>
+                  <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
+                    Be among the first to experience the future of AI forms.
+                  </p>
+                  <NewsletterSignup showCounter={true} variant="landing" />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Concept Preview - Clean comparison */}

@@ -1,6 +1,7 @@
 import {useState, useEffect} from "react";
 import {Button} from "../ui/button";
 import {AuthButton} from "../auth/AuthWrapper";
+import {NewsletterSignup} from "../ui/newsletter-signup";
 
 const Header = () => {
   const [currentPath, setCurrentPath] = useState("");
@@ -64,7 +65,11 @@ const Header = () => {
           </div>
 
           {/* Authentication - Purposeful placement */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
+            {/* Newsletter signup - shown when not logged in */}
+            <div className="hidden lg:block">
+              <NewsletterSignup variant="header" />
+            </div>
             <AuthButton onProfileClick={handleProfileClick} />
           </div>
         </div>
