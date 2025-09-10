@@ -21,7 +21,7 @@ export const Chat = ({
     () =>
       new BleakSession({
         baseUrl: `${import.meta.env.VITE_API_BASE_URL}/bleak`,
-        // apiKey: initialApiKey || "your-api-key",
+        apiKey: `${import.meta.env.VITE_BLEAK_API_KEY}`,
         elements: BLEAK_ELEMENT_CONFIG
       })
   );

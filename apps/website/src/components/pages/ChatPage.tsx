@@ -70,7 +70,7 @@ const ChatPage = () => {
               </div>
 
               {/* API Key Input */}
-              <div className="w-full space-y-6">
+              {/* <div className="w-full space-y-6">
                 <h3 className="text-lg font-medium text-foreground text-center">
                   Enter your OpenAI API Key
                 </h3>
@@ -81,7 +81,7 @@ const ChatPage = () => {
                     error={null}
                   />
                 </div>
-              </div>
+              </div> */}
 
               {/* Example Prompts */}
               <div className="space-y-6">

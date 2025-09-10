@@ -24,6 +24,55 @@ interface BleakChoiceProps extends BleakComponentProps {
 }
 ```
 
+## Text Input Example (Without Options)
+
+```typescript
+import {type BleakComponentProps} from "bleakai";
+const TextInput: React.FC<BleakComponentProps> = ({text, value, onChange}) => (
+  <div className="question-group">
+    {/* Always provide clear labels for accessibility */}
+    <label className="question-label">{text}</label>
+    <input
+      type="text"
+      value={value || ""} // Handle undefined/null values gracefully
+      onChange={(e) => onChange(e.target.value)} // Call onChange with new value
+      placeholder={`Enter ${text.toLowerCase()}`} // Dynamic placeholder
+      className="text-input"
+    />
+  </div>
+);
+```
+
+## Radio Example (With Options)
+
+```typescript
+import {type BleakChoiceProps} from "bleakai";
+const RadioGroup: React.FC<BleakChoiceProps> = ({
+  text,
+  options,
+  value,
+  onChange
+}) => (
+  <div className="question-group">
+    <label className="question-label">{text}</label>
+    <div className="radio-options">
+      {/* Map through the options array provided by BleakAI */}
+      {options?.map((option: string, i: number) => (
+        <label key={i} className="radio-option">
+          <input
+            type="radio"
+            name={text.replace(/\s+/g, "_")} // Unique name for radio group
+            checked={value === option} // Check if this option is selected
+            onChange={() => onChange(option)} // Set this option as selected
+          />
+          <span>{option}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+);
+```
+
 ## Element Configuration Object
 
 When creating a BleakSession, you define your components using the `elements` object:

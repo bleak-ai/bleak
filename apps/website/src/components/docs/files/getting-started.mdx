@@ -39,24 +39,15 @@ The API key authenticates your application with the BleakAI backend service. Thi
 ## Environment Setup
 
 For security, store your API key in environment variables:
-
-### `.env.local` (for Next.js)
+(For Deployment, we recommend creating a proxy and storing the variable on a Backend, we are creating and example to show you how to do it.)
 
 ```bash
 BLEAK_API_KEY=your_api_key_here
 ```
 
-### `.env` (for other frameworks)
-
-```bash
-REACT_APP_BLEAK_API_KEY=your_api_key_here
-# or
-VITE_BLEAK_API_KEY=your_api_key_here
-```
-
 ## Supported Frameworks
 
-BleakAI works with any JavaScript framework that supports React-style components:
+BleakAI works with any JavaScript framework that supports every type of components:
 
 - ✅ **React** (16.8+)
 - ✅ **Next.js** (10+)
