@@ -3,6 +3,7 @@ import {MessageSquare} from "lucide-react";
 import {Button} from "../ui/button";
 import {ApiKeyInput} from "../ApiKeyInput";
 import {Chat} from "../chat";
+import demoBleak from "../../assets/demo_bleak.mov";
 
 const ChatPage = () => {
   const [conversationStarted, setConversationStarted] = useState(false);
@@ -26,6 +27,15 @@ const ChatPage = () => {
   const handleExamplePromptClick = (prompt: string) => {
     setPrefilledPrompt(prompt);
   };
+
+  return (
+    <div className="w-fit mx-auto my-10">
+      <video controls width="100%" style={{maxHeight: "700px"}}>
+        <source src={demoBleak} type="video/webm" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-background text-foreground">
